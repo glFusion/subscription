@@ -130,8 +130,9 @@ function plugin_getheaderjs_subscription()
     global $_CONF, $_CONF_SUBSCR; 
 
     $pi_dir = SUBSCR_PI_PATH . '/js/';
-    $files = array();
-    $files[] = $pi_dir . 'toggleEnabled.js';
+    $files = array(
+        $pi_dir . 'toggleEnabled.js',
+    );
 
     return $files;
 }
@@ -522,7 +523,7 @@ function phpblock_subscription_subscribe()
         $P->Read($row['item_id']);
         if ($P->item_id == '') continue;     // no access to this product
 
-        $status = SUBSCR_invokeService('paypal', 'getCurrency', array(),
+        $status = LGLIB_invokeService('paypal', 'getCurrency', array(),
                     $currency, $svc_msg);
         if (empty($currency)) $currency = 'USD';
 
@@ -611,6 +612,12 @@ function plugin_getheadercss_subscription()
     $styles = array();
     $files = array('style.css');
 
+/*    if (!defined('HAVE_CALENDAR_CSS')) {
+        // Include the popup calendar CSS if not included by another plugin
+        $files[] = 'calendar-blue.css';
+        define('HAVE_CALENDAR_CSS', 1);
+    }
+*/
     $defpath = SUBSCR_PI_PATH . '/css';
     $layoutpath = $_CONF['layout_path'] . 'plugins/' . $_SUBSCR_CONF['pi_name'];
     foreach ($files as $file) {
@@ -852,95 +859,6 @@ function plugin_user_create_subscription($uid = 0)
         }
     }
 
-}
-
-
-/**
-*   Get the SQL information needed to provide subscription info to the Profile
-*   plugin.
-*
-*   @deprecated version 0.1.1
-*   @see service_profilefields_subscription()
-*   @return array   Array of components to go into a SQL query
-*/
-function Xplugin_profilefields_subscription()
-{
-    global $LANG_SUBSCR, $_CONF_SUBSCR, $_TABLES;
-
-    $pi = $_CONF_SUBSCR['pi_name'];
-    $prod = $_TABLES['subscr_products'];
-    $sub = $_TABLES['subscr_subscriptions'];
-
-    $fields = array(
-        'names' => array(
-                    "{$pi}_description" => $LANG_SUBSCR['description'],
-                    "{$pi}_expires" => $LANG_SUBSCR['expires'],
-                    ),
-
-        'query' => "{$sub}.expiration as {$pi}_expires, 
-                    {$prod}.short_description AS {$pi}_description",
-
-        'join' => "LEFT JOIN {$sub} ON u.uid = {$sub}.uid 
-                LEFT JOIN {$prod} ON {$prod}.item_id = {$sub}.item_id",
-
-        'search' => array($prod.'.short_description'),
-    );
-
-    return $fields;
-}
-
-
-/**
-*   Strips slashes if magic_quotes_gpc is on.
-*
-*   @param  mixed   $var    Value or array of values to strip.
-*   @return mixed           Stripped value or array of values.
-*/
-function SUBSCR_stripslashes($var)
-{
-    if (get_magic_quotes_gpc()) {
-        if (is_array($var)) {
-            return array_map('SUBSCR_stripslashes', $var);
-        } else {
-            return stripslashes($var);
-        }
-    } else {
-        return $var;
-    }
-}
-
-
-/**
-*   Invoke a service from another plugin.
-*   This is our own version of PLG_invokeService() so we don't have to enable
-*   web services.
-*
-*   @param  string  $type   Plugin name
-*   @param  string  $action Plugin function
-*   @param  array   $args   Array of arguments to pass to the plugin
-*   @param  mixed   &$output    Pointer to output values
-*   @param  mixed   &$svc_msg   Service message (unused)
-*   @return integer Return value, see lib-plugins.php
-*/
-function SUBSCR_invokeService($type, $action, $args, &$output, &$svc_msg)
-{
-    global $_CONF;
-
-    $retval = PLG_RET_ERROR;
-
-    $output  = '';
-    $svc_msg = '';
-
-    // Check if the plugin type and action are valid
-    $function = 'service_' . $action . '_' . $type;
-    if (function_exists($function)) {
-        if (!isset($args['gl_svc'])) {
-            $args['gl_svc'] = false;
-        }
-        $retval = $function($args, $output, $svc_msg);
-    }
-
-    return $retval;
 }
 
 ?>

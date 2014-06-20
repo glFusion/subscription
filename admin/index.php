@@ -18,12 +18,6 @@ if (!in_array('subscription', $_PLUGINS)) {
     COM_404();
 }
 
-// Clean $_POST and $_GET, in case magic_quotes_gpc is set
-if (GVERSION < '1.3.0') {
-    $_POST = SUBSCR_stripslashes($_POST);
-    $_GET = SUBSCR_stripslashes($_GET);
-}
-
 USES_subscription_functions();
 USES_lib_admin();
 USES_subscription_class_product();

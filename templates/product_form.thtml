@@ -5,6 +5,10 @@ window.addEvent('domready',function() {
 });
 </script>
 
+{!if show_htmleditor}
+{wysiwyg}
+{!endif}
+
 <link rel="stylesheet" type="text/css" href="{pi_url}/css/style.css" />
 <form action="{action_url}" method="POST" class="subscriptionform" id="submit"
     enctype="multipart/form-data">
@@ -78,7 +82,7 @@ window.addEvent('domready',function() {
     <a href="#" onclick="popupWindow('{doc_url}#desc_description', 'Help', 640, 480, 1)" class="toolbar">
     <img src="{layout_url}/images/button_help.png" alt="" /></a>
   </label>
-  <textarea id="html_content" 
+  <textarea id="description"
       name="description" cols="35" rows="5" 
       style="width:70%">{description}</textarea>
 </p>
@@ -133,14 +137,43 @@ window.addEvent('domready',function() {
   <input type=text name="early_renewal" value="{early_renewal}">
 </p>
 
-<p>
-  <label for="pp_account" style="width:16em;">{$LANG_SUBSCR['pp_account']}:
-    <a href="#" onclick="popupWindow('{doc_url}#desc_early_renewal', 'Help', 640, 480, 1)" class="toolbar">
-    <img src="{layout_url}/images/button_help.png" alt="" /></a>
-  </label>
-  <input type=text name="pp_account" value="{pp_account}">
-</p>
+</fieldset>
 
+{!if profile_enabled}
+<fieldset>
+  <legend>{$LANG_SUBSCR['profile_integration']}</legend>
+<p>
+  <label for="prf_update">{$LANG_SUBSCR['prf_update']}:
+    <a href="#" onclick="popupWindow('{doc_url}#desc_prf_update', 'Help', 640, 480, 1)" class="toolbar">
+    <img src="{layout_url}/images/button_help.png" alt="" {xhtml}></a>
+  </label>
+  <input type="radio" name="prf_update" value="0" {prf_upd_chk0} {xhtml}>
+    {$LANG_SUBSCR['none']}&nbsp;&nbsp;
+  <input type="radio" name="prf_update" value="1" {prf_upd_chk1} {xhtml}>
+    {$LANG_SUBSCR['prf_upd_acct']}&nbsp;&nbsp;
+  <input type="radio" name="prf_update" value="2" {prf_upd_chk2} {xhtml}>
+    {$LANG_SUBSCR['prf_upd_child']}&nbsp;&nbsp;
+  <input type="radio" name="prf_update" value="3" {prf_upd_chk2} {xhtml}>
+    {$LANG_SUBSCR['prf_upd_all']}&nbsp;&nbsp;
+</p>
+<p>
+  <label>{$LANG_SUBSCR['prf_type']}
+    <a href="#" onclick="popupWindow('{doc_url}#desc_prf_type', 'Help', 640, 480, 1)" class="toolbar">
+    <img src="{layout_url}/images/button_help.png" alt="" {xhtml}></a>
+  </label>
+  <input type="tetxt" name="prf_type" value="{prf_type}" size="40" {xhtml}>
+</p>
+</fieldset>
+{!endif}
+
+<fieldset>
+  <legend>{$LANG_ACCESS['permissions']}</legend>
+  <p><b>{$LANG_ACCESS['owner']}:</b> {owner_dropdown}</p>
+  <p><b>{$LANG_ACCESS['group']}:</b> {group_dropdown}</p>
+  <p><b>{$LANG_ACCESS['permissions']}:</b></p>
+  <p>{$LANG_ACCESS['permissionskey']}</p>
+  {permissions_editor}
+  <p>{$LANG_SUBSCR['permissions_msg']}</p>
 </fieldset>
 
 <input class="formbutton" type="submit" name="saveproduct" 

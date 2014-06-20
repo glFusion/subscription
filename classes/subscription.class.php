@@ -20,17 +20,17 @@ class Subscription
 {
     /** Property fields.  Accessed via __set() and __get()
     *   @var array */
-    var $properties;
+    private $properties;
 
     /** Indicate whether the current user is an administrator
     *   @var boolean */
-    var $isAdmin;
+    private $isAdmin;
 
-    var $isNew;
+    private $isNew;
 
     /** Array of error messages
      *  @var array */
-    var $Errors = array();
+    public $Errors = array();
 
 
     /**
@@ -40,7 +40,7 @@ class Subscription
      *
      *  @param integer $id Optional type ID
      */
-    function Subscription($id=0)
+    public function __construct($id=0)
     {
         global $_CONF_SUBSCR;
 
@@ -73,7 +73,7 @@ class Subscription
     *   @param  string  $var    Name of property to set.
     *   @param  mixed   $value  New value for property.
     */
-    function __set($var, $value='')
+    public function __set($var, $value='')
     {
         switch ($var) {
         case 'id':
@@ -122,7 +122,7 @@ class Subscription
     *   @param  string  $var    Name of property to retrieve.
     *   @return mixed           Value of property, NULL if undefined.
     */
-    function __get($var)
+    public function __get($var)
     {
         if (array_key_exists($var, $this->properties)) {
             return $this->properties[$var];
@@ -138,7 +138,7 @@ class Subscription
      *  @param  array   $row        Array of values, from DB or $_POST
      *  @param  boolean $fromDB     True if read from DB, false if from $_POST
      */
-    function SetVars($row, $fromDB=false)
+    public function SetVars($row, $fromDB=false)
     {
         if (!is_array($row)) return;
 
@@ -162,7 +162,7 @@ class Subscription
      *  @param  integer $id Optional ID.  Current ID is used if zero.
      *  @return boolean     True if a record was read, False on failure
      */
-    function Read($id = 0)
+    public function Read($id = 0)
     {
         global $_TABLES;
 
@@ -194,7 +194,7 @@ class Subscription
      *  @param  array   $A      Optional array of values from $_POST
      *  @return boolean         True if no errors, False otherwise
      */
-    function Save($A = '')
+    public function Save($A = '')
     {
         global $_TABLES;
 
@@ -259,9 +259,11 @@ class Subscription
 
 
     /**
-     *  Delete the current subscription record from the database
-     */
-    function Delete()
+    *   Delete the current subscription record from the database
+    *
+    *   @return boolean True on success, False on invalid ID
+    */
+    public function Delete()
     {
         global $_TABLES, $_CONF_SUBSCR;
 
@@ -285,7 +287,7 @@ class Subscription
     *   @param  integer $duration_type  Duration interval (week, month, etc.)
     *   @return boolean     True on successful update, False on error
     */
-    function Add($uid, $item_id, $duration=0, $duration_type='',
+    public function Add($uid, $item_id, $duration=0, $duration_type='',
                 $expiration=NULL, $upgrade = false, $txn_id = '', $price = -1)
     {
         global $_TABLES;
@@ -399,7 +401,7 @@ class Subscription
     *   @param  string  $txn_id     Transaction ID
     *   @param  float   $price      Price paid
     */
-    function AddHistory($txn_id = '', $price = 0)
+    public function AddHistory($txn_id = '', $price = 0)
     {
         global $_TABLES;
 
@@ -421,7 +423,7 @@ class Subscription
     *   @param  integer $groupid    Group the user is added to
     *   @param  integer $uid        User ID being added
     */
-    function AddtoGroup($groupid, $uid)
+    public function AddtoGroup($groupid, $uid)
     {
         global $_TABLES;
 
@@ -438,7 +440,7 @@ class Subscription
 
                 // If there are child accounts related to this subscriber,
                 // then try to add them to the same group
-                $status = SUBSCR_invokeService('profile', 'getChildAccounts',
+                $status = LGLIB_invokeService('profile', 'getChildAccounts',
                         array('uid' => $uid), $output, $svc_msg);
                 if ($status == PLG_RET_OK) {
                     foreach ($output as $child_uid) {
@@ -466,11 +468,11 @@ class Subscription
 
 
     /**
-     *  Determines if the current record is valid.
-     *
-     *  @return boolean     True if ok, False when first test fails.
-     */
-    function isValidRecord()
+    *   Determines if the current record is valid.
+    *
+    *   @return boolean     True if ok, False when first test fails.
+    */
+    public function isValidRecord()
     {
         global $LANG_SUBSCR;
 
@@ -493,12 +495,12 @@ class Subscription
 
 
     /**
-     *  Creates the edit form.
-     *
-     *  @param  integer $id     Optional ID, current record used if zero.
-     *  @return string          HTML for edit form
-     */
-    function Edit($id = 0)
+    *   Creates the edit form.
+    *
+    *   @param  integer $id     Optional ID, current record used if zero.
+    *   @return string          HTML for edit form
+    */
+    public function Edit($id = 0)
     {
         global $_TABLES, $_CONF, $_CONF_SUBSCR, $LANG_SUBSCR, 
                 $LANG24, $LANG_postmodes;
@@ -569,7 +571,7 @@ class Subscription
     *
     *   @return string      HTML for the product page.
     */
-    function Detail()
+    public function Detail()
     {
         global $_CONF, $_CONF_SUBSCR, $_TABLES, $LANG_SUBSCR, $_USER;
 
@@ -607,7 +609,7 @@ class Subscription
     }
 
 
-    function Find($uid, $item_id)
+    public function Find($uid, $item_id)
     {
         global $_TABLES;
 
@@ -633,7 +635,7 @@ class Subscription
     *   @param  integer $sub_id     Database ID of the subscription to cancel
     *   @param  boolean $system     True if this is a system action.
     */
-    function Cancel($sub_id, $system=false)
+    public function Cancel($sub_id, $system=false)
     {
         global $_TABLES;
 
@@ -657,7 +659,7 @@ class Subscription
         $uid = (int)$A['uid'];
         USER_delGroup($groupid, $uid);
 
-        $status = SUBSCR_invokeService('profile', 'getChildGroups',
+        $status = LGLIB_invokeService('profile', 'getChildGroups',
                 array('uid' => $uid), $output, $svc_msg);
         if ($status == PLG_RET_OK) {
             foreach ($output as $child_uid) {
@@ -682,7 +684,7 @@ class Subscription
     *
     *   @return string      Product name
     */
-    function ProductName()
+    public function ProductName()
     {
         global $_TABLES;
         return DB_getItem($_TABLES['subscr_products'], 'name',
@@ -695,7 +697,7 @@ class Subscription
     *
     *   @return string      Formatted error messages.
     */
-    function PrintErrors()
+    public function PrintErrors()
     {
         $retval = '';
         foreach($this->Errors as $key=>$msg) {

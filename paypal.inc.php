@@ -129,7 +129,7 @@ function Xplugin_paypal_getproducts_subscription($cat='')
             'quantity'      => 1,
         );
 
-        $status = SUBSCR_invokeService('paypal', 'genButton', $vars,
+        $status = LGLIB_invokeService('paypal', 'genButton', $vars,
             &$output, &$svc_msg);
         if ($status == PLG_RET_OK) {
             $buttons = $output;

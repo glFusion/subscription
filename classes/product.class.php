@@ -21,30 +21,31 @@ class SubscriptionProduct
 {
     /** Property fields.  Accessed via __set() and __get()
     *   @var array */
-    var $properties = array();
+    private $properties = array();
 
     /** Indicate whether the current user is an administrator
     *   @var boolean */
-    var $isAdmin = false;
+    private $isAdmin = false;
 
     /** Should permissions be checked?
     *   Normally yes, but if the product is instantiated by an IPN message,
     *   then checking permissions would break the process.
+    *   Public to be called from the Subscription class
     *   @var boolean */
     public $checkPerms = true;
 
     /** Indicator that this is a new product vs. editing an existing one.
     *   @var boolean */
-    var $isNew;
+    private $isNew;
 
     /** Array of error messages
      *  @var array */
-    var $Errors = array();
+    public $Errors = array();
 
     /**
     *   Array form of pricing options
     */
-    var $pricing = array();
+    public $pricing = array();
 
     /**
     *   Constructor.
@@ -53,7 +54,7 @@ class SubscriptionProduct
     *
     *   @param integer  $id     Optional product ID
     */
-    function __construct($id = '')
+    public function __construct($id = '')
     {
         global $_CONF_SUBSCR, $LANG_SUBSCR;
 
@@ -101,7 +102,7 @@ class SubscriptionProduct
     *   @param  string  $var    Name of property to set.
     *   @param  mixed   $value  New value for property.
     */
-    function __set($var, $value='')
+    public function __set($var, $value='')
     {
         switch ($var) {
         case 'item_id':
@@ -186,7 +187,7 @@ class SubscriptionProduct
     *   @param  string  $var    Name of property to retrieve.
     *   @return mixed           Value of property, NULL if undefined.
     */
-    function __get($var)
+    public function __get($var)
     {
         if (array_key_exists($var, $this->properties)) {
             return $this->properties[$var];
@@ -202,7 +203,7 @@ class SubscriptionProduct
     *   @param  array   $row        Array of values, from DB or $_POST
     *   @param  boolean $fromDB     True if read from DB, false if from $_POST
     */
-    function SetVars($row, $fromDB=false)
+    public function SetVars($row, $fromDB=false)
     {
         if (!is_array($row)) return;
 
@@ -278,7 +279,7 @@ class SubscriptionProduct
     *   @param  integer $id Optional ID.  Current ID is used if zero.
     *   @return boolean     True if a record was read, False on failure
     */
-    function Read($id = '')
+    public function Read($id = '')
     {
         global $_TABLES;
 
@@ -314,7 +315,7 @@ class SubscriptionProduct
     *   @param  array   $A      Optional array of values from $_POST
     *   @return boolean         True if no errors, False otherwise
     */
-    function Save($A = '')
+    public function Save($A = '')
     {
         global $_TABLES;
 
@@ -415,7 +416,7 @@ class SubscriptionProduct
     *
     *   @return boolean     True on success, False if item not valid
     */
-    function Delete()
+    public function Delete()
     {
         global $_TABLES, $_CONF_SUBSCR;
 
@@ -435,7 +436,7 @@ class SubscriptionProduct
     *
     *   @return boolean     True if ok, False if any test fails.
     */
-    function isValidRecord()
+    private function isValidRecord()
     {
         global $LANG_SUBSCR;
 
@@ -468,7 +469,7 @@ class SubscriptionProduct
     *   @param  integer $id     Optional ID, current record used if zero.
     *   @return string          HTML for edit form
     */
-    function Edit($id = '')
+    public function Edit($id = '')
     {
         global $_TABLES, $_CONF, $_CONF_SUBSCR, $LANG_SUBSCR, 
                 $LANG24, $LANG_postmodes;
@@ -481,37 +482,27 @@ class SubscriptionProduct
             }
         }
         $id = $this->item_id;
-        $T = new Template(SUBSCR_PI_PATH . '/templates');
-
-        if (isset($_CONF['advanced_editor']) && 
-                $_CONF['advanced_editor'] == 1) {
-            $editor_type = '_advanced';
-            $postmode_adv = 'selected="selected"';
-            $postmode_html = '';
-        } else {
-            $editor_type = '';
-            $postmode_adv = '';
-            $postmode_html = 'selected="selected"';
-        }
-
-        $T->set_file(array('product' => "product_form{$editor_type}.thtml"));
         $action_url = SUBSCR_ADMIN_URL . '/index.php';
-        if ($editor_type == '_advanced') {
-            $T->set_var('show_adveditor','');
-            $T->set_var('show_htmleditor','none');
-        } else {
-            $T->set_var('show_adveditor','none');
-            $T->set_var('show_htmleditor','');
+        $T = new Template(SUBSCR_PI_PATH . '/templates');
+        $T->set_file(array('product' => "product_form.thtml"));
+
+        // Set up the wysiwyg editor, if available
+        switch (PLG_getEditorType()) {
+        case 'ckeditor':
+            $T->set_var('show_htmleditor', true);
+            PLG_requestEditor('subscription','subscr_entry','ckeditor_subscription.thtml');
+            PLG_templateSetVars('subscr_entry', $T);
+            break;
+        case 'tinymce' :
+            $T->set_var('show_htmleditor',true);
+            PLG_requestEditor('paypal','subscr_entry','tinymce_subscription.thtml');
+            PLG_templateSetVars('subscr_entry', $T);
+            break;
+        default :
+            // don't support others right now
+            $T->set_var('show_htmleditor', false);
+            break;
         }
-        $post_options = "<option value=\"html\" $postmode_html>{$LANG_postmodes['html']}</option>";
-        $post_options .= "<option value=\"adveditor\" $postmode_adv>{$LANG24[86]}</option>";
-        $T->set_var('lang_postmode', $LANG24[4]);
-        $T->set_var('post_options',$post_options);
-        $T->set_var('change_editormode', 'onchange="change_editmode(this);"');
-        $T->set_var('glfusionStyleBasePath', $_CONF['site_url']. '/fckeditor');
-        $T->set_var('gltoken_name', CSRF_TOKEN);
-        $T->set_var('gltoken', SEC_createToken());
-        $T->set_var('site_url', $_CONF['site_url']);
 
         if ($id != '') {
             $T->set_var('item_id', $this->item_id);
@@ -596,12 +587,6 @@ class SubscriptionProduct
         }
 
         $retval .= $T->parse('output', 'product');
-
-        @setcookie($_CONF['cookie_name'].'fckeditor', 
-                SEC_createTokenGeneral('advancededitor'),
-                time() + 1200, $_CONF['cookie_path'],
-                $_CONF['cookiedomain'], $_CONF['cookiesecure']);
-
         $retval .= COM_endBlock();
         return $retval;
 
@@ -615,7 +600,7 @@ class SubscriptionProduct
     *   @param  integer $value New value to set
     *   @return         New value, or old value upon failure
     */
-    function _toggle($oldvalue, $varname, $id)
+    private function _toggle($oldvalue, $varname, $id)
     {
         global $_TABLES;
 
@@ -641,11 +626,11 @@ class SubscriptionProduct
     *
     *   @return string      HTML for product detail
     */
-    function Detail()
+    public function Detail()
     {
         global $_TABLES, $_CONF, $_USER, $_CONF_SUBSCR, $LANG_SUBSCR;
 
-        $status = SUBSCR_invokeService('paypal', 'getCurrency', array(), 
+        $status = LGLIB_invokeService('paypal', 'getCurrency', array(), 
             $output, $svc_msg);
         if ($status == PLG_RET_OK) {
             $currency = $output;
@@ -717,7 +702,7 @@ class SubscriptionProduct
     *   @param  integer $value New value to set
     *   @return         New value, or old value upon failure
     */
-    function toggleEnabled($oldvalue, $id)
+    public function toggleEnabled($oldvalue, $id)
     {
         $oldvalue = $oldvalue == 0 ? 1 : 0;
         $id = COM_sanitizeID($id);
@@ -738,7 +723,7 @@ class SubscriptionProduct
     *
     *   @return boolean     True if used, False if not
     */
-    function isUsed($id = '')
+    public function isUsed($id = '')
     {
         global $_TABLES;
 
@@ -767,7 +752,7 @@ class SubscriptionProduct
     *
     *   @return string      Button code
     */
-    function MakeButton($btn_type = 'pay_now')
+    public function MakeButton($btn_type = 'pay_now')
     {
         global $_CONF, $_CONF_DON, $_USER;
 
@@ -782,7 +767,7 @@ class SubscriptionProduct
                 'taxable' => $this->taxable,
                 'btn_type' => 'pay_now',
             );
-            $status = SUBSCR_invokeService('paypal', 'genButton', $vars, 
+            $status = LGLIB_invokeService('paypal', 'genButton', $vars, 
                     $output, $svc_msg);
             if ($status == PLG_RET_OK && is_array($output)) {
                 foreach ($output as $button) {
@@ -799,7 +784,7 @@ class SubscriptionProduct
     *
     *   @return string      Formatted error messages.
     */
-    function PrintErrors()
+    public function PrintErrors()
     {
         $retval = '';
         foreach($this->Errors as $key=>$msg) {
@@ -814,7 +799,7 @@ class SubscriptionProduct
     *
     *   @return boolean     True if Errors[] is not empty, false if it is.
     */
-    function hasErrors()
+    private function hasErrors()
     {
         return (!empty($this->Errors));
     }
@@ -825,9 +810,9 @@ class SubscriptionProduct
     *
     *   @param  string  $newdate    Subscription expiration date
     *   @param  integer $uid        User ID
-    *   @return integer             Result from SUBSCR_invokeService()
+    *   @return integer             Result from LGLIB_invokeService()
     */
-    function updateProfile($newdate, $uid)
+    public function updateProfile($newdate, $uid)
     {
         $args = array(
             'sys_expires'       => $newdate,
@@ -841,18 +826,18 @@ class SubscriptionProduct
         // also implements 2 and 1.
         switch ($this->prf_update) {
         case 3:         // Find siblings (children of our parent)
-            $status = SUBSCR_invokeService('profile', 'getParentAccount',
+            $status = LGLIB_invokeService('profile', 'getParentAccount',
                 array('uid' => $uid), $output, $svc_msg);
             if ($status == PLG_RET_OK && $output > 0) {
                 $args['uid'] = $output;
-                $status = SUBSCR_invokeService('profile', 'setSysValues',
+                $status = LGLIB_invokeService('profile', 'setSysValues',
                             $args, $output, $svc_msg);
-                $status = SUBSCR_invokeService('profile', 'getChildAccounts',
+                $status = LGLIB_invokeService('profile', 'getChildAccounts',
                     array('uid' => $output), $output, $svc_msg);
                 if ($status == PLG_RET_OK && is_array($output)) {
                     foreach ($output as $user_id) {
                         $args['uid'] = $user_id;
-                        $status = SUBSCR_invokeService('profile', 'setSysValues',
+                        $status = LGLIB_invokeService('profile', 'setSysValues',
                             $args, $output, $svc_msg);
                         if ($status != PLG_RET_OK) {
                             COM_errorLog("Error updating profile for $user_id");
@@ -863,12 +848,12 @@ class SubscriptionProduct
 
         case 2:         // Update children of this account
             // Update all the children
-            $status = SUBSCR_invokeService('profile', 'getChildAccounts',
+            $status = LGLIB_invokeService('profile', 'getChildAccounts',
                 array('uid' => $uid), $output, $svc_msg);
             if ($status == PLG_RET_OK) {
                 foreach ($output as $user_id) {
                     $args['uid'] = $user_id;
-                    $status = SUBSCR_invokeService('profile', 'setSysValues',
+                    $status = LGLIB_invokeService('profile', 'setSysValues',
                         $args, $output, $svc_msg);
                     if ($status != PLG_RET_OK) {
                         COM_errorLog("Error updating profile for user $user_id");
@@ -880,7 +865,7 @@ class SubscriptionProduct
         case 1:
             // Finally, update this account
             $args['uid'] = $uid;
-            return SUBSCR_invokeService('profile', 'setSysValues', $args, 
+            return LGLIB_invokeService('profile', 'setSysValues', $args, 
                         $output, $svc_msg);
         }
     }

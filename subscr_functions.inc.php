@@ -70,7 +70,7 @@ function SUBSCR_ProductList()
     USES_subscription_class_product();
     $P = new SubscriptionProduct();
 
-    $status = SUBSCR_invokeService('paypal', 'getCurrency', array(),
+    $status = LGLIB_invokeService('paypal', 'getCurrency', array(),
         $currency, $svc_msg);
     if (empty($currency)) $currency = 'USD';
 
@@ -120,7 +120,7 @@ function SUBSCR_ProductList()
 
         $buttons = '';
         if ($ok_to_buy) {
-            $status = SUBSCR_invokeService('paypal', 'genButton', $vars,
+            $status = LGLIB_invokeService('paypal', 'genButton', $vars,
                     $output, $svc_msg);
             if ($status == PLG_RET_OK) {
                 $buttons = implode('<br ' . XHTML . '>', $output);

@@ -1,5 +1,4 @@
 <?php
-//  $Id: english.php 42 2012-05-23 15:05:36Z root $
 /**
 *   Default English Language file for the Subscription plugin.
 *

@@ -24,7 +24,7 @@ global $_CONF_SUBSCR;
 $_CONF_SUBSCR['pi_name']            = 'subscription';
 $_CONF_SUBSCR['pi_display_name']    = 'Subscriptions';
 $_CONF_SUBSCR['pi_version']         = '0.1.5';
-$_CONF_SUBSCR['gl_version']         = '1.2.0';
+$_CONF_SUBSCR['gl_version']         = '1.4.0';
 $_CONF_SUBSCR['pi_url']             = 'http://www.leegarner.com';
 
 $_SUBSCR_table_prefix = $_DB_table_prefix . 'subscr_';
