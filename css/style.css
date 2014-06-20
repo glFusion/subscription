@@ -1,0 +1,33 @@
+.expmessage {
+    font-style: italic;
+}
+
+.expmessage .renewnow {
+    color: #FF0000;
+}
+
+.expired {
+    background-color: #FF9999;
+}
+
+.ingrace {
+    background-color: #FFFF99;
+}
+
+.prodform label {
+    width: 12em;
+    float: left;
+    text-align: right;
+    margin-right: 1em;
+    display: block;
+    clear: both;
+}
+
+.prodform label error {
+    color: #FF0000;
+}
+
+.prodform p {
+    margin: .5em;
+}
+

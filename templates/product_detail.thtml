@@ -1,0 +1,29 @@
+{# begin {templatelocation} #}
+<div style="position:relative;float:right;">
+  <div>{purchase_btn}</div>
+  <div><b>{$LANG_SUBSCR['price']}:</b> {price}</div>
+  <div>
+    {!if expiration}
+    <b>{$LANG_SUBSCR['expiration']}:</b> {expiration}
+    {!else}
+    <b>{$LANG_SUBSCR['duration']}:</b> {duration} {duration_type}
+    {!endif}
+  </div>
+  {!if exp_date}
+    <div class="expmessage">
+      {$LANG_SUBSCR['your_sub_expires']} {exp_date}
+      {!if renew_now}
+      <br {xhtml}>
+      <span class="renewnow">{$LANG_SUBSCR['renew_now']}</span>
+      {!endif}
+    </div>
+  {!endif}
+</div>
+<div>
+  <h2>{name}</h2>
+  {short_description}
+  <p />
+  {description}
+</div>
+{# end {templatelocation} #}
+

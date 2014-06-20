@@ -1,0 +1,24 @@
+{# begin {templatelocation} #}
+<h1>{$LANG_SUBSCR['subscriptions']}</h1>
+<hr width="85%" />
+<!-- BEGIN ProductBlock -->
+<div class="prodlistitem" style="padding:10px;clear:both;">
+  <div style="float:left;">
+    <div>
+      <h2>
+        <!--<a href="{pi_url}/index.php?mode=detail&id={item_id}">{name}</a>-->
+        {name}
+      </h2>
+    </div>
+    <div>{description}<p /></div>
+  </div>
+  <div style="float:right; margin-right:5%; text-align:left;">
+    {purchase_btn}
+    <div>{lang_price}: {price} {currency}</div>
+  </div>
+</div>
+<div style="clear:both;">
+  <hr width="85%" />
+</div>
+<!-- END ProductBlock -->
+{# end {templatelocation} #}

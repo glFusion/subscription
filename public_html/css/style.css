@@ -1,0 +1,50 @@
+.subscriptionform label
+{
+//color: #781351;
+width: 8em;
+float: left;
+text-align: right;
+margin-right: 0.5em;
+display: block
+}
+
+.subscriptionform p {
+  line-height: 1px;
+  margin-top:0px;
+}
+
+.subscriptionform form div {
+  clear: left;
+  display: block;
+/*  width: 354px; */
+  height: expression('1%');
+  margin: 5px 0 0 0;
+  padding: 1px 3px;
+}
+/*
+.subscriptionform submit input button
+{
+  margin-left: 4.5em;
+}
+
+form.subscriptionform input
+{
+  color: #781351;
+  background: #fee3ad;
+  border: 1px solid #781351
+}
+
+form.subscriptionform submit input
+{
+  color: #000;
+  background: #ffa20f;
+  border: 2px outset #d7b9c9
+}
+
+div.subscriptionform input.file {
+    position: relative;
+    text-align: right;
+    //-moz-opacity:0 ;
+    //filter:alpha(opacity: 0);
+    //opacity: 0;
+    z-index: 2;

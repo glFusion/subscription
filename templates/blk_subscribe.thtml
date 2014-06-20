@@ -1,0 +1,11 @@
+{# begin {templatelocation} #}
+{hr}
+<span style="font-weight:bold;">
+  <a href="{pi_url}/index.php?view=detail&item_id={item_id}">{title}</a>
+</span><br />
+<div style="clear:both;">
+ {description}<br />
+ {price} {currency}<p />
+ {purchase_btn}
+</div>
+{# end {templatelocation} #}

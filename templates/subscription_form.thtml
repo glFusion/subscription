@@ -1,0 +1,99 @@
+{# begin {templatelocation} #}
+<link rel="stylesheet" type="text/css" href="{pi_url}/css/style.css" {xhtml}>
+<form action="{action_url}" method="POST" class="subscriptionform">
+<input type=hidden name="mode" value="savesubscription">
+<input type=hidden name="id" value="{id}">
+
+<fieldset>
+<legend>{$LANG_SUBSCR['subscription_info']}</legend>
+
+<p>
+  <label for="uid" style="width:16em;">{$LANG_SUBSCR['subscriber']}
+    <a href="#" onclick="popupWindow('{doc_url}#desc_subscriber', 'Help', 640, 480, 1)" class="toolbar">
+    <img src="{layout_url}/images/button_help.png" alt="" {xhtml}></a>
+  </label>
+    <select name="uid">
+      {subscriber_select}
+    </select>
+</p>
+
+<p>
+  <label for="camp_id" style="width:16em;">{$LANG_SUBSCR['product']}
+    <a href="#" onclick="popupWindow('{doc_url}#desc_product', 'Help', 640, 480, 1)" class="toolbar">
+    <img src="{layout_url}/images/button_help.png" alt="" {xhtml}></a>
+  </label>
+    <select name="item_id">
+      {product_select}
+    </select>
+</p>
+
+<p>
+  <label for="dt" style="width:16em;">{$LANG_SUBSCR['expiration']}
+    <a href="#" onclick="popupWindow('{doc_url}#desc_expiration', 'Help', 640, 480, 1)" class="toolbar">
+    <img src="{layout_url}/images/button_help.png" alt="" {xhtml}></a>
+  </label>
+  <input type=text name="expiration" value="{expiration}" id="f_expire" {xhtml}>
+  <img src="{site_url}/images/datepicker.jpg" 
+    id="exp_trigger"
+    style="cursor: pointer;" 
+    title="{$LANG_SUBSCR['date_selector']}"
+    {xhtml}>
+  <!--<span id="exp_date" dir="ltr">
+    <select id="exp_month" name="exp_month">
+      {exp_month_options}
+    </select>
+    /
+    <select id="exp_day" name="exp_day">
+      {exp_day_options}
+    </select>
+    /
+    <select id="exp_year" name="exp_year">
+      {exp_year_options}
+    </select>
+                                
+    <a href="#" id="toggler3">
+      <img src="{site_url}/images/datepicker.jpg" alt="Date Picker" 
+            style="vertical-align:middle;border:none;"{xhtml}>
+    </a>
+    <div id="calendar3"></div>
+  </span>-->
+</p>
+
+<p>
+  <label for="comment" style="width:16em;">{$LANG_SUBSCR['user_notified']}:
+    <a href="#" onclick="popupWindow('{doc_url}#desc_user_notified', 'Help', 640, 480, 1)" class="toolbar">
+    <img src="{layout_url}/images/button_help.png" alt="" {xhtml}></a>
+  </label>
+  <input type="checkbox" name="notified" value="1" {notified_chk}>
+</p>
+
+<p>
+  <label for="status" style="width:16em;">{$LANG_SUBSCR['status']}:
+    <a href="#" onclick="popupWindow('{doc_url}#desc_status', 'Help', 640, 480, 1)" class="toolbar">
+    <img src="{layout_url}/images/button_help.png" alt="" {xhtml}></a>
+  </label>
+  <input type="radio" name="status" value="0" {status_0} {xhtml}>{$LANG_SUBSCR['active']}
+  <input type="radio" name="status" value="1" {status_1} {xhtml}>{$LANG_SUBSCR['expired']}
+  <input type="radio" name="status" value="2" {status_2} {xhtml}>{$LANG_SUBSCR['canceled']}
+</p>
+
+</fieldset>
+
+<input class="formbutton" type="submit" name="savesubscription" 
+    value="{$LANG_ADMIN['submit']}" {xhtml}>
+<input class="formbutton" type="reset" value="{$LANG_SUBSCR['clearform']}" {xhtml}>
+<input class="formbutton" type="submit" name="deletesubscription" 
+    value="{$LANG_ADMIN['delete']}" 
+    onclick="return confirm('{$LANG_SUBSCR['q_del_item']}');" {xhtml}>
+
+</form>
+
+<script type="text/javascript">
+Calendar.setup({
+    inputField     :    "f_expire",
+    ifFormat       :    "%Y-%m-%d",
+    showsTime      :    false,
+    button          :   "exp_trigger"
+});
+</script>
+{# end {templatelocation} #}

@@ -1,0 +1,10 @@
+{# begin {templatelocation} #}
+<div class="profile-header">
+  {$LANG_SUBSCR['block_title']}
+</div>
+<ul>
+<!-- BEGIN subscription_row -->
+  <li>{name}:&nbsp;&nbsp;{$LANG_SUBSCR['expires']} {expires}</li>
+<!-- END subscription_row -->
+</ul>
+{# end {templatelocation} #}
