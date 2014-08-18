@@ -861,4 +861,24 @@ function plugin_user_create_subscription($uid = 0)
 
 }
 
+
+/**
+*   Support merging local accounts into remote accounts
+*
+*   @param  integer $origUID    Original (remote) user ID
+*   @param  integer $destUID    Merged (local) user ID
+*/
+function plugin_user_move_subscription($origUID, $destUID)
+{
+    global $_TABLES;
+
+    $origUID = (int)$origUID;
+    $destUID = (int)$destUID;
+
+    DB_query("UPDATE {$_TABLES['subscr_subscdriptions']}
+            SET uid = $destUID WHERE uid = $origUID", 1);
+    DB_query("UPDATE {$_TABLES['subscr_history']}
+            SET uid = $destUID WHERE uid = $origUID", 1);
+}
+
 ?>
