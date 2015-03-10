@@ -20,7 +20,7 @@ window.addEvent('domready',function() {
 
 <p>
   <label for="name" style="width:16em;">{$LANG_SUBSCR['name']}:
-    <a href="#" onclick="popupWindow('{doc_url}#desc_campaign_name', 'Help', 640, 480, 1)" class="toolbar">
+    <a href="#" onclick="popupWindow('{doc_url}#desc_campaign_name', 'Help', 640, 480, 1);return false;" class="toolbar">
     <img src="{layout_url}/images/button_help.png" alt="" /></a>
   </label>
   <input class="fValidate['required']"  size="50"
@@ -29,7 +29,7 @@ window.addEvent('domready',function() {
 
 <p>
   <label for="duration" style="width:16em;">{$LANG_SUBSCR['duration']}:
-    <a href="#" onclick="popupWindow('{doc_url}#desc_duration', 'Help', 640, 480, 1)" class="toolbar">
+    <a href="#" onclick="popupWindow('{doc_url}#desc_duration', 'Help', 640, 480, 1);return false;" class="toolbar">
     <img src="{layout_url}/images/button_help.png" alt="" /></a>
   </label>
   <input type=text name="duration" value="{duration}" id="f_duration">
@@ -44,7 +44,7 @@ window.addEvent('domready',function() {
 
 <p>
   <label for="price" style="width:16em;">Fixed Expiration:
-    <a href="#" onclick="popupWindow('{doc_url}#desc_expiration', 'Help', 640, 480, 1)" class="toolbar">
+    <a href="#" onclick="popupWindow('{doc_url}#desc_expiration', 'Help', 640, 480, 1);return false;" class="toolbar">
     <img src="{layout_url}/images/button_help.png" alt="" /></a>
   </label>
   <input type=text name="expiration" value="{expiration}" id="f_expiration">
@@ -52,7 +52,7 @@ window.addEvent('domready',function() {
 
 <p>
   <label for="price" style="width:16em;">{$LANG_SUBSCR['price']}:
-    <a href="#" onclick="popupWindow('{doc_url}#desc_price', 'Help', 640, 480, 1)" class="toolbar">
+    <a href="#" onclick="popupWindow('{doc_url}#desc_price', 'Help', 640, 480, 1);return false;" class="toolbar">
     <img src="{layout_url}/images/button_help.png" alt="" /></a>
   </label>
   <input type=text name="price" value="{price}" id="f_price">
@@ -60,7 +60,7 @@ window.addEvent('domready',function() {
 
 <p>
   <label for="addgroup" style="width:16em;">{$LANG_SUBSCR['addgroup']}:
-    <a href="#" onclick="popupWindow('{doc_url}#desc_addgroup', 'Help', 640, 480, 1)" class="toolbar">
+    <a href="#" onclick="popupWindow('{doc_url}#desc_addgroup', 'Help', 640, 480, 1);return false;" class="toolbar">
     <img src="{layout_url}/images/button_help.png" alt="" /></a>
   </label>
   <select name="addgroup" value="{addgroup}" id="f_addgroup">
@@ -70,7 +70,7 @@ window.addEvent('domready',function() {
 
 <p>
   <label style="width:16em;">{$LANG_SUBSCR['short_description']}:
-    <a href="#" onclick="popupWindow('{doc_url}#desc_short_description', 'Help', 640, 480, 1)" class="toolbar">
+    <a href="#" onclick="popupWindow('{doc_url}#desc_short_description', 'Help', 640, 480, 1);return false;" class="toolbar">
     <img src="{layout_url}/images/button_help.png" alt="" /></a>
   </label>
   <input type="text" name="short_description" size="60" maxlength="255"
@@ -79,7 +79,7 @@ window.addEvent('domready',function() {
 
 <p id="html_editarea">
   <label style="width:16em;">{$LANG_SUBSCR['description']}:
-    <a href="#" onclick="popupWindow('{doc_url}#desc_description', 'Help', 640, 480, 1)" class="toolbar">
+    <a href="#" onclick="popupWindow('{doc_url}#desc_description', 'Help', 640, 480, 1);return false;" class="toolbar">
     <img src="{layout_url}/images/button_help.png" alt="" /></a>
   </label>
   <textarea id="description"
@@ -89,7 +89,7 @@ window.addEvent('domready',function() {
 
 <p>
   <label for="enabled" style="width:16em;">{$LANG_SUBSCR['enabled']}?
-    <a href="#" onclick="popupWindow('{doc_url}#desc_enabled', 'Help', 640, 480, 1)" class="toolbar">
+    <a href="#" onclick="popupWindow('{doc_url}#desc_enabled', 'Help', 640, 480, 1);return false;" class="toolbar">
     <img src="{layout_url}/images/button_help.png" alt="" /></a>
   </label>
   <input type="checkbox" name="enabled" value="1" {ena_chk}>
@@ -97,7 +97,7 @@ window.addEvent('domready',function() {
 
 <p>
   <label for="show_in_block" style="width:16em;">{$LANG_SUBSCR['show_in_block']}?
-    <a href="#" onclick="popupWindow('{doc_url}#desc_show_in_block', 'Help', 640, 480, 1)" class="toolbar">
+    <a href="#" onclick="popupWindow('{doc_url}#desc_show_in_block', 'Help', 640, 480, 1);return false;" class="toolbar">
     <img src="{layout_url}/images/button_help.png" alt="" /></a>
   </label>
   <input type="checkbox" name="show_in_block" value="1" {block_chk}>
@@ -105,7 +105,7 @@ window.addEvent('domready',function() {
 
 <p>
   <label for="taxable" style="width:16em;">{$LANG_SUBSCR['taxable']}?
-    <a href="#" onclick="popupWindow('{doc_url}#desc_taxable', 'Help', 640, 480, 1)" class="toolbar">
+    <a href="#" onclick="popupWindow('{doc_url}#desc_taxable', 'Help', 640, 480, 1);return false;" class="toolbar">
     <img src="{layout_url}/images/button_help.png" alt="" /></a>
   </label>
   <input type="checkbox" name="taxable" value="1" {taxable_chk}>
@@ -113,7 +113,7 @@ window.addEvent('domready',function() {
 
 <p>
   <label for="at_registration" style="width:16em;">{$LANG_SUBSCR['at_registration']}?
-    <a href="#" onclick="popupWindow('{doc_url}#desc_at_registration', 'Help', 640, 480, 1)" class="toolbar">
+    <a href="#" onclick="popupWindow('{doc_url}#desc_at_registration', 'Help', 640, 480, 1);return false;" class="toolbar">
     <img src="{layout_url}/images/button_help.png" alt="" /></a>
   </label>
   <input type="radio" name="at_registration" value="0" {register_none_sel} {xhtml}>{$LANG_SUBSCR['none']}
@@ -123,7 +123,7 @@ window.addEvent('domready',function() {
 
 <p>
   <label for="grace_days" style="width:16em;">{$LANG_SUBSCR['grace_days']}:
-    <a href="#" onclick="popupWindow('{doc_url}#desc_grace_days', 'Help', 640, 480, 1)" class="toolbar">
+    <a href="#" onclick="popupWindow('{doc_url}#desc_grace_days', 'Help', 640, 480, 1);return false;" class="toolbar">
     <img src="{layout_url}/images/button_help.png" alt="" /></a>
   </label>
   <input type=text name="grace_days" value="{grace_days}" id="f_grace_days">
@@ -131,7 +131,7 @@ window.addEvent('domready',function() {
 
 <p>
   <label for="early_renewal" style="width:16em;">{$LANG_SUBSCR['early_renewal']}:
-    <a href="#" onclick="popupWindow('{doc_url}#desc_early_renewal', 'Help', 640, 480, 1)" class="toolbar">
+    <a href="#" onclick="popupWindow('{doc_url}#desc_early_renewal', 'Help', 640, 480, 1);return false;" class="toolbar">
     <img src="{layout_url}/images/button_help.png" alt="" /></a>
   </label>
   <input type=text name="early_renewal" value="{early_renewal}">
@@ -144,7 +144,7 @@ window.addEvent('domready',function() {
   <legend>{$LANG_SUBSCR['profile_integration']}</legend>
 <p>
   <label for="prf_update">{$LANG_SUBSCR['prf_update']}:
-    <a href="#" onclick="popupWindow('{doc_url}#desc_prf_update', 'Help', 640, 480, 1)" class="toolbar">
+    <a href="#" onclick="popupWindow('{doc_url}#desc_prf_update', 'Help', 640, 480, 1);return false;" class="toolbar">
     <img src="{layout_url}/images/button_help.png" alt="" {xhtml}></a>
   </label>
   <input type="radio" name="prf_update" value="0" {prf_upd_chk0} {xhtml}>
@@ -158,7 +158,7 @@ window.addEvent('domready',function() {
 </p>
 <p>
   <label>{$LANG_SUBSCR['prf_type']}
-    <a href="#" onclick="popupWindow('{doc_url}#desc_prf_type', 'Help', 640, 480, 1)" class="toolbar">
+    <a href="#" onclick="popupWindow('{doc_url}#desc_prf_type', 'Help', 640, 480, 1);return false;" class="toolbar">
     <img src="{layout_url}/images/button_help.png" alt="" {xhtml}></a>
   </label>
   <input type="tetxt" name="prf_type" value="{prf_type}" size="40" {xhtml}>
