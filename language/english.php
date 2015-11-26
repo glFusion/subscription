@@ -46,6 +46,7 @@ $LANG_SUBSCR = array(
 'admin_txt'     => 'Click on a subscription name to view details.',
 'admin_txt_subscriptions'    => 'Add or edit subscriptions.',
 'admin_txt_editsubscrip'    => 'Edit the subscription below.  Click on one of the above links to return to the admin menus.',
+'admin_txt_editproduct' => '',
 'block_title'   => 'Subscriptions',
 'date'          => 'Date',
 'expires'       => 'Expires',

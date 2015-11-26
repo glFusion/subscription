@@ -36,18 +36,23 @@ function SUBSCR_adminMenu($view = '')
     $menu_arr = array (
         array('url' => $_CONF['site_admin_url'],
                 'text' => $LANG_ADMIN['admin_home']),
-        array('url' => SUBSCR_ADMIN_URL . '/index.php',
-                'text' => $LANG_SUBSCR['products']),
-        array('url' => SUBSCR_ADMIN_URL . '/index.php?editproduct=x',
-                'text' => $LANG_SUBSCR['new_product']),
-        array('url' => SUBSCR_ADMIN_URL . '/index.php?editsubscrip=x',
-                'text' => $LANG_SUBSCR['new_subscription']),
-        array('url' => SUBSCR_ADMIN_URL . '/index.php?subscriptions=x',
-                'text' => $LANG_SUBSCR['subscriptions']),
     );
+    if ($view == 'products') {
+        $menu_arr[] = array('url' => SUBSCR_ADMIN_URL . '/index.php?editproduct=x',
+                'text' => '<span class="subNewAdminItem">' . $LANG_SUBSCR['new_product'] . '</span>');
+    } else {
+        $menu_arr[] = array('url' => SUBSCR_ADMIN_URL . '/index.php',
+                'text' => $LANG_SUBSCR['products']);
+    }
+    if ($view == 'subscriptions') {
+        $menu_arr[] = array('url' => SUBSCR_ADMIN_URL . '/index.php?editsubscrip=x',
+                'text' => '<span class="subNewAdminItem">' . $LANG_SUBSCR['new_subscription'] . '</span>');
+    } else {
+        $menu_arr[] = array('url' => SUBSCR_ADMIN_URL . '/index.php?subscriptions=x',
+                'text' => $LANG_SUBSCR['subscriptions']);
+    }
 
-    if (isset($LANG_SUBSCR['admin_txt_' . $view]) && 
-        !empty($LANG_SUBSCR['admin_txt_' . $view])) {
+    if (isset($LANG_SUBSCR['admin_txt_' . $view])) {
         $hdr_txt = $LANG_SUBSCR['admin_txt_' . $view];
     } else {
         $hdr_txt = $LANG_SUBSCR['admin_txt'];
@@ -117,6 +122,7 @@ function SUBSCR_subscriptionList($item_id)
             . $_CONF['layout_url'] . '/images/admin/delete.' . $_IMAGE_TYPE
             . '" style="vertical-align:text-bottom;" title="' . $LANG01[124]
             . '" class="gl_mootip"'
+            . ' data-uk-tooltip="{pos:\'top-left\'}"'
             . ' onclick="return confirm(\'' . $LANG01[125] . '\');"'
             . XHTML . '>&nbsp;' . $LANG_ADMIN['delete'] . '&nbsp;&nbsp;' .
 
@@ -124,6 +130,7 @@ function SUBSCR_subscriptionList($item_id)
             . SUBSCR_URL . '/images/renew.png'
             . '" style="vertical-align:text-bottom;" title="' . $LANG_SUBSCR['renew_all'] 
             . '" class="gl_mootip"' 
+            . ' data-uk-tooltip="{pos:\'top-left\'}"'
             . ' onclick="return confirm(\'' . $LANG_SUBSCR['confirm_renew']
             . '\');"'
             . XHTML . '>&nbsp;' . $LANG_SUBSCR['renew'],
@@ -496,6 +503,7 @@ case 'editproduct':
         // Pick a field.  If it exists, then this is probably a rejected save
         $P->SetVars($_POST);
     }
+    $content .= SUBSCR_adminMenu($view);
     $content .= $P->Edit();
     break;
 
