@@ -3,9 +3,9 @@
 *   Upgrade routines for the Subscription plugin.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2016 Lee Garner <lee@leegarner.com>
 *   @package    subscription
-*   @version    0.1.1
+*   @version    0.2.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -65,6 +65,11 @@ function SUBSCR_do_upgrade($current_ver)
                 'select', 0, 0, 3, 70, true, $_CONF_SUBSCR['pi_name']);
         }
         $error = SUBSCR_do_upgrade_sql('0.1.3');
+        if ($error > 1) return $error;
+    }
+
+    if ($current_ver < '0.2.0') {
+        $error = SUBSCR_do_upgrade_sql('0.2.0');
         if ($error > 1) return $error;
     }
 

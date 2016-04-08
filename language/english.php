@@ -115,6 +115,8 @@ $LANG_SUBSCR = array(
 'profile_integration' => 'Profile Plugin Integration',
 'frm_invalid'   => 'Invalid Entry',
 'member_type'   => 'Member Type',
+'purch_access'  => 'Purchase allowed by',
+'your_current_subs' => 'Your current subscriptions',
 );
 
 // Messages for the plugin upgrade
@@ -136,6 +138,7 @@ $LANG_confignames['subscription'] = array(
     'enabled'       => 'Product is enabled?',
     'taxable'       => 'Product is taxable?',
     'displayblocks'  => 'Display glFusion Blocks',
+    'onmenu' => 'Show on default glFusion menu?',
 );
 
 $LANG_configsubgroups['subscription'] = array(

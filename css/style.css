@@ -14,8 +14,8 @@
     background-color: #FFFF99;
 }
 
-.prodform label {
-    width: 12em;
+.subscriptionForm label {
+    width: 16em;
     float: left;
     text-align: right;
     margin-right: 1em;
@@ -23,11 +23,17 @@
     clear: both;
 }
 
-.prodform label error {
+.subscriptionForm label error {
     color: #FF0000;
 }
 
-.prodform p {
+.subscriptionForm p {
     margin: .5em;
+}
+
+.subNewAdminItem {
+    font-style: italic;
+    font-weight: bold;
+    color: red;
 }
 

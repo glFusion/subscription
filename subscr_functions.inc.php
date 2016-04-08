@@ -3,9 +3,9 @@
 *   Plugin-specific functions for the Subscription plugin for glFusion.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2010 Lee Garner
+*   @copyright  Copyright (c) 2010-2016 Lee Garner
 *   @package    subscription
-*   @version    0.1.0
+*   @version    0.2.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -24,40 +24,44 @@ function SUBSCR_ProductList()
     if (!SUBSCR_PAYPAL_ENABLED) {
         return "PayPal is required";
     }
+    USES_subscription_class_product();
+    USES_subscription_class_subscription();
 
-    // Determine if the current user is subscribed already.
-    $sql = "SELECT item_id, expiration
-            FROM {$_TABLES['subscr_subscriptions']}
-            WHERE uid = '" . (int)$_USER['uid'] . "'
-            AND status = '" . SUBSCR_STATUS_ENABLED . "'";
-    $res = DB_query($sql, 1);
-    $mySub = DB_fetchArray($res, false);
-    if (empty($mySub)) {
-        $mySub = array('item_id' => '', 'expiration' => '');
-    }
-
-    $custom = array();  // Holder for custom attributes
-    $options = array();
-
-    // Create product template
     $T = new Template(SUBSCR_PI_PATH . '/templates');
     $T->set_file(array(
         'prodlist'  => 'product_list.thtml',
     ));
-
     $T->set_var(array(
-            'site_url'      => $_CONF['site_url'],
             'pi_url'        => SUBSCR_URL,
             'user_id'       => $_USER['uid'],
     ) );
 
+    $mySubs = Subscription::getSubscriptions($_USER['uid']);
+    if (!empty($mySubs)) {
+        // Let current members know when they expire
+        $str = '<ul>';
+        foreach ($mySubs as $SubObj) {
+            $dt = new Date($SubObj->expiration, $_CONF['timezone']);
+            $str .= '<li>' . $SubObj->Plan->name . '&nbsp;&nbsp;' .
+                $LANG_SUBSCR['expires'] . ':&nbsp;' . $dt->format($_CONF['shortdate']) . '</li>';
+        }
+        $str .= '</ul>';
+        $T->set_var('current_subs', $str);
+    } 
+
+    $options = array();
+
+    // Create product template
     // Select products where the user either isn't subscribed, or is
     // subscribed and the expiration is within early_renewal days from now.
     // FIXME: this doesn't pick up non-subscribed users
     $sql = "SELECT p.item_id
             FROM {$_TABLES['subscr_products']} p
-            WHERE p.enabled = 1 " .
-            COM_getPermSQL('AND', 0, 2);
+            WHERE p.enabled = 1 ";
+    if (!SUBSCR_isAdmin()) {
+        $sql .= SEC_buildAccessSql();
+    }
+    //echo $sql;die;
     //COM_errorLog($sql);
     $result = DB_query($sql);
     if (!$result || DB_numRows($result) < 1) {
@@ -67,7 +71,6 @@ function SUBSCR_ProductList()
         return $retval;
     }
 
-    USES_subscription_class_product();
     $P = new SubscriptionProduct();
 
     $status = LGLIB_invokeService('paypal', 'getCurrency', array(),
@@ -96,7 +99,6 @@ function SUBSCR_ProductList()
         if ($P->upg_from == $mySub['item_id'] && $P->upg_price != '') {
             $price = (float)$P->upg_price;
             $lang_price = $LANG_SUBSCR['upg_price'];
-            //$custom['sub_type'] = '1';
             $options['sub_type'] = 'upgrade';
             $item_option = ':upgrade';
         } else {
@@ -104,6 +106,7 @@ function SUBSCR_ProductList()
             $item_option = ':new';
         }
 
+        // Create variable array for purchase buttons
         $vars = array(
             'item_number'   => 'subscription:' . $P->item_id . $item_option,
             'item_name'     => $P->name,
@@ -112,7 +115,6 @@ function SUBSCR_ProductList()
             'quantity'      => 1,
             'tax'           => 0,
             //'return' => SUBSCR_URL . '/index.php?action=ppthanks',
-            'custom'        => $custom,
             'options'       => $options,
             'btn_type'      => 'pay_now',
             'add_cart'      => 'true',
@@ -123,7 +125,7 @@ function SUBSCR_ProductList()
             $status = LGLIB_invokeService('paypal', 'genButton', $vars,
                     $output, $svc_msg);
             if ($status == PLG_RET_OK) {
-                $buttons = implode('<br ' . XHTML . '>', $output);
+                $buttons = implode('<br />', $output);
             }
         }
 
@@ -282,6 +284,5 @@ function SUBSCR_siteFooter()
     return $retval;
 
 }
-
 
 ?>

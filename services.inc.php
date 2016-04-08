@@ -266,8 +266,10 @@ function service_getproducts_subscription($args, &$output, &$svc_msg)
     // FIXME: this doesn't pick up non-subscribed users
     $sql = "SELECT p.item_id
             FROM {$_TABLES['subscr_products']} p
-            WHERE p.enabled = 1 " .
-            COM_getPermSQL('AND', 0, 2);
+            WHERE p.enabled = 1 ";
+    if (!SUBSCR_isAdmin()) {
+        $sql .= SEC_buildAccessSql();
+    }
     $result = DB_query($sql);
     if (!$result)
         return PLG_RET_ERROR;

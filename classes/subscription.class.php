@@ -11,6 +11,7 @@
 *   @filesource
 */
 
+USES_subscription_class_product();
 
 /**
  *  Class for subscription
@@ -22,11 +23,16 @@ class Subscription
     *   @var array */
     private $properties;
 
+    /** Subscription plan object.
+    *   @var object */
+    public $Plan;
+
     /** Indicate whether the current user is an administrator
     *   @var boolean */
     private $isAdmin;
 
     private $isNew;
+    private $dt;        // Place to keep a date value
 
     /** Array of error messages
      *  @var array */
@@ -42,20 +48,22 @@ class Subscription
      */
     public function __construct($id=0)
     {
-        global $_CONF_SUBSCR;
+        global $_CONF_SUBSCR, $_CONF;
 
         $this->properties = array();
         $this->isNew = true;
-
+        $this->status = 0;
+        $this->dt = new Date('now', $_CONF['timezone']);
+        $this->Plan = NULL;
         $id = (int)$id;
         if ($id < 1) {
             $this->id = 0;
             $this->item_id = 0;
             $this->uid = 0;
             $this->price = 0;
-            $this->expiration = date('Y-m-d');
+            $this->expiration = $this->dt->format('Y-m-d');
             $this->txn_id = '';
-            $this->purchase_date = date('Y-m-d');
+            $this->purchase_date = $this->dt->format('Y-m-d');
         } else {
             $this->id  = $id;
             if (!$this->Read()) {
@@ -145,12 +153,7 @@ class Subscription
         $this->id = $row['id'];
         $this->item_id = $row['item_id'];
         $this->uid = $row['uid'];
-        //if ($fromDB) {
-            $this->expiration = $row['expiration'];
-        /*} else {
-            $this->expiration = sprintf("%04d-%02d-%02d 23:59:59",
-                $row['exp_year'], $row['exp_month'], $row['exp_day']);
-        }*/
+        $this->expiration = $row['expiration'];
         $this->notified = $row['notified'];
         $this->status = $row['status'];
     }
@@ -182,6 +185,7 @@ class Subscription
             $row = DB_fetchArray($result, false);
             $this->SetVars($row, true);
             $this->isNew = false;
+            $this->Plan = new SubscriptionProduct($row['item_id']);
             return true;
         }
     }
@@ -202,22 +206,14 @@ class Subscription
             $this->SetVars($A);
         }
 
+        // If cancelling an existing subscription, just call self::Cancel()
+        if ($this->status == SUBSCR_STATUS_CANCELED && $this->id > 0) {
+            return self::Cancel($this->uid);
+        }
+
         if (!$this->isValidRecord()) {
             return false;
         }
-
-        /*// Insert or update the record, as appropriate
-        if ($this->id > 0) {
-            $logmsg = 'Updating subscription';
-            $sql1 = "UPDATE {$_TABLES['subscr_subscriptions']}";
-            $sql3 = "WHERE id = " . (int)$this->id;
-            //$status = $this->Update();
-        } else {
-            $logmsg = 'Adding subscription';
-            $sql1 = "INSERT INTO {$_TABLES['subscr_subscriptions']}";
-            $sql3 = '';
-            //$status = $this->Insert();
-        }*/
 
         //$sql2 = " SET
         $db_expiration = DB_escapeString($this->expiration);
@@ -242,7 +238,7 @@ class Subscription
             $status = true;
             $P = new SubscriptionProduct($this->item_id);
             $this->AddtoGroup($P->addgroup, $this->uid);
-            $P->updateProfile($this->expiration, $this->uid);
+            //$P->updateProfile($this->expiration, $this->uid);
             $this->Read();
             $this->AddHistory();
         } else {
@@ -283,8 +279,12 @@ class Subscription
     *   @uses   AddHistory()
     *   @param  integer $uid        User ID
     *   @param  string  $item_id    Product item ID
-    *   @param  integer $duration   Duration (# of duration_type's)
-    *   @param  integer $duration_type  Duration interval (week, month, etc.)
+    *   @param  integer $duration   Optionsl Duration (# of duration_type's)
+    *   @param  integer $duration_type  Optional Duration interval (week, month, etc.)
+    *   @param  string  $expiration Optional fixed expiration
+    *   @param  boolean $upgrade    True if this is an upgrade, default False
+    *   @param  string  $txn_id     Optional Payment transaction ID
+    *   @param  float   $price      Optional price, default to product price
     *   @return boolean     True on successful update, False on error
     */
     public function Add($uid, $item_id, $duration=0, $duration_type='',
@@ -294,7 +294,7 @@ class Subscription
 
         $this->uid = $uid;
         $this->item_id = $item_id;
-        $today = date('Y-m-d');
+        $today = $this->dt->format('Y-m-d');
         $this->status = SUBSCR_STATUS_ENABLED;
         $this->notified = 0;
 
@@ -389,7 +389,7 @@ class Subscription
             $this->Read();
             $this->AddHistory($txn_id, $price);
             // Now have the product update the member profile
-            $P->updateProfile($this->expiration, $this->uid);
+            //$P->updateProfile($this->expiration, $this->uid);
         }
         return $status;
     }
@@ -410,7 +410,7 @@ class Subscription
             item_id = '{$this->item_id}',
             uid = '{$this->uid}',
             txn_id = '" . DB_escapeString($txn_id) . "',
-            purchase_date = '" . date('Y-m-d H:i:s') . "',
+            purchase_date = '" . $this->dt->toMySQL() . "',
             expiration = '{$this->expiration}',
             price = '$price'";
         DB_query($sql, 1);
@@ -659,14 +659,6 @@ class Subscription
         $uid = (int)$A['uid'];
         USER_delGroup($groupid, $uid);
 
-        $status = LGLIB_invokeService('profile', 'getChildGroups',
-                array('uid' => $uid), $output, $svc_msg);
-        if ($status == PLG_RET_OK) {
-            foreach ($output as $child_uid) {
-                USER_delGroup($groupid, $uid);
-            }
-        }
-
         // Mark the subscription as cancelled
         /*DB_query("UPDATE {$_TABLES['subscr_subscriptions']}
                 SET status = " . SUBSCR_STATUS_CANCELED . 
@@ -719,6 +711,38 @@ class Subscription
         }
         return true;
     }*/
+
+
+    /**
+    *   Get all current subscriptions for a user
+    *
+    *   @param  integer $uid    User ID to check, current user by default
+    *   @return array   Array of subscription objects
+    */
+    public static function getSubscriptions($uid = 0, $status = SUBSCR_STATUS_ACTIVE)
+    {
+        global $_USER, $_TABLES;
+
+        $retval = array();
+        if ($uid == 0) {
+            $uid = $_USER['uid'];
+        }
+        $uid = (int)$uid;
+        $sql = "SELECT id FROM {$_TABLES['subscr_subscriptions']}
+                WHERE uid = $uid";
+        if (is_array($status)) {
+            $status = array_map('intval', $status);
+            $sql .= ' AND status IN (' . implode(',', $status) . ')';
+        } elseif ($status > -1) {
+            $status = (int)$status;
+            $sql .= " AND status = $status";
+        }
+        $res = DB_query($sql);
+        while ($A = DB_fetchArray($res, false)) {
+            $retval[] = new Subscription($A['id']);
+        }
+        return $retval;
+    }
 
 
 }   // class Subscription

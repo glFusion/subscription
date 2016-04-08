@@ -3,9 +3,9 @@
 *   Common functions for the Subscription plugin.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2010-2011 Lee Garner
+*   @copyright  Copyright (c) 2010-2016 Lee Garner
 *   @package    subscription
-*   @version    0.1.1
+*   @version    0.2.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -540,7 +540,7 @@ function phpblock_subscription_subscribe()
         ) );
 
         if ($i > 0)
-            $T->set_var('hr', '<hr' . XHTML . '>');
+            $T->set_var('hr', '<hr />');
         $i++;
 
         $T->parse('output','block');
@@ -699,7 +699,7 @@ function SUBSCR_auditLog($logentry = '', $system=false)
 
     // Can't open the log file?  Return an error
     if (!$file = fopen($logfile, 'a+')) {
-        return $LANG01[33] . $logfile . ' (' . $timestamp . ')<br' . XHTML . '>' . LB;
+        return $LANG01[33] . $logfile . ' (' . $timestamp . ')<br />' . LB;
     }
 
     if ($system == false) {
@@ -880,5 +880,23 @@ function plugin_user_move_subscription($origUID, $destUID)
     DB_query("UPDATE {$_TABLES['subscr_history']}
             SET uid = $destUID WHERE uid = $origUID", 1);
 }
+
+
+/**
+*   Check if the current user is allowed to administer the plugin
+*
+*   @return boolean     True is user is an admin, False if not
+*/
+function SUBSCR_isAdmin()
+{
+    global $_CONF_SUBSCR;
+
+    static $isAdmin = NULL;       // static since this can be called many times
+    if ($isAdmin === NULL) {
+        $isAdmin = SEC_hasRights($_CONF_SUBSCR['pi_name'] . '.admin') ? true : false;
+    }
+    return $isAdmin;
+}
+
 
 ?>

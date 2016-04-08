@@ -124,7 +124,7 @@ function SUBSCR_subscriptionList($item_id)
             . '" class="gl_mootip"'
             . ' data-uk-tooltip="{pos:\'top-left\'}"'
             . ' onclick="return confirm(\'' . $LANG01[125] . '\');"'
-            . XHTML . '>&nbsp;' . $LANG_ADMIN['delete'] . '&nbsp;&nbsp;' .
+            . '/>&nbsp;' . $LANG_ADMIN['delete'] . '&nbsp;&nbsp;' .
 
             '<input name="renewbutton" type="image" src="'
             . SUBSCR_URL . '/images/renew.png'
@@ -133,7 +133,7 @@ function SUBSCR_subscriptionList($item_id)
             . ' data-uk-tooltip="{pos:\'top-left\'}"'
             . ' onclick="return confirm(\'' . $LANG_SUBSCR['confirm_renew']
             . '\');"'
-            . XHTML . '>&nbsp;' . $LANG_SUBSCR['renew'],
+            . '/>&nbsp;' . $LANG_SUBSCR['renew'],
     );
     
     if (isset($_POST['showexp'])) {
@@ -323,19 +323,12 @@ function SUBSCR_product_getListField($fieldname, $fieldvalue, $A, $icon_arr)
         break;
 
     case 'enabled':
-        if ($fieldvalue == 1) {
-            $ena_icon = 'on.png';
-            $enabled = 0;
-        } else {
-            $ena_icon = 'off.png';
-            $enabled = 1;
-        }
-        $retval .= "<span id=togena{$A['item_id']}>\n" .
-                "<img src=\"{$_CONF['site_url']}/{$_CONF_SUBSCR['pi_name']}" . 
-                    "/images/{$ena_icon}\" ".
-                "onclick='SUBSCR_toggleEnabled({$enabled}, \"{$A['item_id']}\", ".
-                "\"subscription\", \"{$_CONF['site_url']}\");'>\n" .
-                "</span>\n";
+        $enabled = $fieldvalue == 1 ? 1 : 0;
+        $chk = $enabled ? 'checked="checked"' : '';
+        $retval = "<input type=\"checkbox\" name=\"togena{$A['item_id']}\"
+            id=\"togena{$A['item_id']}\" $chk
+            onchange='SUBSCR_toggleEnabled(\"{$enabled}\", \"{$A['item_id']}\",
+                \"subscription\", \"{$_CONF['site_url']}\");' />";
         break;
 
     case 'name':

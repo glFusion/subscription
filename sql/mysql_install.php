@@ -44,12 +44,7 @@ $_SQL['subscr_products'] =
   `trial_days` int(3) unsigned NOT NULL DEFAULT '0',
   `prf_update` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `prf_type` varchar(40) DEFAULT NULL,
-  `owner_id` mediumint(8) NOT NULL DEFAULT '2',
-  `group_id` mediumint(8) NOT NULL DEFAULT '13',
-  `perm_owner` tinyint(1) unsigned NOT NULL DEFAULT '3',
-  `perm_group` tinyint(1) unsigned NOT NULL DEFAULT '2',
-  `perm_members` tinyint(1) unsigned NOT NULL DEFAULT '2',
-  `perm_anon` tinyint(1) unsigned NOT NULL DEFAULT '2',
+  `grp_access` mediumint(8) NOT NULL DEFAULT '13',
   PRIMARY KEY (`item_id`)
 )";
 
@@ -124,6 +119,14 @@ $SUBSCR_UPGRADE = array(
       KEY `subscr_itemid` (`item_id`),
       KEY `subscr_userid` (`uid`)
     )",
+    ),
+'0.1.6' => array(
+    "ALTER TABLE {$_TABLES['subscr_products']}
+        CHANGE group_id grp_access mediumint(8) unsigned NOT NULL DEFAULT 13,
+        DROP owner_id, perm_owner, DROP perm_group, DROP perm_members, DROP perm_anon",
+    "ALTER TABLE {$_TABLES['subscr_subscriptions']}
+        DROP KEY subscr_userid,
+        ADD KEY subscr_userid(uid, item_id)",
     ),
 );
 

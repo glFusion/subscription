@@ -1,11 +1,11 @@
 Hello, {username};
-<p {xhtml}>
+<p />
 Your subscription to {site_name} will be expiring shortly.
-<p {xhtml}>
+<p />
 {product} - {short_description}
-<p {xhtml}>
+<p />
 Log into <a href="{detail_url}">{detail_url}</a> to review.
-<p {xhtml}>
+<p />
 Sincerely,
 {site_name}
 

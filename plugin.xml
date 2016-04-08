@@ -2,7 +2,7 @@
     <id>subscription</id>
     <name>Subscription</name>
     <description>Integrates with the PayPal plugin to provide subscriptions to site content for members.</description>
-    <version>0.1.5</version>
+    <version>0.2.0</version>
     <glfusionversion>1.4.0</glfusionversion>
     <phpversion>5.3.0</phpversion>
     <url>http://www.glfusion.org</url>

@@ -3,9 +3,9 @@
 *   Class to manage subscription items
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2010 Lee Garner
+*   @copyright  Copyright (c) 2010-2016 Lee Garner
 *   @package    subscription
-*   @version    0.1.1
+*   @version    0.2.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -84,12 +84,7 @@ class SubscriptionProduct
             $this->views = 0;
             $this->grace_days = $_CONF_SUBSCR['grace_days'];
             $this->early_renewal = $_CONF_SUBSCR['early_renewal'];
-            $this->owner_id = 2;
-            $this->group_id = 13;       // logged-in users
-            $this->perm_owner = 3;
-            $this->perm_group = 3;
-            $this->perm_members = 2;
-            $this->perm_members = 2;
+            $this->grp_access = 13;       // logged-in users
             $this->pricing = array();
         }
 
@@ -118,12 +113,7 @@ class SubscriptionProduct
         case 'early_renewal':
         case 'at_registration':
         case 'trial_days':
-        case 'owner_id':
-        case 'group_id':
-        case 'perm_owner':
-        case 'perm_group':
-        case 'perm_members':
-        case 'perm_anon':
+        case 'grp_access':
         case 'prf_update':
             // Integer values
             $this->properties[$var] = (int)$value;
@@ -235,27 +225,12 @@ class SubscriptionProduct
         $this->addgroup = $row['addgroup'];
         $this->grace_days = $row['grace_days'];
         $this->early_renewal = $row['early_renewal'];
-        $this->owner_id = $row['owner_id'];
-        $this->group_id = $row['group_id'];
+        $this->grp_access = $row['grp_access'];
         if ($fromDB) {
             $this->buttons = $row['buttons'];
-            $this->perm_owner = $row['perm_owner'];
-            $this->perm_group = $row['perm_group'];
-            $this->perm_members = $row['perm_members'];
-            $this->perm_anon = $row['perm_anon'];
             $this->pricing = @unserialize($row['pricing']);
         } else {
             $this->buttons = $this->btn_types;
-            if (is_array($row['perm_owner']) ||
-                is_array($row['perm_group']) ||
-                is_array($row['perm_members']) ||
-                is_array($row['perm_anon']) ) {
-                list($this->perm_owner, $this->perm_group,
-                    $this->perm_members,$this->perm_anon) =
-                    SEC_getPermissionValues($row['perm_owner'],
-                        $row['perm_group'], $row['perm_members'], 
-                        $row['perm_anon']);
-            }
             $this->pricing['base'] = (float)$row['price'];
             $disc_price = (float)$row['disc_price'];
             if ($disc_price > 0) {
@@ -293,9 +268,8 @@ class SubscriptionProduct
         $sql = "SELECT * 
                FROM {$_TABLES['subscr_products']} 
                WHERE item_id='$id' ";
-        if ($this->checkPerms && !$this->isAdmin) {
-            $sql .= COM_getPermSQL('AND');
-        }
+        //echo $sql;die;
+        //COM_errorLog($sql);
         $result = DB_query($sql, 1);
         if (!$result || DB_numRows($result) != 1) {
             return false;
@@ -380,12 +354,7 @@ class SubscriptionProduct
                 upg_extend_exp = '{$this->upg_extend_exp}',
                 prf_update = '{$this->prf_update}',
                 prf_type = '" . DB_escapeString($this->prf_type) . "',
-                owner_id = '{$this->owner_id}',
-                group_id = '{$this->group_id}',
-                perm_owner = '{$this->perm_owner}',
-                perm_group = '{$this->perm_group}',
-                perm_members = '{$this->perm_members}',
-                perm_anon = '{$this->perm_anon}',
+                grp_access = '{$this->grp_access}',
                 buttons = '{$this->buttons}'";
         $sql = $sql1 . $sql2 . $sql3;
         //echo $sql;die;
@@ -472,7 +441,7 @@ class SubscriptionProduct
     public function Edit($id = '')
     {
         global $_TABLES, $_CONF, $_CONF_SUBSCR, $LANG_SUBSCR, 
-                $LANG24, $LANG_postmodes;
+                $LANG24, $LANG_postmodes, $_SYSTEM;
 
         $id = COM_sanitizeID($id, false);
         if ($id != '') {
@@ -513,11 +482,13 @@ class SubscriptionProduct
 
         }
 
-        if (function_exists('USES_profile_functions')) {
+        /*if (function_exists('USES_profile_functions')) {
             $T->set_var('profile_enabled', 'true');
-        }
+        }*/
+        $this->prf_update = false;
 
         $T->set_var(array(
+            'mootools'  => $_SYSTEM['disable_mootools'] ? '' : 'true',
             'name'          => htmlspecialchars($this->name),
             'short_description'   => 
                             htmlspecialchars($this->short_description),
@@ -539,13 +510,7 @@ class SubscriptionProduct
             'sel_' . $this->duration_type => ' selected="selected"',
             'expiration'    => $this->expiration,
             'addgroup_sel'  => COM_optionList($_TABLES['groups'],
-                            'grp_id,grp_name', $this->addgroup, 1),
-            'owner_dropdown' => COM_buildOwnerList('owner_id',
-                        $this->owner_id),
-            'group_dropdown' => SEC_getGroupDropdown($this->group_id, 3),
-            'permissions_editor' => SEC_getPermissionsHTML(
-                    $this->perm_owner, $this->perm_group,
-                    $this->perm_members, $this->perm_anon),
+                            'grp_id,grp_name', $this->addgroup, 1, 'grp_id <> 1'),
             'dur_type'      => $this->duration_type,
             'upg_no_selection' => $this->upg_from == '' ? 
                         'selected="selected"' : '',
@@ -558,6 +523,8 @@ class SubscriptionProduct
             'upg_price' => sprintf('%.2f', $this->upg_price),
             'prf_upd_chk' . $this->prf_update  => 'checked="checked"',
             'prf_type' => $this->prf_type,
+            'group_options' => COM_optionList($_TABLES['groups'],
+                                'grp_id,grp_name', $this->grp_access, 1, 'grp_id <> 1'),
         ) );
 
         $trial_days = '';
@@ -771,7 +738,7 @@ class SubscriptionProduct
                     $output, $svc_msg);
             if ($status == PLG_RET_OK && is_array($output)) {
                 foreach ($output as $button) {
-                    $retval .= $button . '<br ' . XHTML . '>';
+                    $retval .= $button . '<br />';
                 }
             }
         }
@@ -808,11 +775,12 @@ class SubscriptionProduct
     /**
     *   Update the Profile plugin data with the membership type and expiration.
     *
+    *   @deprecated 0.2.0
     *   @param  string  $newdate    Subscription expiration date
     *   @param  integer $uid        User ID
     *   @return integer             Result from LGLIB_invokeService()
     */
-    public function updateProfile($newdate, $uid)
+    public function DEPRECATED_updateProfile($newdate, $uid)
     {
         $args = array(
             'sys_expires'       => $newdate,

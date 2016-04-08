@@ -1,5 +1,11 @@
 {# begin {templatelocation} #}
 <h1>{$LANG_SUBSCR['subscriptions']}</h1>
+{!if current_subs}
+  <span class="info">
+    {$LANG_SUBSCR['your_current_subs']}:<br />
+    {current_subs}
+  </span>
+{!endif}
 <hr width="85%" />
 <!-- BEGIN ProductBlock -->
 <div class="prodlistitem" style="padding:10px;clear:both;">

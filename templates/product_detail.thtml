@@ -13,7 +13,7 @@
     <div class="expmessage">
       {$LANG_SUBSCR['your_sub_expires']} {exp_date}
       {!if renew_now}
-      <br {xhtml}>
+      <br />
       <span class="renewnow">{$LANG_SUBSCR['renew_now']}</span>
       {!endif}
     </div>
