@@ -96,11 +96,11 @@ function service_productinfo_subscription($A, &$output, &$svc_msg)
     if (isset($A[1]) && !empty($A[1])) {
         $A[1] = COM_sanitizeID($A[1]);
         $info = DB_fetchArray(DB_query(
-                "SELECT item_id, name, description, price, upg_from, upg_price
+                "SELECT item_id, name, short_description, description, price, upg_from, upg_price
                 FROM {$_TABLES['subscr_products']} 
                 WHERE item_id='{$A[1]}'", 1), false);
         if (!empty($info)) {
-            $output['short_description'] = $info['description'];
+            $output['short_description'] = $info['short_description'];
             $output['name'] = $info['name']; 
             $output['description'] = $info['description'];
             //if (isset($custom['sub_type']) && 
@@ -281,6 +281,7 @@ function service_getproducts_subscription($args, &$output, &$svc_msg)
         $P->Read($A['item_id']);
 
         $description = $P->description;
+        $short_description = $P->short_description;
 
         $ok_to_buy = true;
         if (!empty($mySub['expiration']) && $mySub['item_id'] == $P->item_id) {
@@ -305,11 +306,12 @@ function service_getproducts_subscription($args, &$output, &$svc_msg)
             $output[] = array(
                 'id'    => 'subscription:' . $P->item_id . $item_option,
                 'name' => $P->name,
-                'short_description' => $description,
+                'short_description' => $short_description,
+                'description' => $description,
                 'price' => $price,
                 'buttons' => array('buy_now' => $P->MakeButton()),
-                //'url' => COM_buildUrl(SUBSC_URL .
-                //    '/index.php?view=detail&item_id=' . $P->plan_id),
+                'url' => COM_buildUrl(SUBSCR_URL .
+                    '/index.php?view=detail&item_id=' . $P->item_id),
             );
         }
     }

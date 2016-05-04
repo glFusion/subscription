@@ -626,8 +626,8 @@ class SubscriptionProduct
                 AND uid='{$_USER['uid']}'";
             $A = DB_fetchArray(DB_query($sql), false);
             if (!empty($A)) {
-                $T->set_var('exp_date', 
-                    strftime($_CONF['shortdate'], $A['exp_date']));
+                $dt = new Date($A['exp_date'], $_CONF['timezone']);
+                $T->set_var('exp_date', $dt->Format($_CONF['shortdate']));
                 $tm = time();
                 if ($A['early_renewal'] < $tm || 
                     ($A['late_renewal'] > $tm && $A['exp_date'] <= $tm)) {
@@ -766,7 +766,7 @@ class SubscriptionProduct
     *
     *   @return boolean     True if Errors[] is not empty, false if it is.
     */
-    private function hasErrors()
+    public function hasErrors()
     {
         return (!empty($this->Errors));
     }
