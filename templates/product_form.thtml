@@ -36,6 +36,15 @@ function update_duration_type(opt)
 <legend>{$LANG_SUBSCR['subscription_info']}</legend>
 
 <p>
+  <label for="item_id">{$LANG_SUBSCR['product_id']}:
+    <a href="#" onclick="popupWindow('{doc_url}#desc_product_id', 'Help', 640, 480, 1);return false;" class="toolbar">
+    <img src="{layout_url}/images/button_help.png" alt="" /></a>
+  </label>
+  <input required class="fValidate['required']"  size="20"
+    type="text" name="item_id" value="{item_id}" id="item_id">
+</p>
+
+<p>
   <label for="name">{$LANG_SUBSCR['name']}:
     <a href="#" onclick="popupWindow('{doc_url}#desc_campaign_name', 'Help', 640, 480, 1);return false;" class="toolbar">
     <img src="{layout_url}/images/button_help.png" alt="" /></a>

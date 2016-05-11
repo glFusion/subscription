@@ -61,7 +61,6 @@ function SUBSCR_ProductList()
     if (!SUBSCR_isAdmin()) {
         $sql .= SEC_buildAccessSql();
     }
-    //echo $sql;die;
     //COM_errorLog($sql);
     $result = DB_query($sql);
     if (!$result || DB_numRows($result) < 1) {
@@ -71,8 +70,6 @@ function SUBSCR_ProductList()
         return $retval;
     }
 
-    $P = new SubscriptionProduct();
-
     $status = LGLIB_invokeService('paypal', 'getCurrency', array(),
         $currency, $svc_msg);
     if (empty($currency)) $currency = 'USD';
@@ -80,7 +77,7 @@ function SUBSCR_ProductList()
     $T->set_block('prodlist', 'ProductBlock', 'PBlock');
 
     while ($A = DB_fetchArray($result)) {
-        $P->Read($A['item_id']);
+        $P = new SubscriptionProduct($A['item_id']);
         $description = $P->description;
         $price = (float)$P->price;
         $lang_price = $LANG_SUBSCR['price'];

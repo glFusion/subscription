@@ -16,6 +16,7 @@
 * @global array $LANG_SUBSCR
 */
 $LANG_SUBSCR = array(
+'product_id'    => 'Product ID',
 'name'          => 'Name',
 'enabled'       => 'Enabled',
 'show_in_block' => 'Show in Block',

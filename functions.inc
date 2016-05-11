@@ -159,7 +159,7 @@ function plugin_showstats_subscription($showsitestats)
                 ON p.item_id=s.item_id
             WHERE p.enabled = 1
             AND ( s.status = '" . SUBSCR_STATUS_ENABLED . "' )
-            AND ( s.expiration > '{$_SUBSCR_CONF['now']}' )
+            AND ( s.expiration > '{$_CONF_SUBSCR['now']}' )
             GROUP BY p.item_id";
     //echo $sql;die;
     $result = DB_query($sql);
@@ -314,37 +314,27 @@ function plugin_autotags_subscription($op, $content = '', $autotag = '')
 {
     global $_CONF, $_TABLES, $_CONF_SUBSCR;
 
-    //USES_subscription_class_campaign();
-
     switch ($op) {
     case 'tagname':
         $retval = 'subscription';
         break;
-/*    case 'parse':
-
+    case 'parse':
         $HTML = '';
         $option = COM_applyFilter($autotag['parm1']);
-
         switch ($option) {
-        case 'random':
-            $quote = DailyQuote::getQuote();
-            return htmlspecialchars($quote['Quotes']);
-            break;
-
-        case 'quoted':
-        case 'quote':
-            $qid = COM_sanitizeID($autotag['parm2']);
-            if ($qid != '') {
-                $quote = DailyQuote::getQuote($qid);
-                return htmlspecialchars($quote['quote']);
-            } else {
-                return '';
+        case 'buynow':
+            // tag: [subscripton:buynow product_id]
+            USES_subscription_class_product();
+            $P = new SubscriptionProduct($autotag['parm2']);
+            if ($P->canBuy()) {
+                $content = $P->MakeButton();
+                var_dump($content);die;
             }
-
+            break;
         } // switch($option)
 
         $retval = str_replace($autotag['tagstr'],$HTML,$content);
-        break; */
+        break; 
 
     default:
         $retval = $content;
@@ -619,7 +609,7 @@ function plugin_getheadercss_subscription()
     }
 */
     $defpath = SUBSCR_PI_PATH . '/css';
-    $layoutpath = $_CONF['layout_path'] . 'plugins/' . $_SUBSCR_CONF['pi_name'];
+    $layoutpath = $_CONF['layout_path'] . 'plugins/' . $_CONF_SUBSCR['pi_name'];
     foreach ($files as $file) {
         if (file_exists($layoutpath . '/' . $file)) {
             $styles[] = $layoutpath . '/' . $file;
@@ -654,9 +644,9 @@ function plugin_runScheduledTask_subscription()
                 FROM {$_TABLES['subscr_subscriptions']} s
                 LEFT JOIN {$_TABLES['subscr_products']} p
                 ON p.item_id = s.item_id
-                WHERE '{$_SUBSCR_CONF['now']}' > (s.expiration + interval p.grace_days DAY)
+                WHERE '{$_CONF_SUBSCR['now']}' > (s.expiration + interval p.grace_days DAY)
                 AND status = " . SUBSCR_STATUS_ENABLED;
-    //COM_errorLog($sql);
+    COM_errorLog($sql);
     $r = DB_query($sql, 1);
     if ($r) {
         USES_subscription_class_subscription();
@@ -757,7 +747,7 @@ function SUBSCR_notifyExpiration()
             LEFT JOIN {$_TABLES['users']} u
                 ON u.uid = s.uid
             WHERE notified = 0
-            AND s.expiration < '{$_SUBSCR_CONF['now']}' + INTERVAL {$_CONF_SUBSCR['notifydays']} DAY";
+            AND s.expiration < '{$_CONF_SUBSCR['now']}' + INTERVAL {$_CONF_SUBSCR['notifydays']} DAY";
     //COM_errorLog($sql);
     $r = DB_query($sql);
     if (!$r)

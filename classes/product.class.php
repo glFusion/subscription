@@ -773,6 +773,25 @@ class SubscriptionProduct
 
 
     /**
+    *   Determine if the current user can purchase this item.
+    *   Also ensures that the current object is a valid item.
+    *
+    *   @return boolean     True if allowed, False if not
+    */
+    public function canBuy()
+    {
+        global $_GROUPS, $_USER;
+
+        $retval = false;
+        if ($this->item_id != '') {
+            if (in_array($this->grp_access, $_GROUPS))
+                $retval = true;
+        }
+        return $retval;
+    }
+
+
+    /**
     *   Update the Profile plugin data with the membership type and expiration.
     *
     *   @deprecated 0.2.0
