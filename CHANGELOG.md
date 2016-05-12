@@ -3,3 +3,4 @@
 - Change from glFusion permissions matrix to simple group ID for access to products.
 - Switch from XML to JSON for AJAX function
 - Remove profile plugin update functions
+- Add autotag [subscription:buynow product_id]

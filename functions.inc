@@ -328,7 +328,6 @@ function plugin_autotags_subscription($op, $content = '', $autotag = '')
             $P = new SubscriptionProduct($autotag['parm2']);
             if ($P->canBuy()) {
                 $content = $P->MakeButton();
-                var_dump($content);die;
             }
             break;
         } // switch($option)
@@ -788,8 +787,8 @@ function SUBSCR_notifyExpiration()
         $message = $T->finish($T->get_var('output'));
 
         COM_mail(
-            "$username <$email>",
-            "{$LANG_SUBSCR['exp_notice']}",
+            array($email, $username),
+            $LANG_SUBSCR['exp_notice'],
             $message,
             "{$_CONF['site_name']} <{$_CONF['site_mail']}>",
             true
