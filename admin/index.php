@@ -94,11 +94,10 @@ function SUBSCR_subscriptionList($item_id)
             'text' => $LANG_SUBSCR['expires'], 'sort' => true);
 
     $defsort_arr = array('field' => 'expiration', 'direction' => 'desc');
-
     $title = $LANG_SUBSCR['admin_hdr'];
     if (!empty($item_id)) {
         list($item_name, $duration) = DB_fetchArray(DB_query(
-            "SELECT name, duration FROM {$_TABLES['subscr_products']}
+            "SELECT item_id, duration FROM {$_TABLES['subscr_products']}
             WHERE item_id='$item_id'", 1), false);
         $title  .= " :: $item_name";
         $item_query = " s.item_id = '".DB_escapeString($item_id)."' ";
@@ -145,7 +144,7 @@ function SUBSCR_subscriptionList($item_id)
     }
 
     $query_arr = array('table' => 'subscr_subscriptions',
-        'sql' => "SELECT s.*, p.name as plan, u.username, u.fullname
+        'sql' => "SELECT s.*, p.item_id as plan, u.username, u.fullname
                 FROM {$_TABLES['subscr_subscriptions']} s
                 LEFT JOIN {$_TABLES['subscr_products']} p
                     ON s.item_id = p.item_id
@@ -243,8 +242,8 @@ function SUBSCR_productAdminList()
         array('field' => 'enabled', 
             'text' => $LANG_SUBSCR['enabled'], 'sort' => false,
             'align' => 'center'),
-        array('field' => 'name', 
-            'text' => $LANG_SUBSCR['name'], 'sort' => true),
+        array('field' => 'item_id', 
+            'text' => $LANG_SUBSCR['product_id'], 'sort' => true),
         array('field' => 'duration', 
             'text' => $LANG_SUBSCR['duration'], 'sort' => false),
         array('field' => 'grp_name',
@@ -257,7 +256,7 @@ function SUBSCR_productAdminList()
             'text' => $LANG_ADMIN['delete'], 'sort' => false),
     );
 
-    $defsort_arr = array('field' => 'name', 'direction' => 'asc');
+    $defsort_arr = array('field' => 'item_id', 'direction' => 'asc');
 
     $retval .= COM_startBlock($LANG_SUBSCR['admin_hdr'], '', COM_getBlockTemplate('_admin_block', 'header'));
 
@@ -275,7 +274,7 @@ function SUBSCR_productAdminList()
                 FROM {$_TABLES['subscr_products']} p 
                 LEFT JOIN {$_TABLES['groups']} g
                     ON g.grp_id=p.addgroup", 
-        'query_fields' => array('name', 'description'),
+        'query_fields' => array('item_id', 'short_description', 'description'),
         'default_filter' => ' WHERE 1=1 ',
     );
 
@@ -331,7 +330,7 @@ function SUBSCR_product_getListField($fieldname, $fieldvalue, $A, $icon_arr)
                 \"subscription\", \"{$_CONF['site_url']}\");' />";
         break;
 
-    case 'name':
+    case 'item_id':
         $retval = COM_createLink($fieldvalue, 
                 SUBSCR_ADMIN_URL . 
                 '/index.php?subscriptions=' . $A['item_id']);
@@ -411,8 +410,10 @@ if ($action == 'mode') {
 //                COM_applyFilter($_REQUEST['view']) : $action;
 
 // Get the product and subscription IDs, if any
-$item_id = isset($_REQUEST['item_id']) ? 
-        COM_sanitizeId($_REQUEST['item_id']) : '';
+// item_id could be item_id_orig if the product is being updated
+$item_id = isset($_REQUEST['item_id_orig']) ?
+        $_REQUEST['item_id_orig'] : $_REQUEST['item_id'];
+$item_id = COM_sanitizeId($item_id, false);
 $sub_id = isset($_REQUEST['sub_id']) ? (int)$_REQUEST['sub_id'] : 0;
 
 $content = '';      // initialize variable for page content
@@ -427,6 +428,8 @@ case 'saveproduct':
     } else {
         $content .= SUBSCR_errorMessage($S->PrintErrors());
         $view = 'editproduct';
+        // Force the submitted item ID to be the original
+        $_POST['item_id'] = $_POST['item_id_orig'];
     }
     break;
 
@@ -492,7 +495,7 @@ switch ($view) {
 case 'editproduct':
     USES_subscription_class_product();
     $P = new SubscriptionProduct($item_id);
-    if (isset($_POST['name'])) {
+    if (isset($_POST['short_description'])) {
         // Pick a field.  If it exists, then this is probably a rejected save
         $P->SetVars($_POST);
     }
@@ -502,8 +505,7 @@ case 'editproduct':
 
 case 'subscriptions':
     //if ($actionval != 'x') $item_id = $actionval;
-    $item_id = isset($_REQUEST['item_id']) ? $_REQUEST['item_id'] : '';
-    $content .= SUBSCR_subscriptionList($item_id);
+    $content .= SUBSCR_subscriptionList($actionval);
     break;
 
 case 'editsubscrip':

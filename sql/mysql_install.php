@@ -128,6 +128,9 @@ $SUBSCR_UPGRADE = array(
         DROP KEY subscr_userid,
         ADD KEY subscr_userid(uid, item_id)",
     ),
+'0.2.0' => array(
+    "ALTER TABLE {$_TABLES['subscr_products']} DROP `name`",
+    ),
 );
 
 ?>

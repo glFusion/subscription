@@ -67,7 +67,6 @@ class SubscriptionProduct
                 $this->item_id = '';
             }
         } else {
-            $this->name = '';
             $this->short_description = '';
             $this->description = '';
             $this->price = 0;
@@ -126,7 +125,6 @@ class SubscriptionProduct
             break;
 
         case 'buttons':
-        case 'name':
         case 'short_description':
         case 'description':
         case 'duration_type':
@@ -198,7 +196,6 @@ class SubscriptionProduct
         if (!is_array($row)) return;
 
         $this->item_id = $row['item_id'];
-        $this->name = $row['name'];
         $this->short_description = $row['short_description'];
         $this->description = $row['description'];
         $this->enabled = $row['enabled'];
@@ -265,8 +262,7 @@ class SubscriptionProduct
             return false;
         }
 
-        $sql = "SELECT * 
-               FROM {$_TABLES['subscr_products']} 
+        $sql = "SELECT * FROM {$_TABLES['subscr_products']} 
                WHERE item_id='$id' ";
         //echo $sql;die;
         //COM_errorLog($sql);
@@ -293,11 +289,19 @@ class SubscriptionProduct
     {
         global $_TABLES;
 
+        if (!$this->isNew) {
+            // Save the original item ID by which this record was loaded
+            // before any updates are done to it.
+            $orig_item_id = $this->item_id;
+        }
+
         if (is_array($A)) {
+            // Should always be an array, e.g. $_POST
             $this->SetVars($A);
         }
 
         if ($this->item_id == '') {
+            // Make sure there's a valid item_id
             $this->item_id = COM_makeSid();
         }
 
@@ -322,18 +326,31 @@ class SubscriptionProduct
         // Insert or update the record, as appropriate
         if ($this->isNew) {
             SUBSCR_debug('Preparing to save a new product.');
+            $count_should_be = 0;   // item_id should not be in the DB
             $sql1 = "INSERT INTO {$_TABLES['subscr_products']} SET
                     item_id='{$this->item_id}', ";
             $sql3 = '';
-            //$status = $this->Insert();
         } else {
             SUBSCR_debug('Preparing to update product id ' . $this->item_id);
             $sql1 = "UPDATE {$_TABLES['subscr_products']} SET ";
-            $sql3 = " WHERE item_id='{$this->item_id}'";
-            //$status = $this->Update();
+            $count_should_be = 1;   // should be one existing record
+            if ($this->item_id != $orig_item_id) {
+                SUBSCR_debug("Updating from {$orig_item_id} to {$this->item_id}");
+                $count_should_be = 0;   // When updating item_id should be absent
+                $sql1 .= "item_id = '{$this->item_id}',";
+            }
+            $sql3 = " WHERE item_id='{$orig_item_id}'";
         }
-        $sql2 = "name = '" . DB_escapeString($this->name) . "',
-                short_description = '" . 
+
+        // Check that the item_id does not already exist, or only exists once
+        // if updating the same ID
+        $c = DB_count($_TABLES['subscr_products'], 'item_id', $this->item_id);
+        if ($c > $count_should_be) {
+            SUBSCR_debug("Item {$this->item_id} already exists, cannot add");
+            $this->Errors[] = "Item {$this->item_id} already exists, cannot create";
+            return false;
+        }
+        $sql2 = "short_description = '" . 
                         DB_escapeString($this->short_description) . "',
                 description = '" . DB_escapeString($this->description) . "',
                 price = '$price',
@@ -452,8 +469,16 @@ class SubscriptionProduct
         }
         $id = $this->item_id;
         $action_url = SUBSCR_ADMIN_URL . '/index.php';
+
         $T = new Template(SUBSCR_PI_PATH . '/templates');
-        $T->set_file(array('product' => "product_form.thtml"));
+        switch ($_SYSTEM['framework']) {
+        case 'uikit':
+            $T->set_file(array('product' => "product_form.uikit.thtml"));
+            break;
+        default:
+            $T->set_file(array('product' => "product_form.thtml"));
+            break;
+        }
 
         // Set up the wysiwyg editor, if available
         switch (PLG_getEditorType()) {
@@ -474,8 +499,7 @@ class SubscriptionProduct
         }
 
         if ($id != '') {
-            $T->set_var('item_id', $this->item_id);
-            $retval = COM_startBlock($LANG_SUBSCR['edit'] . ': ' . $this->name);
+            $retval = COM_startBlock($LANG_SUBSCR['edit'] . ': ' . $this->item_id);
 
         } else {
             $retval = COM_startBlock($LANG_SUBSCR['new_product']);
@@ -488,8 +512,8 @@ class SubscriptionProduct
         $this->prf_update = false;
 
         $T->set_var(array(
+            'item_id'   => $id,
             'mootools'  => $_SYSTEM['disable_mootools'] ? '' : 'true',
-            'name'          => htmlspecialchars($this->name),
             'short_description'   => 
                             htmlspecialchars($this->short_description),
             'description'   => htmlspecialchars($this->description),
@@ -515,7 +539,7 @@ class SubscriptionProduct
             'upg_no_selection' => $this->upg_from == '' ? 
                         'selected="selected"' : '',
             'upg_from_sel'  => COM_optionList($_TABLES['subscr_products'],
-                        'item_id,name', $this->upg_from, 1, 
+                        'item_id,item_id', $this->upg_from, 1, 
                         "item_id <> '{$this->item_id}'" ),
             'upg_ext_chk' => $this->upg_extend_exp == 1 ? 
                         'checked="checked"' : '',
@@ -643,7 +667,6 @@ class SubscriptionProduct
                 'pi_url'        => SUBSCR_URL,
                 'user_id'       => $_USER['uid'],
                 'item_id'       => $this->item_id,
-                'name'          => $this->name,
                 'short_description'   => PLG_replacetags($this->short_description),
                 'description'   => PLG_replacetags($this->description),
                 'price'         => COM_numberFormat($this->price, 2),
@@ -728,7 +751,7 @@ class SubscriptionProduct
         if (SUBSCR_PAYPAL_ENABLED) {
             $vars = array(
                 'item_number' => 'subscription:' . $this->item_id,
-                'item_name' => $this->name,
+                'item_name' => $this->item_id,
                 'amount' => sprintf("%5.2f", (float)$this->price),
                 'no_shipping' => 1,
                 'taxable' => $this->taxable,

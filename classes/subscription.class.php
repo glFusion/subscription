@@ -557,7 +557,7 @@ class Subscription
 
         $T->set_var('product_select', $sel_opts .
                 COM_optionList($_TABLES['subscr_products'],
-                'item_id,name', $this->item_id, 1));
+                'item_id,item_id', $this->item_id, 1));
 
         $retval .= $T->parse('output', 'product');
         $retval .= COM_endBlock();
@@ -586,7 +586,7 @@ class Subscription
         $T->set_file(array('subscription' => 'subscr_detail.thtml',
             ));
 
-        $A = DB_fetchArray(DB_query("SELECT name, description
+        $A = DB_fetchArray(DB_query("SELECT item_id, description
                 FROM {$_TABLES['subscr_products']}
                 WHERE item_id='" . $this->item_id . "'"), false);
 
@@ -594,7 +594,7 @@ class Subscription
             'user_id'           => $this->uid,
             'id'                => $id,
             'item_id'           => $this->item_id,
-            'name'              => $A['name'],
+            'name'              => $A['item_id'],
             'description'       => $A['description'],
             'expiration'        => $this->expiration,
             'purchase_date'     => $this->purchase_date,
@@ -644,7 +644,7 @@ class Subscription
             return;
 
         // Remove the user from the group(s) related to the subscription
-        $sql = "SELECT s.uid, s.expiration, p.addgroup, p.name
+        $sql = "SELECT s.uid, s.expiration, p.addgroup, p.item_id
                 FROM {$_TABLES['subscr_subscriptions']} s
                 LEFT JOIN {$_TABLES['subscr_products']} p
                 ON s.item_id = p.item_id
@@ -665,7 +665,7 @@ class Subscription
                 " WHERE id = $sub_id");*/
         DB_delete($_TABLES['subscr_subscriptions'], 'id', $sub_id);
 
-        SUBSCR_auditLog("Cancelled subscription $sub_id ({$A['name']}) " .
+        SUBSCR_auditLog("Cancelled subscription $sub_id ({$A['item_id']}) " .
                 "for user $uid (" .COM_getDisplayName($uid) . '), expiring ' .
                 $A['expiration'], $system);
     }
@@ -679,7 +679,7 @@ class Subscription
     public function ProductName()
     {
         global $_TABLES;
-        return DB_getItem($_TABLES['subscr_products'], 'name',
+        return DB_getItem($_TABLES['subscr_products'], 'item_id',
             "item_id='" . $this->item_id . "'");
     }
 

@@ -887,5 +887,7 @@ function SUBSCR_isAdmin()
     return $isAdmin;
 }
 
+// This is temporary, and will be included in glFusion 1.6.0
+isset($_SYSTEM['framework']) || $_SYSTEM['framework'] = 'legacy';
 
 ?>
