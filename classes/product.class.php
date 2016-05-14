@@ -756,6 +756,7 @@ class SubscriptionProduct
                 'no_shipping' => 1,
                 'taxable' => $this->taxable,
                 'btn_type' => 'pay_now',
+                'quantity' => 1,
             );
             $status = LGLIB_invokeService('paypal', 'genButton', $vars, 
                     $output, $svc_msg);
