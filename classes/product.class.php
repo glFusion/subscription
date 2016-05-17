@@ -350,6 +350,21 @@ class SubscriptionProduct
             $this->Errors[] = "Item {$this->item_id} already exists, cannot create";
             return false;
         }
+
+        // If the item_id has changed, update all the current subscription
+        // records with the new value. Do this first, before updating the
+        // product, to avoid getting out of sync.
+        if ($this->item_id != $orig_item_id) {
+            $sql = "UPDATE {$_TABLES['subscr_subscriptions']}
+                    SET item_id = '{$this->item_id}'
+                    WHERE item_id = '$orig_item_id'";
+            DB_query($sql, 1);
+            if (DB_error()) {
+                $this->Errors[] = "Failed updating subscriptions to {$this->item_id}";
+                return false;
+            }
+        }
+
         $sql2 = "short_description = '" . 
                         DB_escapeString($this->short_description) . "',
                 description = '" . DB_escapeString($this->description) . "',
