@@ -47,9 +47,6 @@ function SUBSCR_adminMenu($view = '')
     if ($view == 'subscriptions') {
         $menu_arr[] = array('url' => SUBSCR_ADMIN_URL . '/index.php?editsubscrip=x',
                 'text' => '<span class="subNewAdminItem">' . $LANG_SUBSCR['new_subscription'] . '</span>');
-    } else {
-        $menu_arr[] = array('url' => SUBSCR_ADMIN_URL . '/index.php?subscriptions=x',
-                'text' => $LANG_SUBSCR['subscriptions']);
     }
 
     if (isset($LANG_SUBSCR['admin_txt_' . $view])) {
@@ -445,7 +442,7 @@ case 'savesubscription':
     $item_id = isset($_POST['item_id']) ? $_POST['item_id'] : '';
     $S = new Subscription($item_id);
     if ($S->Save($_POST)) {
-        $item_id = $S->item_id;
+        $actionval = $S->item_id;
         $view = 'subscriptions';
     } else {
         $content .= SUBSCR_errorMessage($S->PrintErrors());
