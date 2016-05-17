@@ -153,7 +153,7 @@ function plugin_showstats_subscription($showsitestats)
 
     $retval = '';
 
-    $sql = "SELECT p.item_id, p.name, COUNT(s.id) as sub_count
+    $sql = "SELECT p.item_id, COUNT(s.id) as sub_count
             FROM {$_TABLES['subscr_products']} p
             LEFT JOIN {$_TABLES['subscr_subscriptions']} s
                 ON p.item_id=s.item_id
@@ -168,7 +168,7 @@ function plugin_showstats_subscription($showsitestats)
         USES_lib_admin();
         $header_arr = array(
             array('text' => $LANG_SUBSCR['product'], 
-                    'field' => 'name', 
+                    'field' => 'item_id', 
                     'header_class' => 'stats-header-title'),
             array('text' => $LANG_SUBSCR['subscriptions'], 
                     'field' => 'sub_count', 
@@ -180,9 +180,9 @@ function plugin_showstats_subscription($showsitestats)
                           'title'        => $LANG_SUBSCR['subscriptions'],
         );
         while ($A = DB_fetchArray($result, false)) {
-            $A['name'] = "<a href=\"" . COM_buildUrl(SUBSCR_URL . 
+            $A['item_id'] = "<a href=\"" . COM_buildUrl(SUBSCR_URL . 
                     "/index.php?mode=detail&item_id={$A['item_id']}"). '">' .
-                    htmlspecialchars($A['name']) . '</a>';
+                    htmlspecialchars($A['item_id']) . '</a>';
             $A['received'] = COM_NumberFormat($A['sub_count']);
             $data_arr[] = $A;
         }
@@ -555,7 +555,7 @@ function plugin_profilevariablesdisplay_subscription($uid, &$T)
     if (!SEC_hasRights('subscription.admin') && $uid != $_USER['uid'])
         return '';
 
-    $sql = "SELECT p.name, s.expiration
+    $sql = "SELECT p.item_id, s.expiration
             FROM {$_TABLES['subscr_subscriptions']} s
             LEFT JOIN {$_TABLES['subscr_products']} p
             ON s.item_id = p.item_id
@@ -570,7 +570,7 @@ function plugin_profilevariablesdisplay_subscription($uid, &$T)
 
         while ($A = DB_fetchArray($res, false)) {
             $LT->set_var(array(
-                'name' => $A['name'],
+                'item_id' => $A['item_id'],
                 'expires' => $A['expiration'],
             ) );
             $LT->parse('srow', 'subscription_row', true);
@@ -739,7 +739,7 @@ function SUBSCR_notifyExpiration()
     }
 
     $sql = "SELECT s.id, s.uid, s.notified, 
-                p.item_id, p.name, p.short_description
+                p.item_id, p.short_description
             FROM {$_TABLES['subscr_subscriptions']} s
             LEFT JOIN {$_TABLES['subscr_products']} p
                 ON p.item_id = s.item_id
@@ -775,7 +775,7 @@ function SUBSCR_notifyExpiration()
             'site_name'     => $_CONF['site_name'],
             'username'      => $username,
             'pi_name'       => $_CONF_SUBSCR['pi_name'],
-            'product'       => $row['name'],
+            'product'       => $row['item_id'],
             'item_id'       => $row['item_id'],
             'short_description' => $row['short_description'],
             'detail_url'    => COM_buildURL(SUBSCR_URL . 

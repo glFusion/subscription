@@ -58,7 +58,7 @@ class Subscription
         $id = (int)$id;
         if ($id < 1) {
             $this->id = 0;
-            $this->item_id = 0;
+            $this->item_id = '';
             $this->uid = 0;
             $this->price = 0;
             $this->expiration = $this->dt->format('Y-m-d');
@@ -477,7 +477,7 @@ class Subscription
         global $LANG_SUBSCR;
 
         // Check that basic required fields are filled in
-        if ($this->item_id < 1) {
+        if ($this->item_id == '') {
             $this->Errors[] = $LANG_SUBSCR['err_missing_item'];
         }
         if ((int)$this->uid < 2) {

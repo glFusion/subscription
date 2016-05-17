@@ -42,7 +42,7 @@ function SUBSCR_ProductList()
         $str = '<ul>';
         foreach ($mySubs as $SubObj) {
             $dt = new Date($SubObj->expiration, $_CONF['timezone']);
-            $str .= '<li>' . $SubObj->Plan->name . '&nbsp;&nbsp;' .
+            $str .= '<li>' . $SubObj->Plan->item_id . '&nbsp;&nbsp;' .
                 $LANG_SUBSCR['expires'] . ':&nbsp;' . $dt->format($_CONF['shortdate']) . '</li>';
         }
         $str .= '</ul>';
@@ -106,7 +106,7 @@ function SUBSCR_ProductList()
         // Create variable array for purchase buttons
         $vars = array(
             'item_number'   => 'subscription:' . $P->item_id . $item_option,
-            'item_name'     => $P->name,
+            'item_name'     => $P->item_id,
             'short_description' => $P->short_description,
             'amount'        => $price,
             'quantity'      => 1,
@@ -128,7 +128,6 @@ function SUBSCR_ProductList()
 
         $T->set_var(array(
             'item_id'   => $P->item_id,
-            'name'      => $P->name,
             'description' => PLG_replacetags($description),
             'price'     => COM_numberFormat($price, 2),
             'encrypted' => '',

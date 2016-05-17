@@ -12,8 +12,7 @@
   <div style="float:left;">
     <div>
       <h2>
-        <!--<a href="{pi_url}/index.php?mode=detail&id={item_id}">{name}</a>-->
-        {name}
+        {item_id}
       </h2>
     </div>
     <div>{description}<p /></div>
