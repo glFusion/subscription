@@ -1,7 +1,15 @@
 {# begin {templatelocation} #}
+{!if is_uikit}
+<nav class="uk-navbar">
+  <div class="uk-navbar-content">
+  {$LANG_SUBSCR['block_title']}
+  </div>
+</nav>
+{!else}
 <div class="profile-header">
   {$LANG_SUBSCR['block_title']}
 </div>
+{!endif}
 <ul>
 <!-- BEGIN subscription_row -->
   <li>{name}:&nbsp;&nbsp;{$LANG_SUBSCR['expires']} {expires}</li>

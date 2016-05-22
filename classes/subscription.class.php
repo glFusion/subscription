@@ -503,7 +503,7 @@ class Subscription
     public function Edit($id = 0)
     {
         global $_TABLES, $_CONF, $_CONF_SUBSCR, $LANG_SUBSCR, 
-                $LANG24, $LANG_postmodes;
+                $LANG24, $LANG_postmodes, $_SYSTEM;
 
         $id = (int)$id;
         if ($id > 0) {
@@ -518,8 +518,14 @@ class Subscription
         }
 
         $T = new Template(SUBSCR_PI_PATH . '/templates');
-        $T->set_file(array('product' => "subscription_form.thtml"));
-        $T->set_var('site_url', $_CONF['site_url']);
+        switch ($_SYSTEM['framework']) {
+        case 'uikit':
+            $T->set_file(array('product' => 'subscription_form.uikit.thtml'));
+            break;
+        default:
+            $T->set_file(array('product' => 'subscription_form.thtml'));
+            break;
+        }
         if ($id > 0) {
             $retval = COM_startBlock($LANG_SUBSCR['edit'] . ': ' . 
                     $this->name);
@@ -539,25 +545,13 @@ class Subscription
             'doc_url'       => SUBSCR_getDocURL('subscription_form.html', 
                                             $_CONF['language']),
             'status_' . $this->status => 'checked="checked"',
+            'subscriber_select' => $sel_opts .
+                        COM_optionList($_TABLES['users'], 
+                        'uid,username', $this->uid, 1),
+            'product_select' => $sel_opts .
+                        COM_optionList($_TABLES['subscr_products'],
+                        'item_id,item_id', $this->item_id, 1),
         ) );
-
-        $T->set_var('exp_month_options', 
-            COM_getMonthFormOptions(substr($this->expiration, 5, 2)));
-
-        $T->set_var('exp_day_options', 
-            COM_getDayFormOptions(substr($this->expiration, 8, 2)));
-
-        $T->set_var('exp_year_options', 
-            COM_getYearFormOptions(substr($this->expiration, 0, 4)));
-
-
-        $T->set_var('subscriber_select', $sel_opts .
-                COM_optionList($_TABLES['users'], 
-                'uid,username', $this->uid, 1));
-
-        $T->set_var('product_select', $sel_opts .
-                COM_optionList($_TABLES['subscr_products'],
-                'item_id,item_id', $this->item_id, 1));
 
         $retval .= $T->parse('output', 'product');
         $retval .= COM_endBlock();

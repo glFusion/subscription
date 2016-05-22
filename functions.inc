@@ -549,7 +549,7 @@ function phpblock_subscription_subscribe()
 */
 function plugin_profilevariablesdisplay_subscription($uid, &$T)
 {
-    global $_CONF_SUBSCR, $LANG_SUBSCR, $_TABLES, $_CONF, $_USER;
+    global $_CONF_SUBSCR, $LANG_SUBSCR, $_TABLES, $_CONF, $_USER, $_SYSTEM;
 
     // non-admins can only see their own subscription.
     if (!SEC_hasRights('subscription.admin') && $uid != $_USER['uid'])
@@ -566,6 +566,7 @@ function plugin_profilevariablesdisplay_subscription($uid, &$T)
         $LT->set_file(array(
             'block' => 'profileblock.thtml',
         ));
+        $LT->set_var('is_uikit', $_SYSTEM['framework'] == 'uikit' ? 'true' : '');
         $LT->set_block('block', 'subscription_row', 'srow');
 
         while ($A = DB_fetchArray($res, false)) {
