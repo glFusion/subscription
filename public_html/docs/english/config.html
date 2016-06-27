@@ -1,123 +1,89 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html xmlns="http://www.w3.org/1999/xhtml" class="uk-height-1-1">
 <head>
-  <meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1" />
-  <link href="../../../docs/docstyle.css" type="text/css" rel="stylesheet" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="apple-touch-icon-precomposed" href="../../layout/cms/images/apple-touch-icon.png">
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/2.26.3/css/uikit.almost-flat.min.css">
   <meta name="robots" content="noindex,nofollow" />
-  <title>Donation Plugin - glFusion CMS</title>
+  <title>glFusion Subscription Plugin Configuration</title>
+  <style>
+    html{background:#f9f9f9}.tm-dropdown,.tm-navbar{background:#325482!important}.uk-form label{font-weight:700}.tm-navbar{border-radius:0!important;padding:1px 0 6px!important;border:none!important}.tm-navbar-brand{color:#eee!important}.tm-navbar-brand a{text-shadow:none;color:#fff}.tm-navbar-brand a:hover{color:#ababab;text-decoration:none}.tm-navbar-brand-oc a{text-shadow:none;color:#fff}.tm-navbar-brand-oc a:hover{color:#ababab;text-decoration:none}.tm-navbar-nav>li>a{border:none;border-radius:3px!important;font-size:15px!important;height:40px!important;margin:0!important}.tm-dropdown{color:#000;border-radius:0!important;border:0!important}.tm-nav-navbar>li>a{color:#fff!important}.tm-navbar::after,.tm-navbar::before{margin-top:7px!important}.tm-navbar-nav>li.uk-open>a,.tm-navbar-nav>li:hover>a,.tm-navbar-nav>li>a:focus{color:#fff;outline:0;background:#35B3EE!important}.tm-navbar-nav>li>a{color:#fff!important;text-shadow:none!important}.tm-navbar-toggle{color:#ccc!important;text-shadow:none!important}.tm-navbar-toggle:focus,.tm-navbar-toggle:hover{color:#fff!important}.tm-footer{background:#252525;border-top:1px solid #232425;margin-bottom:0;bottom:0;padding:10px;color:#fff}.tm-wrapper{min-height:100%;margin:0 auto -51px!important}.tm-push,footer{height:51px}.uk-navbar-content > a {color:#fff !important;}
+  </style>
 </head>
 
-<body style="direction: ltr;">
-<div id="gl_container_fluid">
-  <div id="gl_header"><span style="color: rgb(255, 255, 255); float: left; padding-left: 10px; padding-top: 5px; vertical-align: middle;">glFusion Documentation Project
-  </span><a style="float: right; padding-right: 10px; padding-top: 5px; vertical-align: middle;" href="http://www.glfusion.org/wiki/doku.php">glFusion Wiki</a>
-</div>
-<div id="gl_wrapper">
-<div class="body-container">
-<h1><a name="advt_plugin" id="advt_plugin">Donation Plugin</a></h1>
+<body class="uk-height-1-1">
+  <div class="tm-wrapper">
+    <nav class="uk-navbar uk-navbar-attached tm-navbar uk-margin-bottom">
+      <div class="uk-navbar-brand tm-navbar-brand">
+        glFusion Subscription Plugin Configuration
+      </div>
+      <div class="uk-navbar-flip uk-hidden-small">
+        <div class="uk-navbar-content tm-navbar-content" style="text-shadow:none;">
+          <a href="https://www.glfusion.org/wiki/">glFusion Wiki</a>
+        </div>
+      </div>
+    </nav>
 
-<div class="level1">
-<p>The Subscription Plugin allows site users to subscribe to additional features and to pay via PayPal.  This requires the PayPal plugin to be installed and working correctly.<p />
-<h1><a name="subscription_plugin_configuration_options" id="subscription_plugin_configuration_options">Donation Plugin Configuration Options</a></h1>
+    <div class="uk-container uk-container-center uk-margin-bottom">
+      <h1>glFusion Subscription Plugin Configuration</h1>
+      <p>The Subscription Plugin allows site users to subscribe to additional features and to pay via PayPal.  This requires the PayPal plugin to be installed and working correctly.<p />
 
-<table class="inline">
-  <tbody>
-    <tr>
-      <th class="col0 leftalign" colspan="2">Main Settings</th>
-    </tr>
+      <h2>Subscription Plugin Configuration Options</h2>
 
-    <tr class="row0">
-      <th class="col0 leftalign">Option </th>
-      <th class="col1 leftalign">Description </th>
-    </tr>
+      <dl id="desc_show_in_pp_cat">
+        <dt>Show in PayPal product catalog?</dt>
+        <dd>Select "Yes" to have subscription products shown with other PayPal products.  Select "No" if you plan to offer these products in other ways, such as static pages or blocks.</dd>
+    
+      </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_show_in_pp_cat"></a>Show in PayPal product catalog?</td>
-      <td class="col1 leftalign">
-        Select "Yes" to have subscription products shown with other PayPal products.  Select "No" if you plan to offer these products in other ways, such as static pages or blocks.
-      </td>
-    </tr>
+    <dl id="desc_grace_days">
+      <dt>Grace Period</dt>
+      <dd>Enter the grace period for subscription expirations.  This is the number of days after a subscription expires during which the subscriber will still be able to access the additional features.  Enter "0" to have the subscription terminate immediately upon expiration.</dd>
+    </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_grace_days"></a>Grace Period</td>
-      <td class="col1 leftalign">
-        Enter the grace period for subscription expirations.  This is the number of days after a subscription expires during which the subscriber will still be able to access the additional features.  Enter "0" to have the subscription terminate immediately upon expiration.
-      </td>
-    </tr>
+    <dl id="desc_early_renewal">
+      <dt>Early Renewal</dt>
+      <dd>This is the number of days prior to a subscription's expiration when it may be renewed.  You probably want to allow subscribers to renew at least a few days before their subscriptions expire.</dd>
+    </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_early_renewal"></a>Early Renewal</td>
-      <td class="col1 leftalign">
-        This is the number of days prior to a subscription's expiration when it may be renewed.  You probably want to allow subscribers to renew at least a few days before their subscriptions expire.
-      </td>
-    </tr>
+    <dl id="desc_notifydays">
+      <dt>Days before expiration to send notifications</dt>
+      <dd>This is the number of days prior to expiration when notifications will be sent to subscribers.  Only one notification will be sent per expiration; when the subscription is renewed the flag is reset to that an email will be sent before the new expiration date.</dd>
+    </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_notifydays"></a>
-        Days before expiration to send notifications</td>
-      <td class="col1 leftalign">
-        This is the number of days prior to expiration when notifications will be sent to subscribers.  Only one notification will be sent per expiration; when the subscription is renewed the flag is reset to that an email will be sent before the new expiration date.
-      </td>
-    </tr>
+    <dl id="desc_debug">
+      <dt>Debugging?</dt>
+      <dd>Select "Yes" to enable verbose logging to the glFusion error log.  Select "No" to turn off logging. Subscriptions, expirations and cancellations are always logged to the plugin's log.</dd>
+    </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_debug"></a>
-        Debugging?</td>
-      <td class="col1 leftalign">
-        Select "Yes" to enable verbose logging to the glFusion error log.  Select "No" to turn off logging. Subscriptions, expirations and cancellations are always logged to the plugin's log.
-      </td>
-    </tr>
+    <dl id="desc_displayblocks">
+      <dt>Diasplay glFusion Blocks</dt>
+      <dd>Select whether to show left, right, both sides or no blocks with the product list.</dd>
+    </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_displayblocks"></a>
-        Diasplay glFusion Blocks</td>
-      <td class="col1 leftalign">
-        Select whether to show left, right, both sides or no blocks with the product list.
-      </td>
-    </tr>
+    <dl id="desc_onmenu">
+      <dt>Show on Menu?</dt>
+      <dd>Select whether to show a menu option for the product list on the default glFusion plugins menu.</dd>
+    </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_displayblocks"></a>
-        Show on Menu?</td>
-      <td class="col1 leftalign">
-        Select whether to show a menu option for the product list on the default glFusion plugins menu.
-    <tr>
-      <th class="col0 leftalign" colspan="2">Product Defaults</th>
-    </tr>
+    <h2>Product Defaults</h2>
 
-    <tr class="row0">
-      <th class="col0 leftalign">Option </th>
-      <th class="col1 leftalign">Description </th>
-    </tr>
+    <dl id="desc_enabled">
+      <dt>Product is Enabled?</dt>
+      <dd>Select "Yes" to enable new products by default.  If this is "No", then new products will not be enabled unless you check the box during their creation.</dd>
+    </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_enabled"></a>
-        Product is Enabled?</td>
-      <td class="col1 leftalign">
-        Select "Yes" to enable new products by default.  If this is "No", then new products will not be enabled unless you check the box during their creation.
-      </td>
-    </tr>
+    <dl id="desc_show_in_block">
+      <dt>Show product in block?</dt>
+      <dd>Select "Yes" to show new products in the "Subscribe" block by default.      </dd>
+    </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_show_in_block"></a>
-        Show product in block?</td>
-      <td class="col1 leftalign">
-        Select "Yes" to show new products in the "Subscribe" block by default.      </td>
-    </tr>
+    <dl id="desc_taxable">
+      <dt>Product is taxable?</dt>
+      <dd>Select "Yes" if subscription products are typically taxable.</dd>
+    </dl>
 
-    <tr class="row0">
-      <td class="col0 leftalign" valign="top"><a name="desc_taxable"></a>
-        Product is taxable?</td>
-      <td class="col1 leftalign">
-        Select "Yes" if subscription products are typically taxable.
-    </tr>
-
-  </tbody>
-</table>
-<p></p>
-</div>
-</div>
-</div>
-</div>
+  </div>
 </body>
 </html>
