@@ -59,7 +59,8 @@ if (is_array($_PLUGINS) && in_array('paypal', $_PLUGINS)) {
 }
 
 // Save the current sql datetime for use throughout the plugin
-$_CONF_SUBSCR['now'] = date('Y-m-d H:i:s');
+$dt = new Date('now', $_CONF['timezone']);
+$_CONF_SUBSCR['now'] = $dt->toMySQL(true);
 
 /**
 * Language file Include
