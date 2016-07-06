@@ -37,11 +37,9 @@
   </label>
   <div class="uk-form-controls">
     <input type=text name="expiration" value="{expiration}" size="12" id="f_expire" />
-    <img src="{site_url}/images/datepicker.jpg" 
-      id="exp_trigger"
-      style="cursor: pointer;" 
+    <i class="uk-icon-calendar" id="exp_trigger"
       title="{$LANG_SUBSCR['date_selector']}"
-      />
+      data-uk-tooltip></i>
   </div>
 </div>
 

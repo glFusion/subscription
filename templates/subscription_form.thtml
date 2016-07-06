@@ -38,25 +38,6 @@
     style="cursor: pointer;" 
     title="{$LANG_SUBSCR['date_selector']}"
     />
-  <!--<span id="exp_date" dir="ltr">
-    <select id="exp_month" name="exp_month">
-      {exp_month_options}
-    </select>
-    /
-    <select id="exp_day" name="exp_day">
-      {exp_day_options}
-    </select>
-    /
-    <select id="exp_year" name="exp_year">
-      {exp_year_options}
-    </select>
-                                
-    <a href="#" id="toggler3">
-      <img src="{site_url}/images/datepicker.jpg" alt="Date Picker" 
-            style="vertical-align:middle;border:none;"/>
-    </a>
-    <div id="calendar3"></div>
-  </span>-->
 </p>
 
 <p>

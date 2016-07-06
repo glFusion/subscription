@@ -75,12 +75,9 @@ function update_duration_type(opt)
   </label>
   <div class="uk-form-controls">
     <input type=text name="expiration" value="{expiration}" id="f_expiration">
-    <img src="{site_url}/images/datepicker.jpg" 
-      id="fixedexp_trigger"
-      style="cursor: pointer;"
-      alt="Date Selector"
+    <i class="uk-icon-calendar" id="fixedexp_trigger"
       title="Date Selector"
-      />
+      data-uk-tooltip></i>
   </div>
 </div>
 
