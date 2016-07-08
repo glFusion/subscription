@@ -3,9 +3,9 @@
 *   Class to manage actual subscriptions
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2010 Lee Garner
+*   @copyright  Copyright (c) 2010-2016 Lee Garner
 *   @package    subscription
-*   @version    0.1.3
+*   @version    0.2.0
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -274,6 +274,7 @@ class Subscription
 
     /**
     *   Add a new subscription record, or extend an existing one.
+    *   This handles purchased subscriptions and calculates an expiration date.
     *
     *   @uses   AddtoGroup()
     *   @uses   AddHistory()
@@ -317,7 +318,7 @@ class Subscription
         // Find out if this is a new subscription or an extension
         $sql = "SELECT id, item_id, expiration, status
                 FROM {$_TABLES['subscr_subscriptions']}
-                WHERE uid=" . $this->uid;
+                WHERE uid='{$this->uid}' AND item_id = '{$this->item_id}'";
         $A = DB_fetchArray(DB_query($sql, 1), false);
 
         // Get the existing subscription ID and set that *starting* expiration
@@ -361,21 +362,21 @@ class Subscription
             //        array($this->uid, $this->item_id));
             $sql1 = "INSERT INTO {$_TABLES['subscr_subscriptions']} SET 
                     uid = '{$this->uid}', ";
-            $sql2 = " ON DUPLICATE KEY UPDATE
+            $sql3 = " ON DUPLICATE KEY UPDATE
                     expiration = $expiration,
                     notified = 0,
                     status = " . SUBSCR_STATUS_ENABLED;
         } else {
             // Update an existing subscription.  Also resets the notify flag
             $sql1 = "UPDATE {$_TABLES['subscr_subscriptions']} SET";
-            $sql2 = " WHERE id = '{$this->id}'";
+            $sql3 = " WHERE id = '{$this->id}'";
         }
 
-        $sql3 = " item_id = '{$this->item_id}',
-                 expiration = $expiration, 
+        $sql2 = "item_id = '{$this->item_id}',
+                expiration = $expiration, 
                 notified = 0, 
                 status = '" . SUBSCR_STATUS_ENABLED . "'";
-        $sql = $sql1 . $sql3 . $sql2;
+        $sql = $sql1 . $sql2 . $sql3;
         //COM_errorLog($sql);
         DB_query($sql, 1);     // Execute event record update
         if (DB_error()) {
@@ -529,10 +530,8 @@ class Subscription
         if ($id > 0) {
             $retval = COM_startBlock($LANG_SUBSCR['edit'] . ': ' . 
                     $this->name);
-
         } else {
             $retval = COM_startBlock($LANG_SUBSCR['new_subscription']);
-
         }
 
         $T->set_var(array(
@@ -653,12 +652,8 @@ class Subscription
         $uid = (int)$A['uid'];
         USER_delGroup($groupid, $uid);
 
-        // Mark the subscription as cancelled
-        /*DB_query("UPDATE {$_TABLES['subscr_subscriptions']}
-                SET status = " . SUBSCR_STATUS_CANCELED . 
-                " WHERE id = $sub_id");*/
+        // Delete the subscription and log the activity
         DB_delete($_TABLES['subscr_subscriptions'], 'id', $sub_id);
-
         SUBSCR_auditLog("Cancelled subscription $sub_id ({$A['item_id']}) " .
                 "for user $uid (" .COM_getDisplayName($uid) . '), expiring ' .
                 $A['expiration'], $system);
@@ -722,7 +717,7 @@ class Subscription
             $uid = $_USER['uid'];
         }
         $uid = (int)$uid;
-        $sql = "SELECT id FROM {$_TABLES['subscr_subscriptions']}
+        $sql = "SELECT id, item_id FROM {$_TABLES['subscr_subscriptions']}
                 WHERE uid = $uid";
         if (is_array($status)) {
             $status = array_map('intval', $status);
@@ -733,7 +728,7 @@ class Subscription
         }
         $res = DB_query($sql);
         while ($A = DB_fetchArray($res, false)) {
-            $retval[] = new Subscription($A['id']);
+            $retval[$A['item_id']] = new Subscription($A['id']);
         }
         return $retval;
     }

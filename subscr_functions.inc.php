@@ -37,7 +37,7 @@ function SUBSCR_ProductList()
     ) );
 
     $mySubs = Subscription::getSubscriptions($_USER['uid']);
-    if (!empty($mySubs)) {
+    /*if (!empty($mySubs)) {
         // Let current members know when they expire
         $str = '<ul>';
         foreach ($mySubs as $SubObj) {
@@ -47,7 +47,7 @@ function SUBSCR_ProductList()
         }
         $str .= '</ul>';
         $T->set_var('current_subs', $str);
-    } 
+    }*/
 
     $options = array();
 
@@ -83,9 +83,11 @@ function SUBSCR_ProductList()
         $lang_price = $LANG_SUBSCR['price'];
 
         $ok_to_buy = true;
-        if (!empty($mySub['expiration']) && $mySub['item_id'] == $P->item_id) {
-            $exp_ts = strtotime($mySub['expiration']);
-            $exp_format = strftime($_CONF['shortdate'], $exp_ts);
+        if (isset($mySubs[$P->item_id])) {
+        //if (!empty($mySub['expiration']) && $mySub['item_id'] == $P->item_id) {
+            $d = new Date($mySubs[$P->item_id]->expiration);
+            $exp_ts = $d->toUnix();
+            $exp_format = $d->format($_CONF['shortdate']);
             $description .=
                 "<br /><i>{$LANG_SUBSCR['your_sub_expires']} $exp_format</i>";
             if ($P->early_renewal > 0) {
@@ -93,7 +95,7 @@ function SUBSCR_ProductList()
                 if ($renew_ts > date('U')) $ok_to_buy = false;
             }
         }
-        if ($P->upg_from == $mySub['item_id'] && $P->upg_price != '') {
+        /*if ($P->upg_from == $mySub['item_id'] && $P->upg_price != '') {
             $price = (float)$P->upg_price;
             $lang_price = $LANG_SUBSCR['upg_price'];
             $options['sub_type'] = 'upgrade';
@@ -101,7 +103,7 @@ function SUBSCR_ProductList()
         } else {
             $options['sub_type'] = 'new';
             $item_option = ':new';
-        }
+        }*/
 
         // Create variable array for purchase buttons
         $vars = array(
