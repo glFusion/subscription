@@ -767,11 +767,14 @@ class SubscriptionProduct
             $vars = array(
                 'item_number' => 'subscription:' . $this->item_id,
                 'item_name' => $this->item_id,
+                'short_description' => $this->short_description,
                 'amount' => sprintf("%5.2f", (float)$this->price),
                 'no_shipping' => 1,
                 'taxable' => $this->taxable,
                 'btn_type' => 'pay_now',
                 'quantity' => 1,
+                'add_cart' => true,
+                'unique' => true,
             );
             $status = LGLIB_invokeService('paypal', 'genButton', $vars, 
                     $output, $svc_msg);

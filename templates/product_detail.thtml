@@ -20,10 +20,10 @@
   {!endif}
 </div>
 <div>
-  <h2>{name}</h2>
-  {short_description}
-  <p />
+  <h2>{short_description}</h2>
+  <p>
   {description}
+  </p>
 </div>
 {# end {templatelocation} #}
 
