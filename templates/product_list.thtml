@@ -1,29 +1,26 @@
 {# begin {templatelocation} #}
-<h1>{$LANG_SUBSCR['subscriptions']}</h1>
+<div class="subProdListHeader">
+  <h1>{$LANG_SUBSCR['subscriptions']}</h1>
 {!if current_subs}
-  <span class="info">
-    {$LANG_SUBSCR['your_current_subs']}:<br />
-    {current_subs}
-  </span>
+    <span class="info">
+      {$LANG_SUBSCR['your_current_subs']}:<br />
+      {current_subs}
+    </span>
 {!endif}
-<hr width="85%" />
+</div>
 <!-- BEGIN ProductBlock -->
-<div class="prodlistitem" style="padding:10px;clear:both;">
-  <div style="float:left;">
-    <div>
-      <h2>
-        {item_id}
-      </h2>
-    </div>
-    <div>{description}<p /></div>
+<div class="subProdListItem">
+  <div class="subProdListItemInfo">
+    <h2>{item_id}</h2>
+    {description}
+{!if exp_msg}
+    <div class="subProdListItemExpMsg">{exp_msg}</div>
+{!endif}
   </div>
-  <div style="float:right; margin-right:5%; text-align:left;">
+  <div class="subProdListItemBtn">
     {purchase_btn}
     <div>{lang_price}: {price} {currency}</div>
   </div>
-</div>
-<div style="clear:both;">
-  <hr width="85%" />
 </div>
 <!-- END ProductBlock -->
 {# end {templatelocation} #}

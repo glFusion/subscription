@@ -2,7 +2,7 @@
 {!if is_uikit}
 <nav class="uk-navbar">
   <div class="uk-navbar-content">
-  {$LANG_SUBSCR['block_title']}
+    {$LANG_SUBSCR['block_title']}
   </div>
 </nav>
 {!else}
@@ -12,7 +12,7 @@
 {!endif}
 <ul>
 <!-- BEGIN subscription_row -->
-  <li>{name}:&nbsp;&nbsp;{$LANG_SUBSCR['expires']} {expires}</li>
+  <li>{item_id}:&nbsp;&nbsp;{$LANG_SUBSCR['expires']} {expires}</li>
 <!-- END subscription_row -->
 </ul>
 {# end {templatelocation} #}

@@ -37,3 +37,29 @@
     color: red;
 }
 
+.subProdListItem {
+    padding:10px;
+    clear:both;
+    overflow: hidden;
+    border-bottom-width: thin;
+    border-bottom-style: solid;
+}
+.subProdListItemID {
+    float:left;
+}
+.subProdListItemInfo {
+    display: inline;
+    float: left;
+}
+
+.subProdListItemBtn {
+    float:right;
+    margin-right:5%;
+    text-align:left;
+}
+
+.subProdListHeader {
+    overflow: hidden;
+    border-bottom-width: thin;
+    border-bottom-style: solid;
+}

@@ -7,7 +7,7 @@
 <legend>{$LANG_SUBSCR['subscription_info']}</legend>
 
 <div class="uk-form-row">
-  <label class="uk-form-label" for="uid" style="width:16em;">{$LANG_SUBSCR['subscriber']}
+  <label class="uk-form-label" for="uid">{$LANG_SUBSCR['subscriber']}
     <a href="#" onclick="popupWindow('{doc_url}#desc_subscriber', 'Help', 640, 480, 1);return false;" class="toolbar">
     <img src="{layout_url}/images/button_help.png" alt="" /></a>
   </label>
@@ -19,7 +19,7 @@
 </div>
 
 <div class="uk-form-row">
-  <label class="uk-form-label" for="item_id" style="width:16em;">{$LANG_SUBSCR['product']}
+  <label class="uk-form-label" for="item_id">{$LANG_SUBSCR['product']}
     <a href="#" onclick="popupWindow('{doc_url}#desc_product', 'Help', 640, 480, 1);return false;" class="toolbar">
     <img src="{layout_url}/images/button_help.png" alt="" /></a>
   </label>
@@ -31,7 +31,7 @@
 </div>
 
 <div class="uk-form-row">
-  <label class="uk-form-label" for="f_expire" style="width:16em;">{$LANG_SUBSCR['expiration']}
+  <label class="uk-form-label" for="f_expire">{$LANG_SUBSCR['expiration']}
     <a href="#" onclick="popupWindow('{doc_url}#desc_expiration', 'Help', 640, 480, 1);return false;" class="toolbar">
     <img src="{layout_url}/images/button_help.png" alt="" /></a>
   </label>
