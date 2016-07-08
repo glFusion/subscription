@@ -368,7 +368,7 @@ class Subscription
                     status = " . SUBSCR_STATUS_ENABLED;
         } else {
             // Update an existing subscription.  Also resets the notify flag
-            $sql1 = "UPDATE {$_TABLES['subscr_subscriptions']} SET";
+            $sql1 = "UPDATE {$_TABLES['subscr_subscriptions']} SET ";
             $sql3 = " WHERE id = '{$this->id}'";
         }
 
