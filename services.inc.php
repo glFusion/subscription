@@ -101,7 +101,7 @@ function service_productinfo_subscription($A, &$output, &$svc_msg)
                 WHERE item_id='{$A[1]}'", 1), false);
         if (!empty($info)) {
             $output['short_description'] = $info['short_description'];
-            $output['name'] = $info['name']; 
+            $output['name'] = $info['short_description'];
             $output['description'] = $info['description'];
             //if (isset($custom['sub_type']) && 
             //        $custom['sub_type'] == 'upgrade' &&
