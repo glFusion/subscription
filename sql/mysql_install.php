@@ -19,8 +19,7 @@ global $_TABLES;
 
 $_SQL['subscr_products'] = 
 "CREATE TABLE {$_TABLES['subscr_products']} (
-  `item_id` varchar(40) NOT NULL,
-  `name` varchar(255) NOT NULL,
+  `item_id` varchar(128) NOT NULL,
   `short_description` varchar(255) NOT NULL,
   `description` text,
   `price` decimal(5,2) unsigned DEFAULT NULL,
@@ -38,7 +37,7 @@ $_SQL['subscr_products'] =
   `addgroup` int(5) DEFAULT NULL,
   `at_registration` tinyint(1) NOT NULL DEFAULT '0',
   `is_upgrade` tinyint(1) unsigned DEFAULT '0',
-  `upg_from` varchar(40) DEFAULT NULL,
+  `upg_from` varchar(128) DEFAULT NULL,
   `upg_price` decimal(5,2) DEFAULT '0.00',
   `upg_extend_exp` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `trial_days` int(3) unsigned NOT NULL DEFAULT '0',
@@ -51,7 +50,7 @@ $_SQL['subscr_products'] =
 $_SQL['subscr_subscriptions'] = 
 "CREATE TABLE {$_TABLES['subscr_subscriptions']} (
   `id` int(11) NOT NULL auto_increment,
-  `item_id` varchar(40) NOT NULL,
+  `item_id` varchar(128) NOT NULL,
   `uid` int(11) unsigned NOT NULL default '0',
   `expiration` date default NULL,
   `notified` tinyint(1) unsigned NOT NULL default '0',
@@ -66,7 +65,7 @@ $_SQL['subscr_subscriptions'] =
 $_SQL['subscr_history'] = 
 "CREATE TABLE {$_TABLES['subscr_history']} (
   `id` int(11) NOT NULL auto_increment,
-  `item_id` int(11) unsigned NOT NULL,
+  `item_id` varchar(128) unsigned NOT NULL,
   `uid` int(11) unsigned NOT NULL default '0',
   `txn_id` varchar(255) default '',
   `purchase_date` datetime default NULL,
@@ -129,7 +128,14 @@ $SUBSCR_UPGRADE = array(
         ADD KEY subscr_userid(uid, item_id)",
     ),
 '0.2.0' => array(
-    "ALTER TABLE {$_TABLES['subscr_products']} DROP `name`",
+    "ALTER TABLE {$_TABLES['subscr_products']}
+        DROP `name`,
+        CHANGE `item_id` `item_id` varchar(128) NOT NULL,
+        CHANGE `upg_from` `upg_from` varchar(128) NOT NULL",
+    "ALTER TABLE {$_TABLES['subscr_subscriptions']}
+        CHANGE `item_id` `item_id` varchar(128) NOT NULL",
+    "ALTER TABLE {$_TABLES['subscr_history']}
+        CHANGE `item_id` `item_id` varchar(128) NOT NULL",
     ),
 );
 
