@@ -174,9 +174,12 @@ function SUBSCR_popupMsg($msg)
 */
 function SUBSCR_errorMessage($msg)
 {
-    $retval = '<span class="alert">' . "\n";
-    $retval .= "<ul>$msg</ul>\n";
-    $retval .= "</span>\n";
+    $retval = '';
+    if (!empty($msg)) {
+        $retval .= '<span class="alert">' . "\n";
+        $retval .= "<ul>$msg</ul>\n";
+        $retval .= "</span>\n";
+    }
     return $retval;
 }
 

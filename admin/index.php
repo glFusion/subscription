@@ -93,12 +93,10 @@ function SUBSCR_subscriptionList($item_id)
     $defsort_arr = array('field' => 'expiration', 'direction' => 'desc');
     $title = $LANG_SUBSCR['admin_hdr'];
     if (!empty($item_id)) {
-        list($item_name, $duration) = DB_fetchArray(DB_query(
-            "SELECT item_id, duration FROM {$_TABLES['subscr_products']}
-            WHERE item_id='$item_id'", 1), false);
-        $title  .= " :: $item_name";
+        $title .= " :: $item_id";
         $item_query = " s.item_id = '".DB_escapeString($item_id)."' ";
     } else {
+        $title  .= " :: All";
         $item_query = ' 1=1 ';
     }
 
@@ -110,7 +108,7 @@ function SUBSCR_subscriptionList($item_id)
     $text_arr = array(
         'has_extras' => true,
         'form_url' => SUBSCR_ADMIN_URL . 
-                '/index.php?subscriptions=x&amp;item_id='.$item_id,
+                '/index.php?subscriptions='.$item_id,
     );
 
     $options = array('chkdelete' => 'true', 'chkfield' => 'id',
@@ -465,7 +463,8 @@ case 'cancelbutton_x':
             Subscription::Cancel($item);
         }
     }
-    echo COM_refresh(SUBSCR_ADMIN_URL.'/index.php?products=x');
+    echo COM_refresh(SUBSCR_ADMIN_URL.'/index.php?subscriptions=' .
+            $_GET['item_id']);
     break;
 
 case 'renewbutton_x':
@@ -501,7 +500,6 @@ case 'editproduct':
     break;
 
 case 'subscriptions':
-    //if ($actionval != 'x') $item_id = $actionval;
     $content .= SUBSCR_subscriptionList($actionval);
     break;
 

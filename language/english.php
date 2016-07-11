@@ -96,6 +96,7 @@ $LANG_SUBSCR = array(
 'err_missing_uid' => 'A valid user ID is required',
 'err_missing_item' => 'A valid product selection is required',
 'err_noaccess'  => 'An invalid product was requested, or you may not have access to the item.  Perhaps you need to log into the site first.',
+'err_no_sub_found'  => 'No subscription of type %s found for user %d.',
 'exp_notice'    => 'Subscription Expiration Notice',
 'confirm_renew' => 'Are you sure you want to renew the selected subscriptions?',
 'system_task'   => 'System Task',
