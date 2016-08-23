@@ -108,7 +108,7 @@ function SUBSCR_ProductList()
         // Create variable array for purchase buttons
         $vars = array(
             'item_number'   => 'subscription:' . $P->item_id . $item_option,
-            'item_name'     => $P->item_id,
+            'item_name'     => $P->short_description,
             'short_description' => $P->short_description,
             'amount'        => $price,
             'quantity'      => 1,
