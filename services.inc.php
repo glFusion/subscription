@@ -142,7 +142,7 @@ function service_handlePurchase_subscription($args, &$output, &$svc_msg)
         $sql = "SELECT * FROM {$_TABLES['subscr_products']}
                 WHERE item_id='{$id[1]}'";
         $res = DB_query($sql, 1);
-        $A = DB_fetchArray($res, false);
+        $A = $res ? DB_fetchArray($res, false) : array();
     } else {
         return PLG_RET_ERROR;
     }
@@ -256,7 +256,7 @@ function service_getproducts_subscription($args, &$output, &$svc_msg)
             WHERE uid = '" . (int)$_USER['uid'] . "'
             AND status = '" . SUBSCR_STATUS_ENABLED . "'";
     $res = DB_query($sql, 1);
-    $mySub = DB_fetchArray($res, false);
+    $mySub = $res ? DB_fetchArray($res, false) : array();
     if (empty($mySub)) {
         $mySub = array('item_id' => '', 'expiration' => '');
     }

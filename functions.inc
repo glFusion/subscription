@@ -502,7 +502,11 @@ function phpblock_subscription_subscribe()
 
     // DB_numRows is checked just to save having to load the subscription
     // class if nothing needs to be shown.
-    $n = DB_numRows($r);
+    if ($r) {
+        $n = DB_numRows($r);
+    } else {
+        $n = 0;
+    }
     if ($n < 1)
         return '';
 
@@ -564,7 +568,7 @@ function plugin_profilevariablesdisplay_subscription($uid, &$T)
             ON s.item_id = p.item_id
             WHERE s.uid = $uid";
     $res = DB_query($sql, 1);
-    if (DB_numRows($res) > 0) {
+    if ($res && DB_numRows($res) > 0) {
         $LT = new Template(SUBSCR_PI_PATH . '/templates/');
         $LT->set_file(array(
             'block' => 'profileblock.thtml',
@@ -584,11 +588,9 @@ function plugin_profilevariablesdisplay_subscription($uid, &$T)
         $existingFields = $T->get_var('plugin_fields');
         $T->set_var('plugin_fields', 
                 $existingFields . $T->finish($LT->get_var('output')));
-
     } else {
         return '';
     }
-
 }
 
 
@@ -843,7 +845,7 @@ function plugin_user_create_subscription($uid = 0)
             WHERE at_registration IN (" . 
                 SUBSCR_REGISTER_AUTO . ', ' . SUBSCR_REGISTER_TRIAL . ')';
     //echo $sql;die;
-    $res = DB_query($sql, 1);
+    $res = DB_query($sql);
     while ($A = DB_fetchArray($res, false)) {
         if ($A['at_registration'] == SUBSCR_REGISTER_TRIAL) {
             $S->Add($uid, $A['item_id'], $A['trial_days'], 'DAY');

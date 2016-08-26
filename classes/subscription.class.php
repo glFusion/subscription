@@ -319,7 +319,8 @@ class Subscription
         $sql = "SELECT id, item_id, expiration, status
                 FROM {$_TABLES['subscr_subscriptions']}
                 WHERE uid='{$this->uid}' AND item_id = '{$this->item_id}'";
-        $A = DB_fetchArray(DB_query($sql, 1), false);
+        $res = DB_query($sql, 1);
+        $A = $res ? DB_fetchArray($res, false) : array();
 
         // Get the existing subscription ID and set that *starting* expiration
         if (empty($A)) {
