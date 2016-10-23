@@ -119,6 +119,8 @@ $LANG_SUBSCR = array(
 'member_type'   => 'Member Type',
 'purch_access'  => 'Purchase allowed by',
 'your_current_subs' => 'Your current subscriptions',
+'all_plans'     => 'All Plans',
+'show_exp'      => 'Show Expired',
 );
 
 // Messages for the plugin upgrade

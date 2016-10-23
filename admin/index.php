@@ -47,6 +47,9 @@ function SUBSCR_adminMenu($view = '')
     if ($view == 'subscriptions') {
         $menu_arr[] = array('url' => SUBSCR_ADMIN_URL . '/index.php?editsubscrip=x',
                 'text' => '<span class="subNewAdminItem">' . $LANG_SUBSCR['new_subscription'] . '</span>');
+    } else {
+        $menu_arr[] = array('url' => SUBSCR_ADMIN_URL . '/index.php?subscriptions=0',
+                'text' => $LANG_SUBSCR['subscriptions']);
     }
 
     if (isset($LANG_SUBSCR['admin_txt_' . $view])) {
@@ -82,13 +85,11 @@ function SUBSCR_subscriptionList($item_id)
         //    'text' => $LANG_SUBSCR['uid'], 'sort' => true),
         array('field' => 'subscriber',
             'text' => $LANG_SUBSCR['subscriber'], 'sort' => false),
+        array('field' => 'plan', 
+            'text' => $LANG_SUBSCR['plan'], 'sort' => true),
+        array('field' => 'expiration', 
+            'text' => $LANG_SUBSCR['expires'], 'sort' => true),
     );
-    if (empty($item_id)) {
-        $header_arr[] = array('field' => 'plan', 
-            'text' => $LANG_SUBSCR['plan'], 'sort' => true);
-    }
-    $header_arr[] = array('field' => 'expiration', 
-            'text' => $LANG_SUBSCR['expires'], 'sort' => true);
 
     $defsort_arr = array('field' => 'expiration', 'direction' => 'desc');
     $title = $LANG_SUBSCR['admin_hdr'];
@@ -152,8 +153,14 @@ function SUBSCR_subscriptionList($item_id)
     );
     //echo $query_arr['sql'];die;
 
-    $filter = '<input type="checkbox" name="showexp" ' . $frmchk . 
-            ' onclick="javascript:submit();"> Show expired?';
+    $plans = $LANG_SUBSCR['plan'] .
+        ': <select name="item_id" onchange=\'window.location.href="' .
+            SUBSCR_ADMIN_URL . '/index.php?subscriptions="+this.value\'><option value="0">' . $LANG_SUBSCR['all_plans'] .
+        '</option>' .
+        COM_optionList($_TABLES['subscr_products'], "item_id,item_id", $item_id) .
+        '</select>';
+    $filter = $plans . '&nbsp;<input type="checkbox" name="showexp" ' . $frmchk . 
+            ' onclick="javascript:submit();"> ' . $LANG_SUBSCR['show_exp'] . '?<br />';
     /*$form_arr = array(
         'top' => '<input type="checkbox" name="showexp"> Show expired?'
     );*/
