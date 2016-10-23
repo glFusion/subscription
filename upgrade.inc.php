@@ -46,17 +46,17 @@ function SUBSCR_do_upgrade($current_ver)
 
     if ($current_ver < '0.1.1') {
         $error = SUBSCR_do_upgrade_sql('0.1.1');
-        if ($error > 1) return $error;
+        if ($error > 0) return $error;
     }
 
     if ($current_ver < '0.1.2') {
         $error = SUBSCR_do_upgrade_sql('0.1.2');
-        if ($error > 1) return $error;
+        if ($error > 0) return $error;
     }
 
     if ($current_ver < '0.1.3') {
         $error = SUBSCR_do_upgrade_sql('0.1.3');
-        if ($error > 1) return $error;
+        if ($error > 0) return $error;
     }
 
     if ($current_ver < '0.1.4') {
@@ -65,16 +65,20 @@ function SUBSCR_do_upgrade($current_ver)
                 'select', 0, 0, 3, 70, true, $_CONF_SUBSCR['pi_name']);
         }
         $error = SUBSCR_do_upgrade_sql('0.1.3');
-        if ($error > 1) return $error;
+        if ($error > 0) return $error;
     }
 
     if ($current_ver < '0.2.0') {
         $error = SUBSCR_do_upgrade_sql('0.2.0');
-        if ($error > 1) return $error;
+        if ($error > 0) return $error;
+    }
+
+    if ($current_ver < '0.2.1') {
+        $error = SUBSCR_do_upgrade_sql('0.2.1');
+        if ($error > 0) return $error;
     }
 
     return $error;
-
 }
 
 
@@ -107,10 +111,7 @@ function SUBSCR_do_upgrade_sql($version='')
             break;
         }
     }
-
     return 0;
-
 }
-
 
 ?>

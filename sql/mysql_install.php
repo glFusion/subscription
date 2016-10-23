@@ -65,7 +65,7 @@ $_SQL['subscr_subscriptions'] =
 $_SQL['subscr_history'] = 
 "CREATE TABLE {$_TABLES['subscr_history']} (
   `id` int(11) NOT NULL auto_increment,
-  `item_id` varchar(128) unsigned NOT NULL,
+  `item_id` varchar(128) NOT NULL,
   `uid` int(11) unsigned NOT NULL default '0',
   `txn_id` varchar(255) default '',
   `purchase_date` datetime default NULL,
@@ -120,9 +120,6 @@ $SUBSCR_UPGRADE = array(
     )",
     ),
 '0.1.6' => array(
-    "ALTER TABLE {$_TABLES['subscr_products']}
-        CHANGE group_id grp_access mediumint(8) unsigned NOT NULL DEFAULT 13,
-        DROP owner_id, perm_owner, DROP perm_group, DROP perm_members, DROP perm_anon",
     "ALTER TABLE {$_TABLES['subscr_subscriptions']}
         DROP KEY subscr_userid,
         ADD KEY subscr_userid(uid, item_id)",
@@ -136,6 +133,25 @@ $SUBSCR_UPGRADE = array(
         CHANGE `item_id` `item_id` varchar(128) NOT NULL",
     "ALTER TABLE {$_TABLES['subscr_history']}
         CHANGE `item_id` `item_id` varchar(128) NOT NULL",
+    ),
+'0.2.1' => array(
+    "ALTER TABLE {$_TABLES['subscr_products']}
+        CHANGE group_id grp_access mediumint(8) unsigned NOT NULL DEFAULT 13,
+        DROP owner_id, DROP perm_owner, DROP perm_group, DROP perm_members, DROP perm_anon",
+    // add subscr_history table creation if it doesn't exist
+    "CREATE TABLE IF NOT EXIST {$_TABLES['subscr_history']} (
+        `id` int(11) NOT NULL auto_increment,
+        `item_id` varchar(128) NOT NULL,
+        `uid` int(11) unsigned NOT NULL default '0',
+        `txn_id` varchar(255) default '',
+        `purchase_date` datetime default NULL,
+        `expiration` datetime default NULL,
+        `price` float(10,2) NOT NULL default '0.00',
+        `notes` text,
+        PRIMARY KEY  (`id`),
+        KEY `subscr_itemid` (`item_id`),
+        KEY `subscr_userid` (`uid`)
+        )",
     ),
 );
 
