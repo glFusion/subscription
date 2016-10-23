@@ -693,12 +693,11 @@ class SubscriptionProduct
         return $T->finish($T->get_var('output', 'detail'));
     }
 
-        
 
     /**
     *   Sets the "enabled" field to the specified value.
     *
-    *   @uses   toggle()
+    *   @uses   _toggle()
     *   @param  integer $id ID number of element to modify
     *   @param  integer $value New value to set
     *   @return         New value, or old value upon failure
