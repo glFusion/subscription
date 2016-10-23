@@ -606,24 +606,20 @@ class SubscriptionProduct
     *   @param  integer $value New value to set
     *   @return         New value, or old value upon failure
     */
-    private function _toggle($oldvalue, $varname, $id)
+    private static function _toggle($oldvalue, $varname, $id)
     {
         global $_TABLES;
-
-        // If it's still an invalid ID, return the old value
-        if ($id < 1)
-            return $oldvalue;
 
         // Determing the new value (opposite the old)
         $newvalue = $oldvalue == 1 ? 0 : 1;
 
         $sql = "UPDATE {$_TABLES['subscr_products']}
                 SET $varname=$newvalue
-                WHERE item_id='$id'";
+                WHERE item_id='" . DB_escapeString($id) . "'";
         //echo $sql;die;
         DB_query($sql);
 
-        return $newvalue;
+        return DB_error() ? $oldvalue : $newvalue;
     }
 
 
@@ -707,16 +703,10 @@ class SubscriptionProduct
     *   @param  integer $value New value to set
     *   @return         New value, or old value upon failure
     */
-    public function toggleEnabled($oldvalue, $id)
+    public static function toggleEnabled($oldvalue, $id)
     {
-        $oldvalue = $oldvalue == 0 ? 1 : 0;
+        $oldvalue = $oldvalue == 1 ? 1 : 0;
         $id = COM_sanitizeID($id);
-        if ($id == '') {
-            if (is_object($this))
-                $id = $this->item_id;
-            else
-                return $oldvalue;
-        }
         return self::_toggle($oldvalue, 'enabled', $id);
     }
 

@@ -24,12 +24,10 @@ $base_url = $_CONF['site_url'];
 
 switch ($_GET['action']) {
 case 'toggleEnabled':
-    $newval = $_REQUEST['oldval'] == 1 ? 0 : 1;
-
     switch ($_GET['type']) {
     case 'subscription':
         USES_subscription_class_product();
-        SubscriptionProduct::toggleEnabled($newval, $_REQUEST['id']);
+        $newval = SubscriptionProduct::toggleEnabled($_REQUEST['oldval'], $_REQUEST['id']);
         break;
 
      default:
