@@ -35,7 +35,7 @@ COM_errorLog("getproductinfo: " . print_r($A, true));
     if (isset($A[1]) && !empty($A[1])) {
         $A[1] = COM_sanitizeID($A[1]);
         $info = DB_fetchArray(DB_query(
-                "SELECT item_id, name, description, price, upg_from, upg_price
+                "SELECT item_id, description, price, upg_from, upg_price
                 FROM {$_TABLES['subscr_products']} 
                 WHERE item_id='{$A[1]}'", 1), false);
         if (!empty($info)) {
