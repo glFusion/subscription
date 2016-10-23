@@ -266,7 +266,7 @@ class SubscriptionProduct
                WHERE item_id='$id' ";
         //echo $sql;die;
         //COM_errorLog($sql);
-        $result = DB_query($sql, 1);
+        $result = DB_query($sql);
         if (!$result || DB_numRows($result) != 1) {
             return false;
         } else {
@@ -358,7 +358,7 @@ class SubscriptionProduct
             $sql = "UPDATE {$_TABLES['subscr_subscriptions']}
                     SET item_id = '{$this->item_id}'
                     WHERE item_id = '$orig_item_id'";
-            DB_query($sql, 1);
+            DB_query($sql);
             if (DB_error()) {
                 $this->Errors[] = "Failed updating subscriptions to {$this->item_id}";
                 return false;
@@ -391,7 +391,7 @@ class SubscriptionProduct
         $sql = $sql1 . $sql2 . $sql3;
         //echo $sql;die;
         SUBSCR_debug($sql);
-        DB_query($sql, 1);
+        DB_query($sql);
         if (DB_error()) {
             $status = false;
         } else {

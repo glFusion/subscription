@@ -95,10 +95,18 @@ function service_productinfo_subscription($A, &$output, &$svc_msg)
 
     if (isset($A[1]) && !empty($A[1])) {
         $A[1] = COM_sanitizeID($A[1]);
-        $info = DB_fetchArray(DB_query(
-                "SELECT item_id, name, short_description, description, price, upg_from, upg_price
+        $sql = "SELECT item_id, short_description, description, price, upg_from, upg_price
                 FROM {$_TABLES['subscr_products']} 
-                WHERE item_id='{$A[1]}'", 1), false);
+                WHERE item_id='{$A[1]}'";
+        // Suppress sql errors to avoid breaking the IPN process, but log
+        // them for review
+        $res = DB_query($sql, 1);
+        if ($res) {
+            $info = DB_fetchArray($res, false);
+        } else {
+            COM_errorLog("service_productinfo_subscription() SQL error: $sql", 1);
+            $info = array();
+        }
         if (!empty($info)) {
             $output['short_description'] = $info['short_description'];
             $output['name'] = $info['short_description'];

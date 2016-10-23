@@ -498,15 +498,11 @@ function phpblock_subscription_subscribe()
                  s.expiration <= '{$_CONF_SUBSCR['now']}' + INTERVAL p.early_renewal DAY)
             AND p.show_in_block = 1";
     //echo $sql;die;
-    $r = DB_query($sql, 1);
+    $r = DB_query($sql);
 
     // DB_numRows is checked just to save having to load the subscription
     // class if nothing needs to be shown.
-    if ($r) {
-        $n = DB_numRows($r);
-    } else {
-        $n = 0;
-    }
+    $n = DB_numRows($r);
     if ($n < 1)
         return '';
 
@@ -567,7 +563,7 @@ function plugin_profilevariablesdisplay_subscription($uid, &$T)
             LEFT JOIN {$_TABLES['subscr_products']} p
             ON s.item_id = p.item_id
             WHERE s.uid = $uid";
-    $res = DB_query($sql, 1);
+    $res = DB_query($sql);
     if ($res && DB_numRows($res) > 0) {
         $LT = new Template(SUBSCR_PI_PATH . '/templates/');
         $LT->set_file(array(
@@ -646,13 +642,13 @@ function plugin_runScheduledTask_subscription()
 
     // Cancel subscriptions not renewed within the grace period
     $sql = "SELECT s.id, s.expiration
-                FROM {$_TABLES['subscr_subscriptions']} s
-                LEFT JOIN {$_TABLES['subscr_products']} p
+            FROM {$_TABLES['subscr_subscriptions']} s
+            LEFT JOIN {$_TABLES['subscr_products']} p
                 ON p.item_id = s.item_id
-                WHERE '{$_CONF_SUBSCR['now']}' > (s.expiration + interval p.grace_days DAY)
+            WHERE '{$_CONF_SUBSCR['now']}' > (s.expiration + interval p.grace_days DAY)
                 AND status = " . SUBSCR_STATUS_ENABLED;
-    COM_errorLog($sql);
-    $r = DB_query($sql, 1);
+    //COM_errorLog($sql);
+    $r = DB_query($sql);
     if ($r) {
         USES_subscription_class_subscription();
         while ($row = DB_fetchArray($r, false)) {
@@ -664,7 +660,6 @@ function plugin_runScheduledTask_subscription()
     // For the subscriptions that are left, notify the subscribers
     // if their expiration is impending
     SUBSCR_notifyExpiration();
-            
 }
 
 
@@ -870,10 +865,18 @@ function plugin_user_move_subscription($origUID, $destUID)
     $origUID = (int)$origUID;
     $destUID = (int)$destUID;
 
-    DB_query("UPDATE {$_TABLES['subscr_subscdriptions']}
-            SET uid = $destUID WHERE uid = $origUID", 1);
-    DB_query("UPDATE {$_TABLES['subscr_history']}
-            SET uid = $destUID WHERE uid = $origUID", 1);
+    $sqls = array(
+        "UPDATE {$_TABLES['subscr_subscriptions']}
+            SET uid = $destUID WHERE uid = $origUID",
+        "UPDATE {$_TABLES['subscr_history']}
+            SET uid = $destUID WHERE uid = $origUID",
+    );
+    foreach($sqls as $sql) {
+        DB_query($sql, 1);
+        if (DB_error()) {
+            COM_errorLog("plugin_user_move_subscription SQL error: $sql",1);
+        }
+    }
 }
 
 
