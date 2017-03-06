@@ -107,9 +107,7 @@ class Subscription
         case 'expiration':
             $value = trim($value);
             $this->properties[$var] = $value;
-            $this->exp_day = substr($value, 8, 2);
-            $this->exp_month = substr($value, 5, 2);
-            $this->exp_year = substr($value, 0, 4);
+            list($this->exp_year, $this->exp_month, $this->exp_day) = explode('-', $value);
             break;
 
         case 'notified':
