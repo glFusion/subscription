@@ -75,12 +75,8 @@ if (file_exists("$langpath/custom/$langfile")) {
     include_once "$langpath/custom/$langfile";
 }
 
-
 function USES_subscription_functions()
 {   require_once SUBSCR_PI_PATH . '/subscr_functions.inc.php';   }
-
-function USES_subscription_upgrade()
-{   require_once SUBSCR_PI_PATH . '/upgrade.inc.php';   }
 
 function USES_subscription_class_product()
 {   require_once SUBSCR_PI_PATH . '/classes/product.class.php';   }
@@ -430,46 +426,8 @@ function SUBSCR_getDocURL($file='', $doclang='english')
  */
 function plugin_upgrade_subscription()
 {
-    global $_TABLES, $_CONF_SUBSCR;
-
-    $pi_name = $_CONF_SUBSCR['pi_name'];
-
-    // Get the current version, compare to the version in the plugin code
-    $current_ver = DB_getItem($_TABLES['plugins'], 'pi_version',
-        "pi_name = '$pi_name'");
-    if (!$current_ver) {
-        COM_errorLog("Error getting the $pi_name Plugin version",1);
-        return '03';
-    }
-
-    // if we're at the current version, what are we doing here?
-    if ($current_ver >= $_CONF_SUBSCR['pi_version']) {
-        COM_errorLog("Current version $current_ver is already up to date");
-        return '06';
-    }
-
-    // If we're still here, perform the upgrade functions.
-    USES_subscription_upgrade();
-    $error = SUBSCR_do_upgrade($current_ver);
-    if ($error) {
-        COM_errorLog("Error updating the $pi_name Plugin version",1);
-        return '04';
-    }
-
-    // now update the current version number.
-    DB_query("UPDATE {$_TABLES['plugins']} SET
-            pi_version = '{$_CONF_SUBSCR['pi_version']}',
-            pi_gl_version = '{$_CONF_SUBSCR['gl_version']}',
-            pi_homepage = '{$_CONF_SUBSCR['pi_url']}'
-        WHERE pi_name = '$pi_name'");
-
-    if (DB_error()) {
-        COM_errorLog("Error updating the $pi_name Plugin version",1);
-        return '05';
-    }
-
-    COM_errorLog("Succesfully updated the $pi_name Plugin!",1);
-    return true;
+    require_once SUBSCR_PI_PATH . '/upgrade.inc.php';
+    return SUBSCR_do_upgrade();
 }
 
 
