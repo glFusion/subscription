@@ -11,6 +11,8 @@
 *   @filesource
 */
 
+namespace subscription;
+
 /** Import core glFusion functions */
 require_once('../../../lib-common.php');
 
@@ -164,7 +166,7 @@ function SUBSCR_subscriptionList($item_id)
     /*$form_arr = array(
         'top' => '<input type="checkbox" name="showexp"> Show expired?'
     );*/
-    $retval .= ADMIN_list('subscription', 'SUBSCR_subscription_getListField', 
+    $retval .= ADMIN_list('subscription', '\Subscription\subscription_getListField', 
                 $header_arr,
                 $text_arr, $query_arr, $defsort_arr, $filter, '', 
                 $options, $form_arr);
@@ -183,7 +185,7 @@ function SUBSCR_subscriptionList($item_id)
 *   @param  array   $icon_arr   Array of system icons
 *   @return string              HTML content for field display
 */
-function SUBSCR_subscription_getListField($fieldname, $fieldvalue, $A, $icon_arr)
+function subscription_getListField($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $LANG_ACCESS, $LANG_SUBSCR, $_CONF_SUBSCR;
 
@@ -191,10 +193,10 @@ function SUBSCR_subscription_getListField($fieldname, $fieldvalue, $A, $icon_arr
 
     switch($fieldname) {
     case 'edit':
-        $retval .= COM_createLink(
-            $icon_arr['edit'],
+        $retval .= COM_createLink('',
             SUBSCR_ADMIN_URL . 
-            '/index.php?editsubscrip=x&amp;sub_id=' . $A['id']
+            '/index.php?editsubscrip=x&amp;sub_id=' . $A['id'],
+            array('class' => 'uk-icon-edit')
         );
         break;
 
@@ -280,7 +282,7 @@ function SUBSCR_productAdminList()
         'default_filter' => ' WHERE 1=1 ',
     );
 
-    $retval .= ADMIN_list('subscription', 'SUBSCR_product_getListField', 
+    $retval .= ADMIN_list('subscription', '\Subscription\product_getListField', 
                     $header_arr,
                     $text_arr, $query_arr, $defsort_arr, $filter, '', 
                     $options, $form_arr);
@@ -299,7 +301,7 @@ function SUBSCR_productAdminList()
 *   @param  array   $icon_arr   Array of system icons
 *   @return string              HTML content for field display
 */
-function SUBSCR_product_getListField($fieldname, $fieldvalue, $A, $icon_arr)
+function product_getListField($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $LANG_ACCESS, $LANG_SUBSCR, $_CONF_SUBSCR, $_TABLES;
 
@@ -307,10 +309,10 @@ function SUBSCR_product_getListField($fieldname, $fieldvalue, $A, $icon_arr)
 
     switch($fieldname) {
     case 'edit':
-        $retval .= COM_createLink(
-            $icon_arr['edit'],
+        $retval .= COM_createLink('',
             SUBSCR_ADMIN_URL . 
-                '/index.php?editproduct=x&amp;item_id=' . $A['item_id']
+                '/index.php?editproduct=x&amp;item_id=' . $A['item_id'],
+            array('class' => 'uk-icon-edit')
         );
         break;
 
@@ -328,8 +330,8 @@ function SUBSCR_product_getListField($fieldname, $fieldvalue, $A, $icon_arr)
         $chk = $enabled ? 'checked="checked"' : '';
         $retval = "<input type=\"checkbox\" name=\"togena{$A['item_id']}\"
             id=\"togena{$A['item_id']}\" $chk
-            onchange='SUBSCR_toggleEnabled(\"{$enabled}\", \"{$A['item_id']}\",
-                \"subscription\", \"{$_CONF['site_url']}\");' />";
+            onchange='SUBSCR_toggleEnabled(this, \"{$A['item_id']}\",
+                \"subscription\");' />";
         break;
 
     case 'item_id':

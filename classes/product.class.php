@@ -3,14 +3,15 @@
 *   Class to manage subscription items
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2010-2016 Lee Garner
+*   @copyright  Copyright (c) 2010-2017 Lee Garner
 *   @package    subscription
-*   @version    0.2.0
+*   @version    0.2.2
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
 */
 
+namespace Subscription;
 
 /**
 *   Class for subscription product items
@@ -320,6 +321,7 @@ class SubscriptionProduct
             $expiration = 'NULL';
         }
 
+        // Ensure prices are formatted for MySQL regardless of locale
         $price = number_format($this->price, 2, '.', '');
         $upg_price = number_format($this->upg_price, 2, '.', '');
 
@@ -485,7 +487,7 @@ class SubscriptionProduct
         $id = $this->item_id;
         $action_url = SUBSCR_ADMIN_URL . '/index.php';
 
-        $T = new Template(SUBSCR_PI_PATH . '/templates');
+        $T = new \Template(SUBSCR_PI_PATH . '/templates');
         switch ($_SYSTEM['framework']) {
         case 'uikit':
             $T->set_file(array('product' => "product_form.uikit.thtml"));
@@ -643,7 +645,7 @@ class SubscriptionProduct
         $buttons = '';
 
         // Create product template
-        $T = new Template(SUBSCR_PI_PATH . '/templates');
+        $T = new \Template(SUBSCR_PI_PATH . '/templates');
         $T->set_file(array(
             'detail'  => 'product_detail.thtml',
         ));
@@ -661,7 +663,7 @@ class SubscriptionProduct
                 AND uid='{$_USER['uid']}'";
             $A = DB_fetchArray(DB_query($sql), false);
             if (!empty($A)) {
-                $dt = new Date($A['exp_date'], $_CONF['timezone']);
+                $dt = new \Date($A['exp_date'], $_CONF['timezone']);
                 $T->set_var('exp_date', $dt->Format($_CONF['shortdate']));
                 $tm = time();
                 if ($A['early_renewal'] < $tm || 

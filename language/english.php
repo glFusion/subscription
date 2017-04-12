@@ -121,6 +121,8 @@ $LANG_SUBSCR = array(
 'your_current_subs' => 'Your current subscriptions',
 'all_plans'     => 'All Plans',
 'show_exp'      => 'Show Expired',
+'msg_toggle'    => 'Item has been %s',
+'msg_unchanged' => 'Item was not changed',
 );
 
 // Messages for the plugin upgrade

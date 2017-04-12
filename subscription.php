@@ -6,9 +6,9 @@
 *   glFusion configuration system, such as allowed file types.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2010-2016 Lee Garner
+*   @copyright  Copyright (c) 2010-2017 Lee Garner
 *   @package    subscription
-*   @version    0.2.0
+*   @version    0.2.2
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -23,8 +23,8 @@ global $_CONF_SUBSCR;
 
 $_CONF_SUBSCR['pi_name']            = 'subscription';
 $_CONF_SUBSCR['pi_display_name']    = 'Subscriptions';
-$_CONF_SUBSCR['pi_version']         = '0.2.1';
-$_CONF_SUBSCR['gl_version']         = '1.4.0';
+$_CONF_SUBSCR['pi_version']         = '0.2.2';
+$_CONF_SUBSCR['gl_version']         = '1.6.0';
 $_CONF_SUBSCR['pi_url']             = 'http://www.leegarner.com';
 
 $_SUBSCR_table_prefix = $_DB_table_prefix . 'subscr_';

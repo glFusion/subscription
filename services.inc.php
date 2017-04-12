@@ -183,22 +183,12 @@ function service_handlePurchase_subscription($args, &$output, &$svc_msg)
     COM_errorLog("Processing subscription for user $uid to item {$id[1]}");
     USES_subscription_class_subscription();
 
-    $S = new Subscription();
+    $S = new \Subscription\Subscription();
     //$S->Add($uid, $id[1], $A['duration'], $A['duration_type'], $A['expiration']);
     $upgrade = isset($id[2]) && $id[2] == 'upgrade' ? true : false;
     $status = $S->Add($uid, $id[1], 0, '', NULL, $upgrade, $ipn_data['txn_id'], $amount);
 
-    //$groupid = (int)$A['addgroup'];
-    //COM_errorLog("Adding user $uid to group $groupid");
-    /*if ($groupid > 0) {
-        USER_addGroup($groupid, $uid);
-    }
-    */
-
-    //COM_errorLog(print_r($retval,true));
-
     return $status == true ? PLG_RET_OK : PLG_RET_ERROR;
-
 }
 
 
@@ -283,7 +273,7 @@ function service_getproducts_subscription($args, &$output, &$svc_msg)
         return PLG_RET_ERROR;
 
     USES_subscription_class_product();
-    $P = new SubscriptionProduct();
+    $P = new \Subscription\SubscriptionProduct();
 
     while ($A = DB_fetchArray($result)) {
         $P->Read($A['item_id']);

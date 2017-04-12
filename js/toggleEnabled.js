@@ -1,48 +1,33 @@
-var SUBSCR_xmlHttp;
-
-function SUBSCR_toggleEnabled(oldval, id, type, base_url)
-{
-  SUBSCR_xmlHttp = SUBSCR_GetXmlHttpObject();
-  if (SUBSCR_xmlHttp==null) {
-    alert ("Browser does not support HTTP Request")
-    return
-  }
-  var url=base_url + "/admin/plugins/subscription/ajax.php?action=toggleEnabled";
-  url=url+"&id="+id;
-  url=url+"&type="+type;
-  url=url+"&oldval="+oldval;
-  url=url+"&sid="+Math.random();
-  SUBSCR_xmlHttp.onreadystatechange=SUBSCR_sc_Enabled;
-  SUBSCR_xmlHttp.open("GET",url,true);
-  SUBSCR_xmlHttp.send(null);
-}
-
-function SUBSCR_sc_Enabled()
-{
-  var newstate;
-
-  if (SUBSCR_xmlHttp.readyState==4 || SUBSCR_xmlHttp.readyState=="complete")
-  {
-    jsonObj = JSON.parse(SUBSCR_xmlHttp.responseText);
-    id = jsonObj.id;
-    baseurl = jsonObj.baseurl;
-    type = jsonObj.type;
-    newval = jsonObj.newval;
-    document.getElementById("togena"+id).checked = jsonObj.newval == 1 ? true : false;
-  }
-}
-
-function SUBSCR_GetXmlHttpObject()
-{
-  var objXMLHttp=null
-  if (window.XMLHttpRequest)
-  {
-    objXMLHttp=new XMLHttpRequest()
-  }
-  else if (window.ActiveXObject)
-  {
-    objXMLHttp=new ActiveXObject("Microsoft.XMLHTTP")
-  }
-  return objXMLHttp
-}
-
+/**
+*   Toggle field for Subscription products
+*
+*   @param  object  cbox    Checkbox
+*   @param  string  id      Sitemap ID, e.g. plugin name
+*   @param  string  type    Type of sitemap (XML or HTML)
+*/
+var SUBSCR_toggleEnabled = function(cbox, id, type) {
+    oldval = cbox.checked ? 0 : 1;
+    var dataS = {
+        "action" : "toggleEnabled",
+        "id": id,
+        "type": type,
+        "oldval": oldval,
+    };
+    data = $.param(dataS);
+    $.ajax({
+        type: "POST",
+        dataType: "json",
+        url: site_admin_url + "/plugins/subscription/ajax.php",
+        data: data,
+        success: function(result) {
+            cbox.checked = result.newval == 1 ? true : false;
+            try {
+                $.UIkit.notify("<i class='uk-icon-check'></i>&nbsp;" + result.statusMessage, {timeout: 1000,pos:'top-center'});
+            }
+            catch(err) {
+                alert(result.statusMessage);
+            }
+        }
+    });
+    return false;
+};

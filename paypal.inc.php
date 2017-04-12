@@ -104,7 +104,7 @@ function Xplugin_paypal_getproducts_subscription($cat='')
 
     $products = array();
     USES_subscription_class_product();
-    $P = new SubscriptionProduct();
+    $P = new \Subscription\SubscriptionProduct();
 
     while ($A = DB_fetchArray($result)) {
         $P->Read($A['item_id']);
@@ -216,7 +216,7 @@ function plugin_paypal_handlePurchase_subscription($id, $item, $paypal_data)
     USES_subscription_class_subscription();
     $amount = (float)$retval['price'];
 
-    $S = new Subscription();
+    $S = new \Subscription\Subscription();
     //$S->Add($uid, $id[1], $A['duration'], $A['duration_type'], $A['expiration']);
     $upgrade = isset($id[2]) && $id[2] == 'upgrade' ? true : false;
     $S->Add($uid, $id[1], 0, '', NULL, $upgrade);
@@ -230,8 +230,6 @@ function plugin_paypal_handlePurchase_subscription($id, $item, $paypal_data)
 
     //COM_errorLog(print_r($retval,true));
     return $retval;
-
 }
-
 
 ?>

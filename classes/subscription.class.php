@@ -3,20 +3,22 @@
 *   Class to manage actual subscriptions
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2010-2016 Lee Garner
+*   @copyright  Copyright (c) 2010-2017 Lee Garner
 *   @package    subscription
-*   @version    0.2.0
+*   @version    0.2.2
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
 */
 
+namespace Subscription;
+
 USES_subscription_class_product();
 
 /**
- *  Class for subscription
- *  @package subscription
- */
+*   Class for subscription
+*   @package subscription
+*/
 class Subscription
 {
     /** Property fields.  Accessed via __set() and __get()
@@ -40,12 +42,12 @@ class Subscription
 
 
     /**
-     *  Constructor.
-     *  Reads in the specified class, if $id is set.  If $id is zero, 
-     *  then a new entry is being created.
-     *
-     *  @param integer $id Optional type ID
-     */
+    *   Constructor.
+    *   Reads in the specified subscription record if $id is set.  If $id is zero, 
+    *   then a new entry is being created.
+    *
+    *   @param  integer $id     Optional subscription record ID
+    */
     public function __construct($id=0)
     {
         global $_CONF_SUBSCR, $_CONF;
@@ -53,7 +55,7 @@ class Subscription
         $this->properties = array();
         $this->isNew = true;
         $this->status = 0;
-        $this->dt = new Date('now', $_CONF['timezone']);
+        $this->dt = new \Date('now', $_CONF['timezone']);
         $this->Plan = NULL;
         $id = (int)$id;
         if ($id < 1) {
@@ -70,7 +72,6 @@ class Subscription
                 $this->id = 0;
             }
         }
-
         $this->isAdmin = SEC_hasRights('subscription.admin') ? 1 : 0;
     }
 
@@ -213,7 +214,6 @@ class Subscription
             return false;
         }
 
-        //$sql2 = " SET
         $db_expiration = DB_escapeString($this->expiration);
         $sql = "INSERT INTO {$_TABLES['subscr_subscriptions']} SET
                     item_id = '{$this->item_id}',
@@ -225,7 +225,6 @@ class Subscription
                     expiration = '$db_expiration',
                     notified = '{$this->notified}',
                     status = '{$this->status}'";
-        //$sql = $sql1 . $sql2 . $sql3;
         //echo $sql;die;
         DB_query($sql, 1);
 
@@ -242,7 +241,7 @@ class Subscription
         } else {
             $status = false;
             $this->Errors[] = 'Database error, possible duplicate key.';
-            COM_errorLog('Subscription::Save(): SQL error: : ' . $sql);
+            COM_errorLog(__METHOD__ . '() SQL error: ' . $sql);
         }
         /*$logmsg .= ' ' . $this->id . ' for ' . 
                 COM_getDisplayName($A['uid']) . ' (' . $A['uid'] . ') ' .
@@ -261,7 +260,7 @@ class Subscription
     {
         global $_TABLES, $_CONF_SUBSCR;
 
-        if ($this->id <= 0)
+        if ($this->id < 1)      // Invalid or new record
             return false;
 
         DB_delete($_TABLES['subscr_subscriptions'], 'id', $this->id);
@@ -356,9 +355,6 @@ class Subscription
 
         if ($this->id == 0) {
             // Create a new subscription record
-            // Ensure no conflicting key
-            //DB_delete($_TABLES['subscr_subscriptions'], array('uid','item_id'),
-            //        array($this->uid, $this->item_id));
             $sql1 = "INSERT INTO {$_TABLES['subscr_subscriptions']} SET 
                     uid = '{$this->uid}', ";
             $sql3 = " ON DUPLICATE KEY UPDATE
@@ -379,6 +375,7 @@ class Subscription
         //COM_errorLog($sql);
         DB_query($sql, 1);     // Execute event record update
         if (DB_error()) {
+            COM_errorLog(__METHOD__ . "() SQL error: $sql");
             $status = false;
         } else {
             if ($this->id == 0) {
@@ -517,7 +514,7 @@ class Subscription
                         $LANG_SUBSCR['select'] . "--</option>\n";
         }
 
-        $T = new Template(SUBSCR_PI_PATH . '/templates');
+        $T = new \Template(SUBSCR_PI_PATH . '/templates');
         switch ($_SYSTEM['framework']) {
         case 'uikit':
             $T->set_file(array('product' => 'subscription_form.uikit.thtml'));
@@ -554,7 +551,6 @@ class Subscription
         $retval .= $T->parse('output', 'product');
         $retval .= COM_endBlock();
         return $retval;
-
     }   // function Edit()
 
 
@@ -574,7 +570,7 @@ class Subscription
 
         $retval = COM_startBlock();
 
-        $T = new Template(SUBSCR_PI_PATH . '/templates');
+        $T = new \Template(SUBSCR_PI_PATH . '/templates');
         $T->set_file(array('subscription' => 'subscr_detail.thtml',
             ));
 
@@ -593,15 +589,12 @@ class Subscription
         ) );
 
         $retval .= $T->parse('output', 'subscription');
-
         $retval .= COM_endBlock();
-
         return $retval;
-
     }
 
 
-    public function Find($uid, $item_id)
+    public function XX_Find($uid, $item_id)
     {
         global $_TABLES;
 
@@ -615,7 +608,6 @@ class Subscription
         } else {
             return false;
         }
-
     }
 
 
@@ -705,6 +697,7 @@ class Subscription
     *   Get all current subscriptions for a user
     *
     *   @param  integer $uid    User ID to check, current user by default
+    *   @param  integer $status Subscription status, Active by default
     *   @return array   Array of subscription objects
     */
     public static function getSubscriptions($uid = 0, $status = SUBSCR_STATUS_ACTIVE)
@@ -732,8 +725,6 @@ class Subscription
         return $retval;
     }
 
-
 }   // class Subscription
-
 
 ?>

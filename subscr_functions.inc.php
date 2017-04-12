@@ -11,6 +11,8 @@
 *   @filesource
 */
 
+namespace subscription;
+
 /**
 *   Display the subscription products available.
 *
@@ -27,7 +29,7 @@ function SUBSCR_ProductList()
     USES_subscription_class_product();
     USES_subscription_class_subscription();
 
-    $T = new Template(SUBSCR_PI_PATH . '/templates');
+    $T = new \Template(SUBSCR_PI_PATH . '/templates');
     $T->set_file(array(
         'prodlist'  => 'product_list.thtml',
     ));
@@ -41,7 +43,7 @@ function SUBSCR_ProductList()
         // Let current members know when they expire
         $str = '<ul>';
         foreach ($mySubs as $SubObj) {
-            $dt = new Date($SubObj->expiration, $_CONF['timezone']);
+            $dt = new \Date($SubObj->expiration, $_CONF['timezone']);
             $str .= '<li>' . $SubObj->Plan->item_id . '&nbsp;&nbsp;' .
                 $LANG_SUBSCR['expires'] . ':&nbsp;' . $dt->format($_CONF['shortdate']) . '</li>';
         }
@@ -72,8 +74,8 @@ function SUBSCR_ProductList()
 
     $status = LGLIB_invokeService('paypal', 'getCurrency', array(),
         $currency, $svc_msg);
-    if (empty($currency)) $currency = 'USD';
 
+    if (empty($currency)) $currency = 'USD';
     $T->set_block('prodlist', 'ProductBlock', 'PBlock');
 
     while ($A = DB_fetchArray($result)) {
@@ -85,7 +87,7 @@ function SUBSCR_ProductList()
         $ok_to_buy = true;
         if (isset($mySubs[$P->item_id])) {
         //if (!empty($mySub['expiration']) && $mySub['item_id'] == $P->item_id) {
-            $d = new Date($mySubs[$P->item_id]->expiration);
+            $d = new \Date($mySubs[$P->item_id]->expiration);
             $exp_ts = $d->toUnix();
             $exp_format = $d->format($_CONF['shortdate']);
             $description .=

@@ -3,9 +3,9 @@
 *   Common functions for the Subscription plugin.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2010-2016 Lee Garner
+*   @copyright  Copyright (c) 2010-2017 Lee Garner
 *   @package    subscription
-*   @version    0.2.0
+*   @version    0.2.2
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -322,7 +322,7 @@ function plugin_autotags_subscription($op, $content = '', $autotag = '')
         case 'buynow':
             // tag: [subscripton:buynow product_id]
             USES_subscription_class_product();
-            $P = new SubscriptionProduct($autotag['parm2']);
+            $P = new \Subscription\SubscriptionProduct($autotag['parm2']);
             if ($P->canBuy()) {
                 $content = $P->MakeButton();
             }
@@ -466,7 +466,7 @@ function phpblock_subscription_subscribe()
 
     USES_subscription_class_product();
     $T = new Template(SUBSCR_PI_PATH . '/templates');
-    $P = new SubscriptionProduct();
+    $P = new \Subscription\SubscriptionProduct();
 
     $i = 0;
     while ($row = DB_fetchArray($r, false)) {

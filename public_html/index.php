@@ -6,10 +6,12 @@
 *   @copyright  Copyright (c) 2010 Lee Garner
 *   @package    subscription
 *   @version    0.0.1
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
+
+namespace subscription;
 
 /** Import core glFusion libraries */
 require_once '../lib-common.php';
@@ -27,7 +29,7 @@ if (COM_isAnonUser()) {
     echo SUBSCR_siteFooter();
     exit;
 }
-    
+
 // Retrieve and sanitize input variables.  Typically _GET, but may be _POSTed.
 COM_setArgNames(array('view', 'item_id'));
 
