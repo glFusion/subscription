@@ -144,11 +144,13 @@ function service_handlePurchase_subscription($args, &$output, &$svc_msg)
     $item = $args['item'];
     $ipn_data = $args['ipn_data'];
 
-    $id = explode(':', $item['item_id']);
+    // Get rid of paypal-supplied options, not used here
+    list($id, $opts) = explode('|', $item['item_id']);
+    $id = explode(':', $id);
     if (isset($id[1])) {
         $subscr_id = COM_sanitizeID($id[1], false);
         $sql = "SELECT * FROM {$_TABLES['subscr_products']}
-                WHERE item_id='{$id[1]}'";
+                WHERE item_id='{$subscr_id}'";
         $res = DB_query($sql, 1);
         $A = $res ? DB_fetchArray($res, false) : array();
     } else {
@@ -184,10 +186,8 @@ function service_handlePurchase_subscription($args, &$output, &$svc_msg)
     USES_subscription_class_subscription();
 
     $S = new \Subscription\Subscription();
-    //$S->Add($uid, $id[1], $A['duration'], $A['duration_type'], $A['expiration']);
     $upgrade = isset($id[2]) && $id[2] == 'upgrade' ? true : false;
     $status = $S->Add($uid, $id[1], 0, '', NULL, $upgrade, $ipn_data['txn_id'], $amount);
-
     return $status == true ? PLG_RET_OK : PLG_RET_ERROR;
 }
 
