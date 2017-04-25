@@ -5,7 +5,7 @@
 *   @author     Lee Garner <lee@leegarner.com>
 *   @copyright  Copyright (c) 2010-2016 Lee Garner
 *   @package    subscription
-*   @version    0.2.0
+*   @version    0.2.2
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -114,7 +114,7 @@ function SUBSCR_ProductList()
             'short_description' => $P->short_description,
             'amount'        => $price,
             'quantity'      => 1,
-            'tax'           => 0,
+            //'tax'           => 0,
             //'return' => SUBSCR_URL . '/index.php?action=ppthanks',
             'options'       => $options,
             'btn_type'      => 'pay_now',
@@ -145,7 +145,6 @@ function SUBSCR_ProductList()
 
     $T->parse('output', 'prodlist');
     return $T->finish($T->get_var('output', 'prodlist'));
-
 }
 
 
