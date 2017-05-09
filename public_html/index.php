@@ -10,8 +10,7 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
-
-namespace subscription;
+namespace Subscription;
 
 /** Import core glFusion libraries */
 require_once '../lib-common.php';

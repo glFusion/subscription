@@ -11,7 +11,7 @@
 *   @filesource
 */
 
-namespace subscription;
+namespace Subscription;
 
 /** Import core glFusion functions */
 require_once('../../../lib-common.php');
@@ -166,7 +166,7 @@ function SUBSCR_subscriptionList($item_id)
     /*$form_arr = array(
         'top' => '<input type="checkbox" name="showexp"> Show expired?'
     );*/
-    $retval .= ADMIN_list('subscription', '\Subscription\subscription_getListField', 
+    $retval .= ADMIN_list('subscription', __NAMESPACE__ . '\subscription_getListField', 
                 $header_arr,
                 $text_arr, $query_arr, $defsort_arr, $filter, '', 
                 $options, $form_arr);
@@ -282,7 +282,7 @@ function SUBSCR_productAdminList()
         'default_filter' => ' WHERE 1=1 ',
     );
 
-    $retval .= ADMIN_list('subscription', '\Subscription\product_getListField', 
+    $retval .= ADMIN_list('subscription', __NAMESPACE__ . '\product_getListField', 
                     $header_arr,
                     $text_arr, $query_arr, $defsort_arr, $filter, '', 
                     $options, $form_arr);

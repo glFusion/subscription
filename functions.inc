@@ -79,10 +79,10 @@ function USES_subscription_functions()
 {   require_once SUBSCR_PI_PATH . '/subscr_functions.inc.php';   }
 
 function USES_subscription_class_product()
-{   require_once SUBSCR_PI_PATH . '/classes/product.class.php';   }
+{   require_once SUBSCR_PI_PATH . '/classes/Product.class.php';   }
 
 function USES_subscription_class_subscription()
-{   require_once SUBSCR_PI_PATH . '/classes/subscription.class.php';   }
+{   require_once SUBSCR_PI_PATH . '/classes/Subscription.class.php';   }
 
 /** Import services to interact with the PayPal plugin */
 require_once SUBSCR_PI_PATH . '/services.inc.php';
