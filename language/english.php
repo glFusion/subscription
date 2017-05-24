@@ -123,6 +123,7 @@ $LANG_SUBSCR = array(
 'show_exp'      => 'Show Expired',
 'msg_toggle'    => 'Item has been %s',
 'msg_unchanged' => 'Item was not changed',
+'tt_view_subscribers' => 'Click to view subscribers',
 );
 
 // Messages for the plugin upgrade

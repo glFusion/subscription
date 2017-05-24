@@ -46,6 +46,12 @@ if (file_exists(SUBSCR_PI_PATH . '/config.php')) {
     include_once SUBSCR_PI_PATH . '/config.php';
 }
 
+// This is temporary, and will be included in glFusion 1.6.0
+isset($_SYSTEM['framework']) || $_SYSTEM['framework'] = 'legacy';
+
+$_CONF_SUBSCR['_is_uikit'] = $_SYSTEM['framework'] == 'uikit' ? 'true' : '';
+$_CONF_SUBSCR['_iconset'] = $_CONF_SUBSCR['_is_uikit'] ? 'uk-icon' : 'fa fa';
+
 // Determine if the paypal plugin is installed and integration is enabled
 if (is_array($_PLUGINS) && in_array('paypal', $_PLUGINS)) {
     /** Import Paypal integration functions */
@@ -510,7 +516,7 @@ function phpblock_subscription_subscribe()
 */
 function plugin_profilevariablesdisplay_subscription($uid, &$T)
 {
-    global $_CONF_SUBSCR, $LANG_SUBSCR, $_TABLES, $_CONF, $_USER, $_SYSTEM;
+    global $_CONF_SUBSCR, $LANG_SUBSCR, $_TABLES, $_CONF, $_USER;
 
     // non-admins can only see their own subscription.
     if (!SEC_hasRights('subscription.admin') && $uid != $_USER['uid'])
@@ -527,7 +533,7 @@ function plugin_profilevariablesdisplay_subscription($uid, &$T)
         $LT->set_file(array(
             'block' => 'profileblock.thtml',
         ));
-        $LT->set_var('is_uikit', $_SYSTEM['framework'] == 'uikit' ? 'true' : '');
+        $LT->set_var('is_uikit', $_CONF_SUBSCR['_is_uikit']);
         $LT->set_block('block', 'subscription_row', 'srow');
 
         while ($A = DB_fetchArray($res, false)) {
@@ -854,7 +860,21 @@ function SUBSCR_isAdmin()
     return $isAdmin;
 }
 
-// This is temporary, and will be included in glFusion 1.6.0
-isset($_SYSTEM['framework']) || $_SYSTEM['framework'] = 'legacy';
+
+/**
+*   Get an icon from the CSS icon set, either UIkit or FontAwesome
+*
+*   @param  string  $name   Base name of icon, e.g. "edit" for "uk-icon-edit"
+*   @param  string  $style  Style name from local CSS
+*   @return string      Class names for icon
+*/
+function SUB_getIcon($name, $style='info')
+{
+    global $_CONF_SUBSCR;
+
+    if ($style != '')
+        $style = ' sub-icon-' . $style;
+    return $_CONF_SUBSCR['_iconset'] . '-' . $name . $style;
+}
 
 ?>

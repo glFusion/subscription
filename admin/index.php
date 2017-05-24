@@ -10,7 +10,6 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
-
 namespace Subscription;
 
 /** Import core glFusion functions */
@@ -166,7 +165,7 @@ function SUBSCR_subscriptionList($item_id)
     /*$form_arr = array(
         'top' => '<input type="checkbox" name="showexp"> Show expired?'
     );*/
-    $retval .= ADMIN_list('subscription', __NAMESPACE__ . '\subscription_getListField', 
+    $retval .= ADMIN_list('subscription', __NAMESPACE__ . '\getListField', 
                 $header_arr,
                 $text_arr, $query_arr, $defsort_arr, $filter, '', 
                 $options, $form_arr);
@@ -185,7 +184,7 @@ function SUBSCR_subscriptionList($item_id)
 *   @param  array   $icon_arr   Array of system icons
 *   @return string              HTML content for field display
 */
-function subscription_getListField($fieldname, $fieldvalue, $A, $icon_arr)
+function getListField($fieldname, $fieldvalue, $A, $icon_arr)
 {
     global $_CONF, $LANG_ACCESS, $LANG_SUBSCR, $_CONF_SUBSCR;
 
@@ -193,10 +192,12 @@ function subscription_getListField($fieldname, $fieldvalue, $A, $icon_arr)
 
     switch($fieldname) {
     case 'edit':
-        $retval .= COM_createLink('',
-            SUBSCR_ADMIN_URL . 
-            '/index.php?editsubscrip=x&amp;sub_id=' . $A['id'],
-            array('class' => 'uk-icon-edit')
+        $retval .= COM_createLink('<i class="' . SUB_getIcon('edit', 'info') . '"></i>',
+            SUBSCR_ADMIN_URL . '/index.php?editsubscrip=x&amp;sub_id=' . $A['id'],
+            array(
+                'class' => 'tooltip',
+                'title' => $LANG_SUBSCR['edit'],
+            )
         );
         break;
 
@@ -309,18 +310,27 @@ function product_getListField($fieldname, $fieldvalue, $A, $icon_arr)
 
     switch($fieldname) {
     case 'edit':
-        $retval .= COM_createLink('',
+        $retval .= COM_createLink(
+            '<i class="' . SUB_getIcon('edit', 'info') . '"></i>',
             SUBSCR_ADMIN_URL . 
                 '/index.php?editproduct=x&amp;item_id=' . $A['item_id'],
-            array('class' => 'uk-icon-edit')
+            array(
+                'class' => 'tooltip',
+                'title' => $LANG_SUBSCR['edit'],
+            )
         );
         break;
 
     case 'delete':
         if (!SubscriptionProduct::isUsed($A['item_id'])) {
-            $retval .= COM_createLink($icon_arr['delete'],
+            $retval .= COM_createLink(
+                '<i class="' . SUB_getIcon('trash', 'danger') . '"></i>',
                 SUBSCR_ADMIN_URL . 
-                "/index.php?deleteproduct=x&amp;item_id={$A['item_id']}"
+                "/index.php?deleteproduct=x&amp;item_id={$A['item_id']}",
+                array(
+                    'class' => 'tooltip',
+                    'title' => $LANG_SUBSCR['delete'],
+                )
             );
         }
         break;
@@ -335,9 +345,14 @@ function product_getListField($fieldname, $fieldvalue, $A, $icon_arr)
         break;
 
     case 'item_id':
-        $retval = COM_createLink($fieldvalue, 
-                SUBSCR_ADMIN_URL . 
-                '/index.php?subscriptions=' . $A['item_id']);
+        $retval = COM_createLink(
+            $fieldvalue,
+            SUBSCR_ADMIN_URL . '/index.php?subscriptions=' . $A['item_id'],
+            array(
+                'class' => 'tooltip',
+                'title' => $LANG_SUBSCR['tt_view_subscribers'],
+            )
+        );
         break;
 
     case 'duration':
