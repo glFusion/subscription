@@ -36,13 +36,15 @@
 </p>
 
 <p>
-  <label for="comment" style="width:16em;">{$LANG_SUBSCR['user_notified']}:
+  <label style="width:16em;">{$LANG_SUBSCR['user_notified']}:
+    <span id="user_notified" class="tooltip_cfg tooltipstered"></span> 
   </label>
   <input type="checkbox" name="notified" value="1" {notified_chk}>
 </p>
 
 <p>
   <label for="status" style="width:16em;">{$LANG_SUBSCR['status']}:
+    <span id="status" class="tooltip_cfg tooltipstered"></span> 
   </label>
   <input type="radio" name="status" value="0" {status_0} />{$LANG_SUBSCR['active']}
   <input type="radio" name="status" value="1" {status_1} />{$LANG_SUBSCR['canceled']}
