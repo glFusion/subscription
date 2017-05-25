@@ -10,7 +10,6 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
-
 namespace Subscription;
 
 /**
@@ -566,6 +565,7 @@ class SubscriptionProduct
             'prf_type' => $this->prf_type,
             'group_options' => COM_optionList($_TABLES['groups'],
                                 'grp_id,grp_name', $this->grp_access, 1, 'grp_id <> 1'),
+            'iconset' => $_CONF_SUBSCR['_iconset'],
         ) );
 
         $trial_days = '';

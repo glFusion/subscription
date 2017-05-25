@@ -63,3 +63,19 @@
     border-bottom-width: thin;
     border-bottom-style: solid;
 }
+
+.sub-icon-ok {
+    color: green;
+}
+.sub-icon-danger {
+    color: red;
+}
+.sub-icon-warning {
+    color: #FFD300;
+}
+.sub-icon-info {
+    color: #0077dd;
+}
+.sub-icon-unknown {
+    color: #530E53;
+}

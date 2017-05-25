@@ -546,6 +546,7 @@ class Subscription
             'product_select' => $sel_opts .
                         COM_optionList($_TABLES['subscr_products'],
                         'item_id,item_id', $this->item_id, 1),
+            'iconset'       => $_CONF_SUBSCR['_iconset'],
         ) );
 
         $retval .= $T->parse('output', 'product');

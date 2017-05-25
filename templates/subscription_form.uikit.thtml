@@ -8,8 +8,7 @@
 
 <div class="uk-form-row">
   <label class="uk-form-label" for="uid">{$LANG_SUBSCR['subscriber']}
-    <a href="#" onclick="popupWindow('{doc_url}#desc_subscriber', 'Help', 640, 480, 1);return false;" class="toolbar">
-    <img src="{layout_url}/images/button_help.png" alt="" /></a>
+    <span id="subscriber" class="tooltip_cfg tooltipstered"></span> 
   </label>
   <div class="uk-form-controls">
     <select id="uid" name="uid">
@@ -20,8 +19,7 @@
 
 <div class="uk-form-row">
   <label class="uk-form-label" for="item_id">{$LANG_SUBSCR['product']}
-    <a href="#" onclick="popupWindow('{doc_url}#desc_product', 'Help', 640, 480, 1);return false;" class="toolbar">
-    <img src="{layout_url}/images/button_help.png" alt="" /></a>
+    <span id="product" class="tooltip_cfg tooltipstered"></span> 
   </label>
   <div class="uk-form-controls">
     <select id="item_id" name="item_id">
@@ -32,21 +30,17 @@
 
 <div class="uk-form-row">
   <label class="uk-form-label" for="f_expire">{$LANG_SUBSCR['expiration']}
-    <a href="#" onclick="popupWindow('{doc_url}#desc_expiration', 'Help', 640, 480, 1);return false;" class="toolbar">
-    <img src="{layout_url}/images/button_help.png" alt="" /></a>
+    <span id="expiration" class="tooltip_cfg tooltipstered"></span> 
   </label>
   <div class="uk-form-controls">
-    <input type=text name="expiration" value="{expiration}" size="12" id="f_expire" />
-    <i class="uk-icon-calendar" id="exp_trigger"
-      title="{$LANG_SUBSCR['date_selector']}"
-      data-uk-tooltip></i>
+    <input type="text" name="expiration" value="{expiration}" size="12" id="f_expire" />
+    <i class="{iconset}-calendar tooltip" id="exp_trigger"
+      title="{$LANG_SUBSCR['date_selector']}"></i>
   </div>
 </div>
 
 <div class="uk-form-row">
   <label class="uk-form-label" for="notified">{$LANG_SUBSCR['user_notified']}:
-    <a href="#" onclick="popupWindow('{doc_url}#desc_user_notified', 'Help', 640, 480, 1);return false;" class="toolbar">
-    <img src="{layout_url}/images/button_help.png" alt="" /></a>
   </label>
   <div class="uk-form-controls">
   <input id="notified" type="checkbox" name="notified" value="1" {notified_chk}>
@@ -55,8 +49,6 @@
 
 <div class="uk-form-row">
   <label class="uk-form-label" for="status">{$LANG_SUBSCR['status']}:
-    <a href="#" onclick="popupWindow('{doc_url}#desc_status', 'Help', 640, 480, 1);return false;" class="toolbar">
-    <img src="{layout_url}/images/button_help.png" alt="" /></a>
   </label>
   <div class="uk-form-controls">
     <input type="radio" name="status" value="0" {status_0} />{$LANG_SUBSCR['active']}&nbsp;&nbsp;
@@ -86,5 +78,31 @@ Calendar.setup({
     showsTime      :    false,
     button          :   "exp_trigger"
 });
+var ConfigDocUrl = '{doc_url}';
+$(document).ready(function() {
+    $('.tooltip_cfg').tooltipster({
+        contentAsHTML: true,
+        animation: 'fade',
+        trigger: 'click',
+        iconDesktop: true,
+        iconTouch: true,
+        functionBefore: function(origin, continueTooltip) {
+            continueTooltip();
+            var attrHref = ConfigDocUrl;
+            var ajobj = $(this);
+            $.get(attrHref, function(data) {
+                var confVar = ajobj.attr('id');
+                if (data.indexOf(confVar) > 0) {
+                    var desc = $(data).find('#desc_' + confVar + ' dd:first').text();
+                    origin.tooltipster('content', desc);
+                } else {
+                    origin.tooltipster('content', 'No Help Text Found');
+                    console.log('Unable to find help text for desc_%s',confVar);
+                }
+            });
+        }
+    });
+});
+
 </script>
 {# end {templatelocation} #}

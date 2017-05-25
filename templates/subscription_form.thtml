@@ -9,8 +9,7 @@
 
 <p>
   <label for="uid" style="width:16em;">{$LANG_SUBSCR['subscriber']}
-    <a href="#" onclick="popupWindow('{doc_url}#desc_subscriber', 'Help', 640, 480, 1);return false;" class="toolbar">
-    <img src="{layout_url}/images/button_help.png" alt="" /></a>
+    <span id="subscriber" class="tooltip_cfg tooltipstered"></span> 
   </label>
     <select name="uid">
       {subscriber_select}
@@ -18,9 +17,8 @@
 </p>
 
 <p>
-  <label for="camp_id" style="width:16em;">{$LANG_SUBSCR['product']}
-    <a href="#" onclick="popupWindow('{doc_url}#desc_product', 'Help', 640, 480, 1);return false;" class="toolbar">
-    <img src="{layout_url}/images/button_help.png" alt="" /></a>
+  <label for="f_item_id" style="width:16em;">{$LANG_SUBSCR['product']}
+    <span id="product" class="tooltip_cfg tooltipstered"></span> 
   </label>
     <select name="item_id">
       {product_select}
@@ -29,29 +27,22 @@
 
 <p>
   <label for="dt" style="width:16em;">{$LANG_SUBSCR['expiration']}
-    <a href="#" onclick="popupWindow('{doc_url}#desc_expiration', 'Help', 640, 480, 1);return false;" class="toolbar">
-    <img src="{layout_url}/images/button_help.png" alt="" /></a>
+    <span id="expiration" class="tooltip_cfg tooltipstered"></span> 
   </label>
   <input type=text name="expiration" value="{expiration}" id="f_expire" />
-  <img src="{site_url}/images/datepicker.jpg" 
-    id="exp_trigger"
-    style="cursor: pointer;" 
-    title="{$LANG_SUBSCR['date_selector']}"
-    />
+  <i class="{iconset}-calendar tooltip" id="exp_trigger"
+      title="{$LANG_SUBSCR['date_selector']}"
+      data-uk-tooltip></i>
 </p>
 
 <p>
   <label for="comment" style="width:16em;">{$LANG_SUBSCR['user_notified']}:
-    <a href="#" onclick="popupWindow('{doc_url}#desc_user_notified', 'Help', 640, 480, 1);return false;" class="toolbar">
-    <img src="{layout_url}/images/button_help.png" alt="" /></a>
   </label>
   <input type="checkbox" name="notified" value="1" {notified_chk}>
 </p>
 
 <p>
   <label for="status" style="width:16em;">{$LANG_SUBSCR['status']}:
-    <a href="#" onclick="popupWindow('{doc_url}#desc_status', 'Help', 640, 480, 1);return false;" class="toolbar">
-    <img src="{layout_url}/images/button_help.png" alt="" /></a>
   </label>
   <input type="radio" name="status" value="0" {status_0} />{$LANG_SUBSCR['active']}
   <input type="radio" name="status" value="1" {status_1} />{$LANG_SUBSCR['canceled']}
@@ -60,13 +51,12 @@
 
 </fieldset>
 
-<input class="formbutton" type="submit" name="savesubscription" 
+<input class="lgButton green" type="submit" name="savesubscription" 
     value="{$LANG_ADMIN['submit']}" />
-<input class="formbutton" type="reset" value="{$LANG_SUBSCR['clearform']}" />
-<input class="formbutton" type="submit" name="deletesubscription" 
+<input class="lgButton" type="reset" value="{$LANG_SUBSCR['clearform']}" />
+<input class="lgButton red" type="submit" name="deletesubscription" 
     value="{$LANG_ADMIN['delete']}" 
     onclick="return confirm('{$LANG_SUBSCR['q_del_item']}');" />
-
 </form>
 
 <script type="text/javascript">
@@ -76,5 +66,32 @@ Calendar.setup({
     showsTime      :    false,
     button          :   "exp_trigger"
 });
+
+var ConfigDocUrl = '{doc_url}';
+$(document).ready(function() {
+    $('.tooltip_cfg').tooltipster({
+        contentAsHTML: true,
+        animation: 'fade',
+        trigger: 'click',
+        iconDesktop: true,
+        iconTouch: true,
+        functionBefore: function(origin, continueTooltip) {
+            continueTooltip();
+            var attrHref = ConfigDocUrl;
+            var ajobj = $(this);
+            $.get(attrHref, function(data) {
+                var confVar = ajobj.attr('id');
+                if (data.indexOf(confVar) > 0) {
+                    var desc = $(data).find('#desc_' + confVar + ' dd:first').text();
+                    origin.tooltipster('content', desc);
+                } else {
+                    origin.tooltipster('content', 'No Help Text Found');
+                    console.log('Unable to find help text for desc_%s',confVar);
+                }
+            });
+        }
+    });
+});
+
 </script>
 {# end {templatelocation} #}

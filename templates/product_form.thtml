@@ -29,36 +29,35 @@ function update_duration_type(opt)
 <link rel="stylesheet" type="text/css" href="{pi_url}/css/style.css" />
 <form action="{action_url}" method="post" class="subscriptionForm" id="submit"
     enctype="multipart/form-data">
-<input type=hidden name="mode" value="saveproduct">
-<input type=hidden name="item_id" value="{item_id}">
+<input type=hidden name="mode" value="saveproduct" />
+<input type=hidden name="item_id" value="{item_id}" />
 
 <fieldset>
 <legend>{$LANG_SUBSCR['subscription_info']}</legend>
 
 <p>
   <label for="item_id">{$LANG_SUBSCR['product_id']}:
-    <a href="#" onclick="popupWindow('{doc_url}#desc_product_id', 'Help', 640, 480, 1);return false;" class="toolbar">
-    <img src="{layout_url}/images/button_help.png" alt="" /></a>
+    <span id="item_id" class="tooltip_cfg tooltipstered"></span> 
   </label>
   <input required class="fValidate['required']"  size="20"
-    type="text" name="item_id" value="{item_id}" id="item_id">
+    type="text" name="item_id" value="{item_id}" id="item_id" />
+    <i class="{iconset}-exclamation-triangle sub-icon-danger tooltip"
+        title="{$LANG_SUBSCR['required']}"></i>
 </p>
 
 <p>
   <label for="name">{$LANG_SUBSCR['name']}:
-    <a href="#" onclick="popupWindow('{doc_url}#desc_campaign_name', 'Help', 640, 480, 1);return false;" class="toolbar">
-    <img src="{layout_url}/images/button_help.png" alt="" /></a>
+    <span id="name" class="tooltip_cfg tooltipstered"></span> 
   </label>
   <input required class="fValidate['required']"  size="50"
-    type="text" name="name" value="{name}" id="f_name">
+    type="text" name="name" value="{name}" id="f_name" />
 </p>
 
 <p>
-  <label for="duration">{$LANG_SUBSCR['duration']}:
-    <a href="#" onclick="popupWindow('{doc_url}#desc_duration', 'Help', 640, 480, 1);return false;" class="toolbar">
-    <img src="{layout_url}/images/button_help.png" alt="" /></a>
+  <label for="f_duration">{$LANG_SUBSCR['duration']}:
+    <span id="duration" class="tooltip_cfg tooltipstered"></span> 
   </label>
-  <input type=text name="duration" value="{duration}" id="f_duration">
+  <input type="text" name="duration" value="{duration}" id="f_duration" />
   <select name="duration_type" onchange="javascript:update_duration_type(this.value);">
     <option value="day" {sel_day}>{$LANG_SUBSCR['day']}</option>
     <option value="week" {sel_week}>{$LANG_SUBSCR['week']}</option>
@@ -69,31 +68,28 @@ function update_duration_type(opt)
 </p>
 
 <p id="fixed_exp_field" style="display:none;">
-  <label for="expiration">Fixed Expiration:
-    <a href="#" onclick="popupWindow('{doc_url}#desc_expiration', 'Help', 640, 480, 1);return false;" class="toolbar">
-    <img src="{layout_url}/images/button_help.png" alt="" /></a>
+  <label for="f_expiration">{$LANG_SUBSCR['fixed_exp']}:
+    <span id="expiration" class="tooltip_cfg tooltipstered"></span> 
   </label>
-  <input type=text name="expiration" value="{expiration}" id="f_expiration">
+  <input type="text" name="expiration" value="{expiration}" id="f_expiration" />
   <img src="{site_url}/images/datepicker.jpg" 
     id="fixedexp_trigger"
     style="cursor: pointer;"
-    alt="Date Selector"
-    title="Date Selector"
+    alt="{$LANG_SUBSCR['date_selector']}"
+    title="{$LANG_SUBSCR['date_selector']}"
     />
 </p>
 
 <p>
-  <label for="price">{$LANG_SUBSCR['price']}:
-    <a href="#" onclick="popupWindow('{doc_url}#desc_price', 'Help', 640, 480, 1);return false;" class="toolbar">
-    <img src="{layout_url}/images/button_help.png" alt="" /></a>
+  <label for="f_price">{$LANG_SUBSCR['price']}:
+    <span id="price" class="tooltip_cfg tooltipstered"></span> 
   </label>
-  <input type=text name="price" value="{price}" id="f_price">
+  <input type="text" name="price" value="{price}" id="f_price" />
 </p>
 
 <p>
-  <label for="addgroup">{$LANG_SUBSCR['addgroup']}:
-    <a href="#" onclick="popupWindow('{doc_url}#desc_addgroup', 'Help', 640, 480, 1);return false;" class="toolbar">
-    <img src="{layout_url}/images/button_help.png" alt="" /></a>
+  <label for="f_addgroup">{$LANG_SUBSCR['addgroup']}:
+    <span id="addgroup" class="tooltip_cfg tooltipstered"></span> 
   </label>
   <select name="addgroup" value="{addgroup}" id="f_addgroup">
     {addgroup_sel}
@@ -102,17 +98,15 @@ function update_duration_type(opt)
 
 <p>
   <label>{$LANG_SUBSCR['short_description']}:
-    <a href="#" onclick="popupWindow('{doc_url}#desc_short_description', 'Help', 640, 480, 1);return false;" class="toolbar">
-    <img src="{layout_url}/images/button_help.png" alt="" /></a>
+    <span id="short_description" class="tooltip_cfg tooltipstered"></span> 
   </label>
   <input type="text" name="short_description" size="60" maxlength="255"
-    value="{short_description}">
+    value="{short_description}" />
 </p>
 
 <p id="html_editarea">
   <label>{$LANG_SUBSCR['description']}:
-    <a href="#" onclick="popupWindow('{doc_url}#desc_description', 'Help', 640, 480, 1);return false;" class="toolbar">
-    <img src="{layout_url}/images/button_help.png" alt="" /></a>
+    <span id="desc" class="tooltip_cfg tooltipstered"></span> 
   </label>
   <textarea id="description"
       name="description" cols="35" rows="5" 
@@ -120,33 +114,29 @@ function update_duration_type(opt)
 </p>
 
 <p>
-  <label for="enabled">{$LANG_SUBSCR['enabled']}?
-    <a href="#" onclick="popupWindow('{doc_url}#desc_enabled', 'Help', 640, 480, 1);return false;" class="toolbar">
-    <img src="{layout_url}/images/button_help.png" alt="" /></a>
+  <label for="f_enabled">{$LANG_SUBSCR['enabled']}?
+    <span id="enabled" class="tooltip_cfg tooltipstered"></span> 
   </label>
-  <input type="checkbox" name="enabled" value="1" {ena_chk}>
+  <input id="f_enabled" type="checkbox" name="enabled" value="1" {ena_chk} />
 </p>
 
 <p>
-  <label for="show_in_block">{$LANG_SUBSCR['show_in_block']}?
-    <a href="#" onclick="popupWindow('{doc_url}#desc_show_in_block', 'Help', 640, 480, 1);return false;" class="toolbar">
-    <img src="{layout_url}/images/button_help.png" alt="" /></a>
+  <label for="f_show_in_block">{$LANG_SUBSCR['show_in_block']}?
+    <span id="show_in_block" class="tooltip_cfg tooltipstered"></span> 
   </label>
-  <input type="checkbox" name="show_in_block" value="1" {block_chk}>
+  <input id="f_show_in_block" type="checkbox" name="show_in_block" value="1" {block_chk} />
 </p>
 
 <p>
-  <label for="taxable">{$LANG_SUBSCR['taxable']}?
-    <a href="#" onclick="popupWindow('{doc_url}#desc_taxable', 'Help', 640, 480, 1);return false;" class="toolbar">
-    <img src="{layout_url}/images/button_help.png" alt="" /></a>
+  <label for="f_taxable">{$LANG_SUBSCR['taxable']}?
+    <span id="taxable" class="tooltip_cfg tooltipstered"></span> 
   </label>
-  <input type="checkbox" name="taxable" value="1" {taxable_chk}>
+  <input if="f_taxable" type="checkbox" name="taxable" value="1" {taxable_chk} />
 </p>
 
 <p>
-  <label for="at_registration">{$LANG_SUBSCR['at_registration']}?
-    <a href="#" onclick="popupWindow('{doc_url}#desc_at_registration', 'Help', 640, 480, 1);return false;" class="toolbar">
-    <img src="{layout_url}/images/button_help.png" alt="" /></a>
+  <label for="f_at_registration">{$LANG_SUBSCR['at_registration']}?
+    <span id="at_registration" class="tooltip_cfg tooltipstered"></span> 
   </label>
   <input type="radio" name="at_registration" value="0" {register_none_sel} />{$LANG_SUBSCR['none']}
   <input type="radio" name="at_registration" value="1" {register_auto_sel} />{$LANG_SUBSCR['automatic']}
@@ -154,25 +144,22 @@ function update_duration_type(opt)
 </p>
 
 <p>
-  <label for="grace_days">{$LANG_SUBSCR['grace_days']}:
-    <a href="#" onclick="popupWindow('{doc_url}#desc_grace_days', 'Help', 640, 480, 1);return false;" class="toolbar">
-    <img src="{layout_url}/images/button_help.png" alt="" /></a>
+  <label for="f_grace_days">{$LANG_SUBSCR['grace_days']}:
+    <span id="grace_days" class="tooltip_cfg tooltipstered"></span> 
   </label>
-  <input type=text name="grace_days" value="{grace_days}" id="f_grace_days">
+  <input type="text" name="grace_days" value="{grace_days}" id="f_grace_days" />
 </p>
 
 <p>
-  <label for="early_renewal">{$LANG_SUBSCR['early_renewal']}:
-    <a href="#" onclick="popupWindow('{doc_url}#desc_early_renewal', 'Help', 640, 480, 1);return false;" class="toolbar">
-    <img src="{layout_url}/images/button_help.png" alt="" /></a>
+  <label for="f_early_renewal">{$LANG_SUBSCR['early_renewal']}:
+    <span id="grace_days" class="tooltip_cfg tooltipstered"></span> 
   </label>
-  <input type=text name="early_renewal" value="{early_renewal}">
+  <input id="f_grace_days" type="text" name="early_renewal" value="{early_renewal}" />
 </p>
 
 <p>
-  <label for="grp_access">{$LANG_SUBSCR['purch_access']}:
-    <a href="#" onclick="popupWindow('{doc_url}#desc_purch_access', 'Help', 640, 480, 1);return false;" class="toolbar">
-    <img src="{layout_url}/images/button_help.png" alt="" /></a>
+  <label for="f_grp_access">{$LANG_SUBSCR['purch_access']}:
+    <span id="purch_access" class="tooltip_cfg tooltipstered"></span> 
   </label>
   <select name="grp_access">
     {group_options}
@@ -216,27 +203,55 @@ function update_duration_type(opt)
 </fieldset>
 {!endif}
 
-<input class="formbutton" type="submit" name="saveproduct" 
+<input class="lgButton green" type="submit" name="saveproduct" 
     value="{$LANG_SUBSCR['submit']}" />
-<input class="formbutton" type="reset" name="reset" 
+<input class="lgButton" type="reset" name="reset" 
     value="{$LANG_SUBSCR['clearform']}" />
-<input class="formbutton" type="submit" name="cancel" 
+<input class="lgButton blue" type="submit" name="cancel" 
     value="{$LANG_ADMIN['cancel']}" />
 
 {!if candelete}
-<input class="formbutton" name="deleteproduct" value="{$LANG_ADMIN['delete']}"
+<input class="lgButton red" name="deleteproduct" value="{$LANG_ADMIN['delete']}"
   type="submit"
   onclick="return confirm('{$LANG_SUBSCR['q_del_item']}');" />
 {!endif}
 
 </form>
 <script type="text/javascript">
-    Calendar.setup({
-        inputField     :    "f_expiration",
-        ifFormat       :    "%Y-%m-%d",
-        showsTime      :    false,
-        timeFormat     :    "24",
-        button          :   "fixedexp_trigger"
+
+Calendar.setup({
+    inputField     :    "f_expiration",
+    ifFormat       :    "%Y-%m-%d",
+    showsTime      :    false,
+    timeFormat     :    "24",
+    button         :   "fixedexp_trigger"
+});
+
+var ConfigDocUrl = '{doc_url}';
+$(document).ready(function() {
+    $('.tooltip_cfg').tooltipster({
+        contentAsHTML: true,
+        animation: 'fade',
+        trigger: 'click',
+        iconDesktop: true,
+        iconTouch: true,
+        functionBefore: function(origin, continueTooltip) {
+            continueTooltip();
+            var attrHref = ConfigDocUrl;
+            var ajobj = $(this);
+            $.get(attrHref, function(data) {
+                var confVar = ajobj.attr('id');
+                if (data.indexOf(confVar) > 0) {
+                    var desc = $(data).find('#desc_' + confVar + ' dd:first').text();
+                    origin.tooltipster('content', desc);
+                } else {
+                    origin.tooltipster('content', 'No Help Text Found');
+                    console.log('Unable to find help text for desc_%s',confVar);
+                }
+            });
+        }
     });
+});
+
 </script>
 {# end {templatelocation} #}
