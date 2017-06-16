@@ -114,7 +114,7 @@ function SUBSCR_ProductList()
             'short_description' => $P->short_description,
             'amount'        => $price,
             'quantity'      => 1,
-            //'tax'           => 0,
+            'taxable'       => $P->taxable,
             //'return' => SUBSCR_URL . '/index.php?action=ppthanks',
             'options'       => $options,
             'btn_type'      => 'pay_now',

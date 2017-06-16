@@ -23,7 +23,7 @@ require_once $_CONF['path_system'] . 'classes/config.class.php';
 $sub_config = config::get_instance();
 $_CONF_SUBSCR = $sub_config->get_config('subscription');
 
-require_once dirname(__FILE__) . '/subscription.php';
+require_once __DIR__ . '/subscription.php';
 
 define('SUBSCR_PI_PATH', 
     $_CONF['path'] . 'plugins/' . $_CONF_SUBSCR['pi_name']);
@@ -420,7 +420,6 @@ function SUBSCR_getDocURL($file='', $doclang='english')
         }
         $doc_url = SUBSCR_URL . "/docs/$doclang/";
     }
-
     return $doc_url;
 }
 
