@@ -119,6 +119,7 @@ function SUBSCR_ProductList()
             'options'       => $options,
             'btn_type'      => 'pay_now',
             'add_cart'      => 'true',
+            'unique'        => true,
         );
 
         $buttons = '';
