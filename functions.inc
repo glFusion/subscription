@@ -6,7 +6,7 @@
 *   @copyright  Copyright (c) 2010-2017 Lee Garner
 *   @package    subscription
 *   @version    0.2.2
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -25,11 +25,10 @@ $_CONF_SUBSCR = $sub_config->get_config('subscription');
 
 require_once __DIR__ . '/subscription.php';
 
-define('SUBSCR_PI_PATH', 
-    $_CONF['path'] . 'plugins/' . $_CONF_SUBSCR['pi_name']);
-define('SUBSCR_ADMIN_URL', 
+define('SUBSCR_PI_PATH', __DIR__);
+define('SUBSCR_ADMIN_URL',
     $_CONF['site_url'] . '/admin/plugins/' . $_CONF_SUBSCR['pi_name']);
-define('SUBSCR_URL', 
+define('SUBSCR_URL',
     $_CONF['site_url'] . '/' . $_CONF_SUBSCR['pi_name']);
 
 define('SUBSCR_STATUS_ENABLED', 0);
@@ -54,10 +53,6 @@ $_CONF_SUBSCR['_iconset'] = $_CONF_SUBSCR['_is_uikit'] ? 'uk-icon' : 'fa fa';
 
 // Determine if the paypal plugin is installed and integration is enabled
 if (is_array($_PLUGINS) && in_array('paypal', $_PLUGINS)) {
-    /** Import Paypal integration functions */
-    //function USES_subscription_paypal()
-    //{   require_once SUBSCR_PI_PATH . '/paypal.inc.php'; }
-  
     define('SUBSCR_PAYPAL_ENABLED', true);
 } else {
     // No paypal integration enabled.  Maybe need to die here?
@@ -130,21 +125,20 @@ function plugin_getmenuitems_subscription()
 */
 function plugin_getheaderjs_subscription()
 {
-    global $_CONF, $_CONF_SUBSCR; 
+    global $_CONF, $_CONF_SUBSCR;
 
     $pi_dir = SUBSCR_PI_PATH . '/js/';
     $files = array(
         $pi_dir . 'toggleEnabled.js',
     );
-
     return $files;
 }
 
 
 /**
 *   Shows the statistics for the plugin on stats.php.
-*   If $showsitestats is 1 then we are to only print the overall stats in 
-*   the 'site statistics' box otherwise we show the detailed stats for the 
+*   If $showsitestats is 1 then we are to only print the overall stats in
+*   the 'site statistics' box otherwise we show the detailed stats for the
 *   plugin.
 *
 *   @param  integer  $showsitestate   Flag to let us know which stats to get
@@ -170,12 +164,12 @@ function plugin_showstats_subscription($showsitestats)
     if ($nrows > 0) {
         USES_lib_admin();
         $header_arr = array(
-            array('text' => $LANG_SUBSCR['product'], 
-                    'field' => 'item_id', 
+            array('text' => $LANG_SUBSCR['product'],
+                    'field' => 'item_id',
                     'header_class' => 'stats-header-title'),
-            array('text' => $LANG_SUBSCR['subscriptions'], 
-                    'field' => 'sub_count', 
-                    'header_class' => 'stats-header-count', 
+            array('text' => $LANG_SUBSCR['subscriptions'],
+                    'field' => 'sub_count',
+                    'header_class' => 'stats-header-count',
                     'field_class' => 'stats-list-count'),
         );
         $data_arr = array();
@@ -183,7 +177,7 @@ function plugin_showstats_subscription($showsitestats)
                           'title'        => $LANG_SUBSCR['subscriptions'],
         );
         while ($A = DB_fetchArray($result, false)) {
-            $A['item_id'] = "<a href=\"" . COM_buildUrl(SUBSCR_URL . 
+            $A['item_id'] = "<a href=\"" . COM_buildUrl(SUBSCR_URL .
                     "/index.php?mode=detail&item_id={$A['item_id']}"). '">' .
                     htmlspecialchars($A['item_id']) . '</a>';
             $A['received'] = COM_NumberFormat($A['sub_count']);
@@ -213,7 +207,7 @@ function plugin_statssummary_subscription()
 
 
 /**
-*   This will put an option for the plugin in the command and control 
+*   This will put an option for the plugin in the command and control
 *   block on moderation.php
 *
 *   @return mixed   Array containing (name, admin_url, icon_url), or ''
@@ -245,8 +239,8 @@ function plugin_getadminoption_subscription()
 
     if (SEC_hasRights('subscription.admin')) {
         return array(
-            $_CONF_SUBSCR['pi_display_name'], 
-            SUBSCR_ADMIN_URL . '/index.php', 
+            $_CONF_SUBSCR['pi_display_name'],
+            SUBSCR_ADMIN_URL . '/index.php',
         );
     } else {
         return '';
@@ -282,8 +276,8 @@ function plugin_autouninstall_subscription()
                         ),
         'groups'    => array($_CONF_SUBSCR['pi_name'] . ' Admin'),
         'features'  => array(
-                $_CONF_SUBSCR['pi_name'] . '.admin', 
-                $_CONF_SUBSCR['pi_name'] . '.view', 
+                $_CONF_SUBSCR['pi_name'] . '.admin',
+                $_CONF_SUBSCR['pi_name'] . '.view',
                         ),
         'php_blocks' => array('phpblock_subscription_subscribe'),
         'vars'      => array($_CONF_SUBSCR['pi_name'] . '_gid')
@@ -336,7 +330,7 @@ function plugin_autotags_subscription($op, $content = '', $autotag = '')
         } // switch($option)
 
         $retval = str_replace($autotag['tagstr'],$HTML,$content);
-        break; 
+        break;
 
     default:
         $retval = $content;
@@ -444,7 +438,7 @@ function plugin_upgrade_subscription()
 function phpblock_subscription_subscribe()
 {
     global $_TABLES, $_CONF_SUBSCR, $_USER;
-    
+
     $retval = '';
 
     // Paypal is required to create the purchase link
@@ -456,8 +450,8 @@ function phpblock_subscription_subscribe()
             FROM {$_TABLES['subscr_products']} p
             LEFT JOIN {$_TABLES['subscr_subscriptions']} s
             ON s.uid = '{$_USER['uid']}' AND p.item_id = s.item_id
-            WHERE p.enabled = 1 
-            AND (s.item_id IS NULL OR 
+            WHERE p.enabled = 1
+            AND (s.item_id IS NULL OR
                  s.expiration <= '{$_CONF_SUBSCR['now']}' + INTERVAL p.early_renewal DAY)
             AND p.show_in_block = 1";
     //echo $sql;die;
@@ -545,7 +539,7 @@ function plugin_profilevariablesdisplay_subscription($uid, &$T)
 
         $LT->parse('output', 'block');
         $existingFields = $T->get_var('plugin_fields');
-        $T->set_var('plugin_fields', 
+        $T->set_var('plugin_fields',
                 $existingFields . $T->finish($LT->get_var('output')));
     } else {
         return '';
@@ -643,7 +637,7 @@ function SUBSCR_auditLog($logentry = '', $system=false)
 
     // A little sanitizing
     $logentry = str_replace(
-            array('<?', '?>'), 
+            array('<?', '?>'),
             array('(@', '@)'),
             $logentry);
 
@@ -658,8 +652,8 @@ function SUBSCR_auditLog($logentry = '', $system=false)
     if ($system == false) {
         // Get the user name if it's not anonymous
         if (isset($_USER['uid'])) {
-            $byuser = $_USER['uid'] . '-'. 
-                    COM_getDisplayName($_USER['uid'], 
+            $byuser = $_USER['uid'] . '-'.
+                    COM_getDisplayName($_USER['uid'],
                         $_USER['username'], $_USER['fullname']);
         } else {
             $byuser = 'anon';
@@ -702,7 +696,7 @@ function SUBSCR_notifyExpiration()
         return;
     }
 
-    $sql = "SELECT s.id, s.uid, s.notified, 
+    $sql = "SELECT s.id, s.uid, s.notified,
                 p.item_id, p.short_description
             FROM {$_TABLES['subscr_subscriptions']} s
             LEFT JOIN {$_TABLES['subscr_products']} p
@@ -715,7 +709,7 @@ function SUBSCR_notifyExpiration()
     $r = DB_query($sql);
     if (!$r)
         return;
-    
+   
     $template_base = SUBSCR_PI_PATH . '/templates/notify';
 
     while ($row = DB_fetchArray($r, false)) {
@@ -723,7 +717,7 @@ function SUBSCR_notifyExpiration()
         $email = DB_getItem($_TABLES['users'], 'email', "uid={$row['uid']}");
         //$language = DB_getItem($_TABLES['users'], 'language', "uid={$row['uid']}");
 
-        // Include the owner's language, if possible.  
+        // Include the owner's language, if possible. 
         // Fallback to site language.
         //$LANG = plugin_loadlanguage_classifieds(array($language, $_CONF['language']));
 
@@ -742,7 +736,7 @@ function SUBSCR_notifyExpiration()
             'product'       => $row['item_id'],
             'item_id'       => $row['item_id'],
             'short_description' => $row['short_description'],
-            'detail_url'    => COM_buildURL(SUBSCR_URL . 
+            'detail_url'    => COM_buildURL(SUBSCR_URL .
                     '/index.php?view=detail&item_id=' .
                     urlencode($row['item_id'])),
         ) );
@@ -759,8 +753,8 @@ function SUBSCR_notifyExpiration()
         );
 
         // Mark that the expiration notification has been sent.
-        DB_query("UPDATE {$_TABLES['subscr_subscriptions']} 
-                SET notified=1 
+        DB_query("UPDATE {$_TABLES['subscr_subscriptions']}
+                SET notified=1
                 WHERE id='{$row['id']}'");
     }
 
@@ -800,7 +794,7 @@ function plugin_user_create_subscription($uid = 0)
 
     $sql = "SELECT item_id, at_registration, trial_days
             FROM {$_TABLES['subscr_products']}
-            WHERE at_registration IN (" . 
+            WHERE at_registration IN (" .
                 SUBSCR_REGISTER_AUTO . ', ' . SUBSCR_REGISTER_TRIAL . ')';
     //echo $sql;die;
     $res = DB_query($sql);
@@ -840,6 +834,142 @@ function plugin_user_move_subscription($origUID, $destUID)
             COM_errorLog("plugin_user_move_subscription SQL error: $sql",1);
         }
     }
+}
+
+
+/**
+*   Provides the getItemInfo function for subscription products
+*
+*   @param  string  $id         Product ID
+*   @param  string  $fields     Comma-separated list of fields to return
+*   @param  integer $uid        User ID
+*   @param  array   $options    Not used
+*   @return array           Array of product information
+*/
+function plugin_getiteminfo_subscription($id, $what, $uid=0, $options=array())
+{
+    global $_TABLES, $_CONF, $LANG_SUBSCR;
+
+    $properties = explode(',', $what);
+    $fields = array();
+    $retval = array();
+    $buildingSearchIndex = false;
+    foreach ($properties as $p) {
+        switch ($p) {
+        case 'search_index':
+            $buildingSearchIndex = true;
+            break;
+        case 'id':
+            $fields[] = 'item_id';
+            break;
+        case 'title':
+            $fields[] = 'short_description';
+            break;
+        case 'content':
+        case 'description':
+            $fields[] = 'description';
+            break;
+        case 'searchidx':
+            $fields[] = 'short_description';
+            $fields[] = 'description';
+            break;
+        case 'price':
+            $fields[] = 'price';
+            break;
+        case 'date':
+            $fields[] = 'dt_add';
+            break;
+        }
+    }
+    if (count($fields) == 0) {
+        return $retval;
+    }
+    $fields = array_unique($fields);
+    $fields = implode(',', $fields);
+    $retval = array();
+    $sql = "SELECT $fields FROM {$_TABLES['subscr_products']} ";
+    if ($id == '*') {
+        $where = '';
+    } else {
+        $where = " WHERE (item_id = '" . DB_escapeString($id) . "')";
+    }
+    //echo $sql;die;
+    $res = DB_query($sql . $where);
+    while ($A = DB_fetchArray($res, false)) {
+        foreach ($properties as $p) {
+            switch ($p) {
+            case 'id':
+                $props[$p] = $A['item_id'];
+                break;
+            case 'excerpt':
+            case 'description':
+            case 'content':
+                $props[$p] = $A['description'];
+                break;
+            case 'title':
+                $props[$p] = $A['short_description'];
+                break;
+            case 'author':
+                $props[$p] = 2;     // no author, just return Admin
+                break;
+            case 'date':
+                $props[$p] = $A['dt_add'];
+                break;
+            case 'searchidx':
+                $props[$p] = $A['short_description'] . ' ' . $A['description'];
+                break;
+            case 'url':
+                $props[$p] = COM_buildUrl(SUBSCR_URL);  // no detail page yet
+                break;
+            default:
+                $props[$p] = isset($A[$p]) ? $A[$p] : NULL;
+                break;
+            }
+        }
+        $mapped = array();
+        foreach ($props as $key => $value) {
+            if ($id == '*') {
+                if ($value != '') {
+                    $mapped[$key] = $value;
+                }
+            } else {
+                $mapped[$key] = $value;
+            }
+        }
+
+        if ($id == '*') {
+            $retval[] = $mapped;
+        } else {
+            $retval = $mapped;
+            break;
+        }
+    }
+
+    if (($id != '*') && (count($retval) == 1)) {
+        $tRet = array_values($retval);
+        $retval = $tRet[0];
+    }
+    if ($retval === '' || (is_array($retval) && count($retval) == 0)) {
+        return NULL;
+    } else {
+        return $retval;
+    }
+}
+
+
+/**
+*   Get the search types for the site search.
+*
+*   @return mixed   Array of typeID=>typeName, or empty string for none.
+*/
+function plugin_searchtypes_subscription()
+{
+    global $_CONF, $_CONF_SUBSCR;
+
+    if (COM_isAnonUser() && $_CONF['loginrequired'] == 1) {
+        return '';
+    }
+    return array($_CONF_SUBSCR['pi_name'] => $_CONF_SUBSCR['pi_display_name']);
 }
 
 
