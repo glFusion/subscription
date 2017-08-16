@@ -6,11 +6,10 @@
 *   @copyright  Copyright (c) 2010-2017 Lee Garner
 *   @package    subscription
 *   @version    0.2.2
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
-
 namespace Subscription;
 
 USES_subscription_class_product();
@@ -43,7 +42,7 @@ class Subscription
 
     /**
     *   Constructor.
-    *   Reads in the specified subscription record if $id is set.  If $id is zero, 
+    *   Reads in the specified subscription record if $id is set.  If $id is zero,
     *   then a new entry is being created.
     *
     *   @param  integer $id     Optional subscription record ID
@@ -175,8 +174,8 @@ class Subscription
             return false;
         }
 
-        $result = DB_query("SELECT * 
-                    FROM {$_TABLES['subscr_subscriptions']} 
+        $result = DB_query("SELECT *
+                    FROM {$_TABLES['subscr_subscriptions']}
                     WHERE id='$id'");
         if (!$result || DB_numRows($result != 1)) {
             return false;
@@ -184,7 +183,7 @@ class Subscription
             $row = DB_fetchArray($result, false);
             $this->SetVars($row, true);
             $this->isNew = false;
-            $this->Plan = new SubscriptionProduct($row['item_id']);
+            $this->Plan = new Product($row['item_id']);
             return true;
         }
     }
@@ -233,7 +232,7 @@ class Subscription
                 $this->id = DB_insertID();
             }*/
             $status = true;
-            $P = new SubscriptionProduct($this->item_id);
+            $P = new Product($this->item_id);
             $this->AddtoGroup($P->addgroup, $this->uid);
             //$P->updateProfile($this->expiration, $this->uid);
             $this->Read();
@@ -243,7 +242,7 @@ class Subscription
             $this->Errors[] = 'Database error, possible duplicate key.';
             COM_errorLog(__METHOD__ . '() SQL error: ' . $sql);
         }
-        /*$logmsg .= ' ' . $this->id . ' for ' . 
+        /*$logmsg .= ' ' . $this->id . ' for ' .
                 COM_getDisplayName($A['uid']) . ' (' . $A['uid'] . ') ' .
                 $this->ProductName() . ", exp {$this->expiration}";*/
         SUBSCR_debug('Status of last update: ' . print_r($status,true));
@@ -298,7 +297,7 @@ class Subscription
 
         // Get the product information for this subscription
         USES_subscription_class_product();
-        $P = new SubscriptionProduct();
+        $P = new Product();
         if ($price == -1) {
             $price = $upgrade ? $P->upg_price : $P->price;
         }
@@ -326,7 +325,7 @@ class Subscription
             $this->expiration = $today;
         } else {
             $this->id = $A['id'];
-            $this->expiration = $A['expiration'] < $today ? $today : 
+            $this->expiration = $A['expiration'] < $today ? $today :
                         $A['expiration'];
             // If this is an upgrade, verify that it is allowed.
             // Check that the current product is an upgrade item, and that it
@@ -355,7 +354,7 @@ class Subscription
 
         if ($this->id == 0) {
             // Create a new subscription record
-            $sql1 = "INSERT INTO {$_TABLES['subscr_subscriptions']} SET 
+            $sql1 = "INSERT INTO {$_TABLES['subscr_subscriptions']} SET
                     uid = '{$this->uid}', ";
             $sql3 = " ON DUPLICATE KEY UPDATE
                     expiration = $expiration,
@@ -368,8 +367,8 @@ class Subscription
         }
 
         $sql2 = "item_id = '{$this->item_id}',
-                expiration = $expiration, 
-                notified = 0, 
+                expiration = $expiration,
+                notified = 0,
                 status = '" . SUBSCR_STATUS_ENABLED . "'";
         $sql = $sql1 . $sql2 . $sql3;
         //COM_errorLog($sql);
@@ -413,7 +412,7 @@ class Subscription
         DB_query($sql, 1);
     }
 
-            
+           
     /**
     *   Adds a user to a glFusion group.
     *
@@ -442,17 +441,17 @@ class Subscription
                 if ($status == PLG_RET_OK) {
                     foreach ($output as $child_uid) {
                         $values_arr[] = "('$groupid', $child_uid)";
-                        /*DB_query("INSERT INTO {$_TABLES['group_assignments']} 
-                                (ug_main_grp_id, ug_uid) 
-                            VALUES 
+                        /*DB_query("INSERT INTO {$_TABLES['group_assignments']}
+                                (ug_main_grp_id, ug_uid)
+                            VALUES
                                 ('$groupid', $child_uid)");*/
                     }
                 }
 
                 $value_str = implode(',', $values_arr);
-                DB_query("INSERT INTO {$_TABLES['group_assignments']} 
-                        (ug_main_grp_id, ug_uid) 
-                    VALUES 
+                DB_query("INSERT INTO {$_TABLES['group_assignments']}
+                        (ug_main_grp_id, ug_uid)
+                    VALUES
                         $value_str");
                         //('$groupid', $uid)");
             } else {
@@ -499,7 +498,7 @@ class Subscription
     */
     public function Edit($id = 0)
     {
-        global $_TABLES, $_CONF, $_CONF_SUBSCR, $LANG_SUBSCR, 
+        global $_TABLES, $_CONF, $_CONF_SUBSCR, $LANG_SUBSCR,
                 $LANG24, $LANG_postmodes, $_SYSTEM;
 
         $id = (int)$id;
@@ -524,7 +523,7 @@ class Subscription
             break;
         }
         if ($id > 0) {
-            $retval = COM_startBlock($LANG_SUBSCR['edit'] . ': ' . 
+            $retval = COM_startBlock($LANG_SUBSCR['edit'] . ': ' .
                     $this->name);
         } else {
             $retval = COM_startBlock($LANG_SUBSCR['new_subscription']);
@@ -533,15 +532,15 @@ class Subscription
         $T->set_var(array(
             'id'            => $this->id,
             'expiration'    => $this->expiration,
-            'notified_chk'  => $this->notified == 1 ? 
+            'notified_chk'  => $this->notified == 1 ?
                                     ' checked="checked"' : '',
             'pi_admin_url'  => SUBSCR_ADMIN_URL,
             'pi_url'        => SUBSCR_URL,
-            'doc_url'       => SUBSCR_getDocURL('subscription_form.html', 
+            'doc_url'       => SUBSCR_getDocURL('subscription_form.html',
                                             $_CONF['language']),
             'status_' . $this->status => 'checked="checked"',
             'subscriber_select' => $sel_opts .
-                        COM_optionList($_TABLES['users'], 
+                        COM_optionList($_TABLES['users'],
                         'uid,username', $this->uid, 1),
             'product_select' => $sel_opts .
                         COM_optionList($_TABLES['subscr_products'],
@@ -602,7 +601,7 @@ class Subscription
         $uid = (int)$uid;
         $item_id = COM_sanitizeID($item_id, false);
 
-        $sub_id = DB_getItem($_TABLES['subscr_subscriptions'], 
+        $sub_id = DB_getItem($_TABLES['subscr_subscriptions'],
                 'id', "uid=$uid AND item_id='$item_id'");
         if (!empty($sub_id)) {
             return $this->Read(sub_id);

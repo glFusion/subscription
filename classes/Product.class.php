@@ -6,7 +6,7 @@
 *   @copyright  Copyright (c) 2010-2017 Lee Garner
 *   @package    subscription
 *   @version    0.2.2
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -17,7 +17,7 @@ namespace Subscription;
 *
 *   @package subscription
 */
-class SubscriptionProduct
+class Product
 {
     /** Property fields.  Accessed via __set() and __get()
     *   @var array */
@@ -49,7 +49,7 @@ class SubscriptionProduct
 
     /**
     *   Constructor.
-    *   Reads in the specified class, if $id is set.  If $id is zero, 
+    *   Reads in the specified class, if $id is set.  If $id is zero,
     *   then a new entry is being created.
     *
     *   @param integer  $id     Optional product ID
@@ -210,7 +210,7 @@ class SubscriptionProduct
         $this->duration = $row['duration'];
         $this->duration_type = $row['duration_type'];
         if ($this->duration_type == 'fixed') {
-            $this->expiration = empty($row['expiration']) ? 
+            $this->expiration = empty($row['expiration']) ?
                             NULL : $row['expiration'];
         } else {
             $this->expiration = NULL;
@@ -231,15 +231,13 @@ class SubscriptionProduct
             $this->pricing['base'] = (float)$row['price'];
             $disc_price = (float)$row['disc_price'];
             if ($disc_price > 0) {
-                
-            if (is_array($row['disc_price'])
-                && is_array($row['disc_from'])
-                && is_array($row['disc_to'])
-                ) {
-            }
+                if (is_array($row['disc_price'])
+                    && is_array($row['disc_from'])
+                    && is_array($row['disc_to'])
+                    ) {
+                }
             }
         }
-
     }
 
 
@@ -262,7 +260,7 @@ class SubscriptionProduct
             return false;
         }
 
-        $sql = "SELECT * FROM {$_TABLES['subscr_products']} 
+        $sql = "SELECT * FROM {$_TABLES['subscr_products']}
                WHERE item_id='$id' ";
         //echo $sql;die;
         //COM_errorLog($sql);
@@ -366,7 +364,7 @@ class SubscriptionProduct
             }
         }
 
-        $sql2 = "short_description = '" . 
+        $sql2 = "short_description = '" .
                         DB_escapeString($this->short_description) . "',
                 description = '" . DB_escapeString($this->description) . "',
                 price = '$price',
@@ -401,11 +399,11 @@ class SubscriptionProduct
 
         SUBSCR_debug('Status of last update: ' . print_r($status,true));
         if (!$this->hasErrors()) {
-            SUBSCR_debug('Update of product ' . $this->item_id . 
+            SUBSCR_debug('Update of product ' . $this->item_id .
                     ' succeeded.');
             return true;
         } else {
-            SUBSCR_debug('Update of product ' . $this->item_id . 
+            SUBSCR_debug('Update of product ' . $this->item_id .
                     ' failed.');
             return false;
         }
@@ -473,7 +471,7 @@ class SubscriptionProduct
     */
     public function Edit($id = '')
     {
-        global $_TABLES, $_CONF, $_CONF_SUBSCR, $LANG_SUBSCR, 
+        global $_TABLES, $_CONF, $_CONF_SUBSCR, $LANG_SUBSCR,
                 $LANG24, $LANG_postmodes, $_SYSTEM;
 
         $id = COM_sanitizeID($id, false);
@@ -530,7 +528,7 @@ class SubscriptionProduct
         $T->set_var(array(
             'item_id'   => $id,
             'mootools'  => $_SYSTEM['disable_mootools'] ? '' : 'true',
-            'short_description'   => 
+            'short_description'   =>
                             htmlspecialchars($this->short_description),
             'description'   => htmlspecialchars($this->description),
             'price'         => sprintf('%.2f', $this->price),
@@ -539,25 +537,25 @@ class SubscriptionProduct
             'early_renewal' => $this->early_renewal,
             'pi_admin_url'  => SUBSCR_ADMIN_URL,
             'pi_url'        => SUBSCR_URL,
-            'doc_url'       => SUBSCR_getDocURL('product_form.html', 
+            'doc_url'       => SUBSCR_getDocURL('product_form.html',
                                             $_CONF['language']),
-            'ena_chk'       => $this->enabled == 1 ? 
+            'ena_chk'       => $this->enabled == 1 ?
                                     ' checked="checked"' : '',
-            'block_chk'     => $this->show_in_block == 1 ? 
+            'block_chk'     => $this->show_in_block == 1 ?
                                     ' checked="checked"' : '',
-            'taxable_chk'   => $this->taxable == 1 ? 
+            'taxable_chk'   => $this->taxable == 1 ?
                                     ' checked="checked"' : '',
             'sel_' . $this->duration_type => ' selected="selected"',
             'expiration'    => $this->expiration,
             'addgroup_sel'  => COM_optionList($_TABLES['groups'],
                             'grp_id,grp_name', $this->addgroup, 1, 'grp_id <> 1'),
             'dur_type'      => $this->duration_type,
-            'upg_no_selection' => $this->upg_from == '' ? 
+            'upg_no_selection' => $this->upg_from == '' ?
                         'selected="selected"' : '',
             'upg_from_sel'  => COM_optionList($_TABLES['subscr_products'],
-                        'item_id,item_id', $this->upg_from, 1, 
+                        'item_id,item_id', $this->upg_from, 1,
                         "item_id <> '{$this->item_id}'" ),
-            'upg_ext_chk' => $this->upg_extend_exp == 1 ? 
+            'upg_ext_chk' => $this->upg_extend_exp == 1 ?
                         'checked="checked"' : '',
             'upg_from' => $this->upg_from,
             'upg_price' => sprintf('%.2f', $this->upg_price),
@@ -589,7 +587,7 @@ class SubscriptionProduct
             $reg_radio      => 'checked="checked"',
             'trial_days'    => $trial_days,
         ) );
- 
+
         if (!$this->isUsed()) {
             $T->set_var('candelete', 'true');
         }
@@ -634,7 +632,7 @@ class SubscriptionProduct
     {
         global $_TABLES, $_CONF, $_USER, $_CONF_SUBSCR, $LANG_SUBSCR;
 
-        $status = LGLIB_invokeService('paypal', 'getCurrency', array(), 
+        $status = LGLIB_invokeService('paypal', 'getCurrency', array(),
             $output, $svc_msg);
         if ($status == PLG_RET_OK) {
             $currency = $output;
@@ -654,7 +652,7 @@ class SubscriptionProduct
         if (!COM_isAnonUser()) {
             $sql = "SELECT expiration,
                 UNIX_TIMESTAMP(expiration) as exp_date,
-                UNIX_TIMESTAMP(expiration - INTERVAL 
+                UNIX_TIMESTAMP(expiration - INTERVAL
                         {$_CONF_SUBSCR['early_renewal']} DAY) AS early_renewal,
                 UNIX_TIMESTAMP(expiration + INTERVAL
                         {$_CONF_SUBSCR['grace_days']} DAY) AS late_renewal
@@ -666,7 +664,7 @@ class SubscriptionProduct
                 $dt = new \Date($A['exp_date'], $_CONF['timezone']);
                 $T->set_var('exp_date', $dt->Format($_CONF['shortdate']));
                 $tm = time();
-                if ($A['early_renewal'] < $tm || 
+                if ($A['early_renewal'] < $tm ||
                     ($A['late_renewal'] > $tm && $A['exp_date'] <= $tm)) {
                     $T->set_var('renew_now', 'true');
                 }
@@ -748,11 +746,35 @@ class SubscriptionProduct
     *
     *   @return string      Button code
     */
-    public function MakeButton($btn_type = 'pay_now')
+    public function MakeButton($btn_type = '')
     {
         global $_CONF, $_CONF_DON, $_USER;
 
         $retval = '';
+
+        if (!$this->canBuy()) {
+            return $retval;
+        }
+
+        switch ($btn_type) {
+        case 'cart':
+        case 'add_cart':
+        case 'addcart':
+            $add_cart = true;
+            break;
+        case 'pay_now':
+        case 'paynow':
+            $btn_type = 'pay_now';
+            $add_cart = false;
+        case 'buy_now':
+        case 'buynow':
+            $btn_type = 'buy_now';
+            $add_cart = false;
+            break;
+        default:
+            $btn_type = 'pay_now';
+            $add_cart = true;
+        }
 
         if (SUBSCR_PAYPAL_ENABLED) {
             $vars = array(
@@ -762,12 +784,12 @@ class SubscriptionProduct
                 'amount' => sprintf("%5.2f", (float)$this->price),
                 'no_shipping' => 1,
                 'taxable' => $this->taxable,
-                'btn_type' => 'pay_now',
+                'btn_type' => $btn_type,
                 'quantity' => 1,
-                'add_cart' => true,
+                'add_cart' => $add_cart,
                 'unique' => true,
             );
-            $status = LGLIB_invokeService('paypal', 'genButton', $vars, 
+            $status = LGLIB_invokeService('paypal', 'genButton', $vars,
                     $output, $svc_msg);
             if ($status == PLG_RET_OK && is_array($output)) {
                 foreach ($output as $button) {
@@ -813,12 +835,25 @@ class SubscriptionProduct
     */
     public function canBuy()
     {
-        global $_GROUPS, $_USER;
+        global $_GROUPS, $_USER, $_CONF;
 
         $retval = false;
         if ($this->item_id != '') {
-            if (in_array($this->grp_access, $_GROUPS))
+            if (in_array($this->grp_access, $_GROUPS)) {
                 $retval = true;
+            }
+            USES_subscription_class_subscription();
+            $mySubs = Subscription::getSubscriptions($_USER['uid']);
+            if (isset($mySubs[$this->item_id])) {
+                $d = new \Date($mySubs[$this->item_id]->expiration);
+                $exp_ts = $d->toUnix();
+                $exp_format = $d->format($_CONF['shortdate']);
+                 if ($this->early_renewal > 0) {
+                    $renew_ts = $exp_ts - ($this->early_renewal * 86400);
+                    if ($renew_ts > date('U'))
+                        $retval = false;
+                }
+            }
         }
         return $retval;
     }
@@ -885,12 +920,11 @@ class SubscriptionProduct
         case 1:
             // Finally, update this account
             $args['uid'] = $uid;
-            return LGLIB_invokeService('profile', 'setSysValues', $args, 
+            return LGLIB_invokeService('profile', 'setSysValues', $args,
                         $output, $svc_msg);
         }
     }
 
-}   // class SubscriptionProduct
-
+}   // class Product
 
 ?>

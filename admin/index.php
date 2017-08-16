@@ -322,7 +322,7 @@ function product_getListField($fieldname, $fieldvalue, $A, $icon_arr)
         break;
 
     case 'delete':
-        if (!SubscriptionProduct::isUsed($A['item_id'])) {
+        if (!Product::isUsed($A['item_id'])) {
             $retval .= COM_createLink(
                 '<i class="' . SUB_getIcon('trash', 'danger') . '"></i>',
                 SUBSCR_ADMIN_URL . 
@@ -440,7 +440,7 @@ $content = '';      // initialize variable for page content
 switch ($action) {
 case 'saveproduct':
     USES_subscription_class_product();
-    $S = new SubscriptionProduct($item_id);
+    $S = new Product($item_id);
     $status = $S->Save($_POST);
     if ($status) {
         $view = 'products';
@@ -454,7 +454,7 @@ case 'saveproduct':
 
 case 'deleteproduct':
     USES_subscription_class_product();
-    $S = new SubscriptionProduct($item_id);
+    $S = new Product($item_id);
     $S->Delete();
     $view = 'products';
     break;
@@ -514,7 +514,7 @@ default:
 switch ($view) {
 case 'editproduct':
     USES_subscription_class_product();
-    $P = new SubscriptionProduct($item_id);
+    $P = new Product($item_id);
     if (isset($_POST['short_description'])) {
         // Pick a field.  If it exists, then this is probably a rejected save
         $P->SetVars($_POST);

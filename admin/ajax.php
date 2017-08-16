@@ -26,7 +26,7 @@ case 'toggleEnabled':
     switch ($_POST['type']) {
     case 'subscription':
         USES_subscription_class_product();
-        $newval = SubscriptionProduct::toggleEnabled($_REQUEST['oldval'], $_REQUEST['id']);
+        $newval = Product::toggleEnabled($_REQUEST['oldval'], $_REQUEST['id']);
         if ($newval != $_REQUEST['oldval']) {
             $message = sprintf($LANG_SUBSCR['msg_toggle'],
                 $newval ? $LANG_SUBSCR['enabled'] : $LANG_SUBSCR['disabled']);

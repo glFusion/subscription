@@ -8,7 +8,7 @@
 *   @copyright  Copyright (c) 2011 Lee Garner <lee@leegarner.com>
 *   @package    subscription
 *   @version    0.1.3
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -96,7 +96,7 @@ function service_productinfo_subscription($A, &$output, &$svc_msg)
     if (isset($A[1]) && !empty($A[1])) {
         $A[1] = COM_sanitizeID($A[1]);
         $sql = "SELECT item_id, short_description, description, price, upg_from, upg_price
-                FROM {$_TABLES['subscr_products']} 
+                FROM {$_TABLES['subscr_products']}
                 WHERE item_id='{$A[1]}'";
         // Suppress sql errors to avoid breaking the IPN process, but log
         // them for review
@@ -111,7 +111,7 @@ function service_productinfo_subscription($A, &$output, &$svc_msg)
             $output['short_description'] = $info['short_description'];
             $output['name'] = $info['short_description'];
             $output['description'] = $info['description'];
-            //if (isset($custom['sub_type']) && 
+            //if (isset($custom['sub_type']) &&
             //        $custom['sub_type'] == 'upgrade' &&
             if (isset($A[2]) && $A[2] == 'upgrade' &&
                     !empty($info['upg_from']) &&
@@ -273,7 +273,7 @@ function service_getproducts_subscription($args, &$output, &$svc_msg)
         return PLG_RET_ERROR;
 
     USES_subscription_class_product();
-    $P = new \Subscription\SubscriptionProduct();
+    $P = new \Subscription\Product();
 
     while ($A = DB_fetchArray($result)) {
         $P->Read($A['item_id']);

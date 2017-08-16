@@ -320,15 +320,17 @@ function plugin_autotags_subscription($op, $content = '', $autotag = '')
         $option = COM_applyFilter($autotag['parm1']);
         switch ($option) {
         case 'buynow':
-            // tag: [subscripton:buynow product_id]
+        case 'buy_now':
+        case 'cart':
+        case 'add_cart':
+            // tag: [subscription:buynow product_id]
             USES_subscription_class_product();
-            $P = new \Subscription\SubscriptionProduct($autotag['parm2']);
+            $P = new \Subscription\Product($autotag['parm2']);
             if ($P->canBuy()) {
-                $content = $P->MakeButton();
+                $content = $P->MakeButton($option);
             }
             break;
-        } // switch($option)
-
+        }
         $retval = str_replace($autotag['tagstr'],$HTML,$content);
         break;
 
@@ -339,7 +341,6 @@ function plugin_autotags_subscription($op, $content = '', $autotag = '')
     }   // switch ($op)
 
     return $retval;
-
 }
 
 
@@ -464,8 +465,8 @@ function phpblock_subscription_subscribe()
         return '';
 
     USES_subscription_class_product();
-    $T = new Template(SUBSCR_PI_PATH . '/templates');
-    $P = new \Subscription\SubscriptionProduct();
+    $T = new \Template(SUBSCR_PI_PATH . '/templates');
+    $P = new \Subscription\Product();
 
     $i = 0;
     while ($row = DB_fetchArray($r, false)) {
@@ -522,7 +523,7 @@ function plugin_profilevariablesdisplay_subscription($uid, &$T)
             WHERE s.uid = $uid";
     $res = DB_query($sql);
     if ($res && DB_numRows($res) > 0) {
-        $LT = new Template(SUBSCR_PI_PATH . '/templates/');
+        $LT = new \Template(SUBSCR_PI_PATH . '/templates/');
         $LT->set_file(array(
             'block' => 'profileblock.thtml',
         ));
@@ -709,7 +710,7 @@ function SUBSCR_notifyExpiration()
     $r = DB_query($sql);
     if (!$r)
         return;
-   
+  
     $template_base = SUBSCR_PI_PATH . '/templates/notify';
 
     while ($row = DB_fetchArray($r, false)) {
@@ -717,7 +718,7 @@ function SUBSCR_notifyExpiration()
         $email = DB_getItem($_TABLES['users'], 'email', "uid={$row['uid']}");
         //$language = DB_getItem($_TABLES['users'], 'language', "uid={$row['uid']}");
 
-        // Include the owner's language, if possible. 
+        // Include the owner's language, if possible.
         // Fallback to site language.
         //$LANG = plugin_loadlanguage_classifieds(array($language, $_CONF['language']));
 
@@ -727,7 +728,7 @@ function SUBSCR_notifyExpiration()
             $template_dir = "$template_base/english";
         }*/
 
-        $T = new Template($template_base);
+        $T = new \Template($template_base);
         $T->set_file('message', 'expiration.thtml');
         $T->set_var(array(
             'site_name'     => $_CONF['site_name'],

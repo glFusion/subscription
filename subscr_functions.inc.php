@@ -6,11 +6,10 @@
 *   @copyright  Copyright (c) 2010-2016 Lee Garner
 *   @package    subscription
 *   @version    0.2.2
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
-
 namespace subscription;
 
 /**
@@ -20,7 +19,7 @@ namespace subscription;
 */
 function SUBSCR_ProductList()
 {
-    global $_TABLES, $_CONF, $_CONF_SUBSCR, $LANG_SUBSCR, $_USER, $_PLUGINS, 
+    global $_TABLES, $_CONF, $_CONF_SUBSCR, $LANG_SUBSCR, $_USER, $_PLUGINS,
             $_IMAGE_TYPE;
 
     if (!SUBSCR_PAYPAL_ENABLED) {
@@ -79,14 +78,13 @@ function SUBSCR_ProductList()
     $T->set_block('prodlist', 'ProductBlock', 'PBlock');
 
     while ($A = DB_fetchArray($result)) {
-        $P = new SubscriptionProduct($A['item_id']);
+        $P = new Product($A['item_id']);
         $description = $P->description;
         $price = (float)$P->price;
         $lang_price = $LANG_SUBSCR['price'];
 
         $ok_to_buy = true;
         if (isset($mySubs[$P->item_id])) {
-        //if (!empty($mySub['expiration']) && $mySub['item_id'] == $P->item_id) {
             $d = new \Date($mySubs[$P->item_id]->expiration);
             $exp_ts = $d->toUnix();
             $exp_format = $d->format($_CONF['shortdate']);
@@ -97,15 +95,6 @@ function SUBSCR_ProductList()
                 if ($renew_ts > date('U')) $ok_to_buy = false;
             }
         }
-        /*if ($P->upg_from == $mySub['item_id'] && $P->upg_price != '') {
-            $price = (float)$P->upg_price;
-            $lang_price = $LANG_SUBSCR['upg_price'];
-            $options['sub_type'] = 'upgrade';
-            $item_option = ':upgrade';
-        } else {
-            $options['sub_type'] = 'new';
-            $item_option = ':new';
-        }*/
 
         // Create variable array for purchase buttons
         $vars = array(
@@ -152,7 +141,7 @@ function SUBSCR_ProductList()
 /**
  *  Display a popup text message
  *
- *  @param string $msg Text to display 
+ *  @param string $msg Text to display
  */
 function SUBSCR_popupMsg($msg)
 {
@@ -214,7 +203,7 @@ function XSUBSCR_callbackCatOptionList($A, $sel=0, $parent_id=0, $txt='')
         $txt = $A['cat_name'];
 
     /*if (SEC_hasAccess($row['owner_id'], $row['group_id'],
-                $row['perm_owner'], $row['perm_group'], 
+                $row['perm_owner'], $row['perm_group'],
                 $row['perm_members'], $row['perm_anon']) < 3) {
             $disabled = 'disabled="true"';
     } else {
