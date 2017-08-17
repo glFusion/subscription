@@ -595,7 +595,6 @@ class Product
         $retval .= $T->parse('output', 'product');
         $retval .= COM_endBlock();
         return $retval;
-
     }   // function Edit()
 
 
@@ -761,6 +760,7 @@ class Product
         case 'add_cart':
         case 'addcart':
             $add_cart = true;
+            $btn_type = '';
             break;
         case 'pay_now':
         case 'paynow':
@@ -772,6 +772,7 @@ class Product
             $add_cart = false;
             break;
         default:
+            // Generate both buttons by default
             $btn_type = 'pay_now';
             $add_cart = true;
         }
@@ -786,9 +787,11 @@ class Product
                 'taxable' => $this->taxable,
                 'btn_type' => $btn_type,
                 'quantity' => 1,
-                'add_cart' => $add_cart,
                 'unique' => true,
             );
+            if ($add_cart) {
+                $vars['add_cart'] = $add_cart;
+            }
             $status = LGLIB_invokeService('paypal', 'genButton', $vars,
                     $output, $svc_msg);
             if ($status == PLG_RET_OK && is_array($output)) {
@@ -835,7 +838,7 @@ class Product
     */
     public function canBuy()
     {
-        global $_GROUPS, $_USER, $_CONF;
+        global $_GROUPS, $_USER, $_CONF_SUBSCR;
 
         $retval = false;
         if ($this->item_id != '') {
@@ -847,10 +850,9 @@ class Product
             if (isset($mySubs[$this->item_id])) {
                 $d = new \Date($mySubs[$this->item_id]->expiration);
                 $exp_ts = $d->toUnix();
-                $exp_format = $d->format($_CONF['shortdate']);
                  if ($this->early_renewal > 0) {
                     $renew_ts = $exp_ts - ($this->early_renewal * 86400);
-                    if ($renew_ts > date('U'))
+                    if ($renew_ts > $_CONF_SUBSCR['_dt']->toUnix())
                         $retval = false;
                 }
             }

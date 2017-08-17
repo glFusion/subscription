@@ -60,8 +60,8 @@ if (is_array($_PLUGINS) && in_array('paypal', $_PLUGINS)) {
 }
 
 // Save the current sql datetime for use throughout the plugin
-$dt = new Date('now', $_CONF['timezone']);
-$_CONF_SUBSCR['now'] = $dt->toMySQL(true);
+$_CONF_SUBSCR['_dt'] = new Date('now', $_CONF['timezone']);
+$_CONF_SUBSCR['now'] = $_CONF_SUBSCR['_dt']->toMySQL(true);
 
 /**
 * Language file Include
@@ -327,11 +327,11 @@ function plugin_autotags_subscription($op, $content = '', $autotag = '')
             USES_subscription_class_product();
             $P = new \Subscription\Product($autotag['parm2']);
             if ($P->canBuy()) {
-                $content = $P->MakeButton($option);
+                $HTML = $P->MakeButton($option);
             }
             break;
         }
-        $retval = str_replace($autotag['tagstr'],$HTML,$content);
+        $retval = str_replace($autotag['tagstr'], $HTML, $content);
         break;
 
     default:
