@@ -144,6 +144,13 @@ function update_duration_type(opt)
 </p>
 
 <p>
+  <label for="f_trial_days">{$LANG_SUBSCR['trial_days']}:
+    <span id="trial_days" class="tooltip_cfg tooltipstered"></span> 
+  </label>
+  <input type="text" name="trial_days" value="{trial_days}" id="f_trial_days" />
+</p>
+
+<p>
   <label for="f_grace_days">{$LANG_SUBSCR['grace_days']}:
     <span id="grace_days" class="tooltip_cfg tooltipstered"></span> 
   </label>

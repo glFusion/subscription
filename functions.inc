@@ -710,7 +710,7 @@ function SUBSCR_notifyExpiration()
     $r = DB_query($sql);
     if (!$r)
         return;
-  
+
     $template_base = SUBSCR_PI_PATH . '/templates/notify';
 
     while ($row = DB_fetchArray($r, false)) {
@@ -779,6 +779,7 @@ function plugin_user_delete_subscription($uid)
 /**
 *   Handle a new user registration.
 *   Called by PLG_createUser (glFusion 1.1.5) to handle a new user signup.
+*   Creates an initial trial subscription for any products so configured.
 *
 *   @param  integer $uid    UID of new user.  Already set by glFusion
 */
@@ -801,12 +802,11 @@ function plugin_user_create_subscription($uid = 0)
     $res = DB_query($sql);
     while ($A = DB_fetchArray($res, false)) {
         if ($A['at_registration'] == SUBSCR_REGISTER_TRIAL) {
-            $S->Add($uid, $A['item_id'], $A['trial_days'], 'DAY');
+            $S->Add($uid, $A['item_id'], $A['trial_days'], 'day');
         } else {
             $S->Add($uid, $A['item_id']);
         }
     }
-
 }
 
 

@@ -82,6 +82,7 @@ $LANG_SUBSCR = array(
 'renew_all'     => 'Renew all selected items',
 'grace_days'    => 'Grace Period (days)',
 'early_renewal' => 'Early Renewal (days)',
+'trial_days'    => 'Trial Period (days)',
 'products'      => 'Products',
 'product'       => 'Product',
 'new_product'   => 'New Product',

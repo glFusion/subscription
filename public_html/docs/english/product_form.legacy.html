@@ -1,0 +1,206 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1" />
+  <link href="../../../docs/docstyle.css" type="text/css" rel="stylesheet" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Subscription Plugin - glFusion CMS</title>
+</head>
+
+<body style="direction: ltr;">
+<div id="gl_container_fluid">
+  <div id="gl_header"><span style="color: rgb(255, 255, 255); float: left; padding-left: 10px; padding-top: 5px; vertical-align: middle;">glFusion Documentation Project
+  </span><a style="float: right; padding-right: 10px; padding-top: 5px; vertical-align: middle;" href="http://www.glfusion.org/wiki/doku.php">glFusion Wiki</a>
+</div>
+<div id="gl_wrapper">
+<div class="body-container">
+<h1><a name="advt_plugin" id="advt_plugin">Subscription Plugin</a></h1>
+
+<style type="text/css">
+td { vertical-align: top; }
+</style>
+
+<div class="level1">
+
+<table class="inline">
+  <tbody>
+    <tr>
+      <th class="col0 leftalign" colspan="2">Product Edit Form</th>
+    </tr>
+
+    <tr class="row0">
+      <th class="col0 leftalign">Option </th>
+      <th class="col1 leftalign">Description </th>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_item_id"></a>Product ID
+      </td>
+      <td class="col1 leftalign">
+        Enter a product ID for this product. This should be short, perhaps one word, and must be unique. If left blank, or not unique, then an ID will be automatically created.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_duration"></a>Duration Period</td>
+      <td class="col1 leftalign">
+        Select the duration type, either "Fixed" or a time period.
+If "Fixed" is selected, enter the expiration date in the field to the right.
+If a period of time is selected, enter the number of periods in the field provided.  For example, you may select "Month" and enter "6" to create a 6-month subscription.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_price"></a>Price
+      </td>
+      <td class="col1 leftalign">
+        Enter the price for this subscription.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_addgroup"></a>Subscription Group
+      </td>
+      <td class="col1 leftalign">
+        Select the glFusion group to which subscribers will be automatically added.  This group can then be granted additional privileges.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_short_description"></a>Short Description
+      </td>
+      <td class="col1 leftalign">
+        Enter a short description for this product.  This will be used in the product listing.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_description"></a>Description
+      </td>
+      <td class="col1 leftalign">
+        Enter a description for this product.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_enabled"></a>Enabled?
+      </td>
+      <td class="col1 leftalign">
+        Check this box to enable this product.  The subscription product will not be available for purchase if it is not enabled.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_show_in_block"></a>Show in Block?
+      </td>
+      <td class="col1 leftalign">
+        Check this box to have this product shown in a "Subscribe" block.  This will only be shown to users who are not subscribed already, or whose subscription will be expiring within <i>early_renewal</i> days.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_taxable"></a>Taxable?
+      </td>
+      <td class="col1 leftalign">
+        If this subscription product is subject to sales tax, check this box.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_at_registration"></a>At Registration
+      </td>
+      <td class="col1 leftalign">
+        Select the action to be taken when a new user signs up.<ul>
+        <li><b>None</b> - No action</li>
+        <li><b>Automatic</b> - The new user will be automatically subscribed</li>
+        <li><b>Trial</b> - The new user will be given a trial subscription for the specified number of days.</li>
+        </ul>
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_trial_days"></a>Trial Days
+      </td>
+      <td class="col1 leftalign">
+        If a trial subscription at registration is enabled, enter the number of days for the trial. The trial subscription expires normally after this period and the subscriber can purchase an extension.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_grace_days"></a>Grace Period
+      </td>
+      <td class="col1 leftalign">
+        Enter the number of days after expiration that the subscription will remain active.  This is intended to offer a short period during which the subscriber may renew without loss of service.  Enter "0" to have the subscription terminated as soon as it expires.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_early_renewal"></a>Early Renewal
+      </td>
+      <td class="col1 leftalign">
+        Enter the maximum number of days before a subscription expires that it may be renewed.  In order to avoid loss of service, this should be set to at least a few days prior to expiration.
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_purch_access"></a>Purchase Allowed By
+      </td>
+      <td class="col1 leftalign">
+        Select the user group that is allowed to purchase this subscription. Typically this will be &quot;Logged-In Users&quot;
+      </td>
+    </tr>
+
+    <tr class="row0">
+      <td class="col0 leftalign">
+        <a name="desc_upg_from"></a>Upgrade From</td>
+      <td class="col1 leftalign">
+        If this product is an upgrade, or can be an upgrade from another product, select that product here.
+<p>If there is an "upgrade price", enter that in the space provided.  If this amount exists, current subscribers to the existing product will be offered the upgrade price while non-subscribers are offered the regular price entered above.</p>
+<p>Optionally, upgrading a subscription may extend the subscription period to the same date as if the product was purchased normally.</p>
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        <a name="desc_prf_update"></a>Updates Profile</td>
+      <td class="col1 leftalign">
+        If the Profile plugin is installed and enabled, subscriptions can update the Member Type and Expiration Date fields in the user's profile record.  This data can then be displayed on membership lists.
+<p>You can specify that the profile data is left unchanged, only the buyer&apos;s account is updated, or the buyer and all child accounts are updated.</p>
+<p><ul><li><b>None</b> - No accounts are updated.</li>
+<li><b>Buyer Only</b> - The buyer's profile information is updated.</li>
+<li><b>Buyer and Children</b> - The buyer's profile information is updated, along with any accounts that indicate the buyer as a &quot;parent&quot;.</li>
+<li><b>All Related</b> - The buyer, buyer&apos;s parent and children, and buyer&apos;s &quot;siblings&quot; will be updated.  In other words, this includes the &quot;Buyer and Children&quot; as above, plus the children of the buyer&apos;s parent.</li>
+</ul></p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <a name="desc_prf_type"></a>Profile Membertype</td>
+      <td class="col1 leftalign">
+        If the "Updates Profile" checkbox is selected, you can enter an optional short text field to indicate the membership type, such as "Single", "Family", "Regular", "Premium", etc.  This string will be displayed in the membership lists.
+If nothing is entered here, the product's name will be added to the profile record.
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p></p>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>
