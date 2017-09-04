@@ -889,13 +889,11 @@ function plugin_getiteminfo_subscription($id, $what, $uid=0, $options=array())
     $fields = implode(',', $fields);
     $retval = array();
     $sql = "SELECT $fields FROM {$_TABLES['subscr_products']} ";
-    if ($id == '*') {
-        $where = '';
-    } else {
-        $where = " WHERE (item_id = '" . DB_escapeString($id) . "')";
+    if ($id != '*') {
+        $sql .= " WHERE (item_id = '" . DB_escapeString($id) . "')";
     }
     //echo $sql;die;
-    $res = DB_query($sql . $where);
+    $res = DB_query($sql);
     while ($A = DB_fetchArray($res, false)) {
         foreach ($properties as $p) {
             switch ($p) {

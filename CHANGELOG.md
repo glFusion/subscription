@@ -1,10 +1,13 @@
 # Changelog for the Subscription plugin for glFusion
 
 ## 0.2.2
+Release TBD
+- Add optional return_url config item
 - Enable namespace
 - Require glFusion 1.6+
 
 ## 0.2.1
+Released 2016-11-16
 - Fix ajax toggle for product enabled status
 - Update admin subscription list view
 - Match sql to current schema

@@ -110,6 +110,9 @@ function SUBSCR_ProductList()
             'add_cart'      => 'true',
             'unique'        => true,
         );
+        if (!empty($_CONF_SUBSCR['return_url'])) {
+            $vars['return'] = $_CONF_SUBSCR['return_url'];
+        }
 
         $buttons = '';
         if ($ok_to_buy) {

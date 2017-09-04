@@ -62,7 +62,7 @@ switch ($view) {
 case 'detail':
     if (!empty($id)) {
         USES_subscription_class_product();
-        $P = new SubscriptionProduct($id);
+        $P = new Product($id);
         if ($P->hasErrors()) {
             $display .= COM_showMessageText($P->PrintErrors(), '', true);
         } else {

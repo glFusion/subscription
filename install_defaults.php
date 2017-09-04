@@ -46,7 +46,7 @@ $_SUBSCR_DEFAULTS['show_in_block'] = 0;
 $_SUBSCR_DEFAULTS['enabled'] = 1;
 $_SUBSCR_DEFAULTS['taxable'] = 0;
 $_SUBSCR_DEFAULTS['onmenu'] = 0;    // Show on site menu?
-
+$_SUBSCR_DEFAULTE['return_url'] = '';   // Optional paypal return override
 
 /**
 *   Initialize Subscriptions plugin configuration
@@ -91,6 +91,9 @@ function plugin_initconfig_subscription($group_id = 0)
 
         $c->add('onmenu', $_SUBSCR_DEFAULTS['onmenu'],
                 'select', 0, 0, 3, 70, true, $_CONF_SUBSCR['pi_name']);
+
+        $c->add('return_url', $_SUBSCR_DEFAULTS['return_url'],
+                'text', 0, 0, 0, 80, true, $_CONF_SUBSCR['pi_name']);
 
         // Product defaults
         $c->add('fs_defaults', NULL, 'fieldset', 0, 10, NULL, 0, true, 

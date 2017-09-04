@@ -147,8 +147,9 @@ $LANG_confignames['subscription'] = array(
     'show_in_block' => 'Show product in block?',
     'enabled'       => 'Product is enabled?',
     'taxable'       => 'Product is taxable?',
-    'displayblocks'  => 'Display glFusion Blocks',
-    'onmenu' => 'Show on default glFusion menu?',
+    'displayblocks' => 'Display glFusion Blocks',
+    'onmenu'        => 'Show on default glFusion menu?',
+    'return_url'    => 'Optional after-payment URL',
 );
 
 $LANG_configsubgroups['subscription'] = array(

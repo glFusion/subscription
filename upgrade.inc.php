@@ -32,10 +32,17 @@ function SUBSCR_do_upgrade()
     global $_TABLES, $_CONF, $_CONF_SUBSCR, $_SUBSCR_DEFAULTS, $_PLUGIN_INFO;
 
     if (isset($_PLUGIN_INFO[$_CONF_SUBSCR['pi_name']])) {
-        $current_ver = $_PLUGIN_INFO[$_CONF_SUBSCR['pi_name']];
+        if (is_array($_PLUGIN_INFO[$_CONF_SUBSCR['pi_name']])) {
+            // glFusion > 1.6.5
+            $current_ver = $_PLUGIN_INFO[$_CONF_SUBSCR['pi_name']]['pi_version'];
+        } else {
+            // legacy
+            $current_ver = $_PLUGIN_INFO[$_CONF_SUBSCR['pi_name']];
+        }
     } else {
         return false;
     }
+    $installed_ver = plugin_chkVersion_subscription();
 
     $c = config::get_instance();
     $have_config = ($c->group_exists($_CONF_SUBSCR['pi_name'])) ? 1 : 0;
@@ -85,8 +92,30 @@ function SUBSCR_do_upgrade()
 
     if (!COM_checkVersion($current_ver, '0.2.1')) {
         $current_ver = '0.2.1';
+        if ($have_config) {
+            $c->add('return_url', $_SUBSCR_DEFAULTS['return_url'],
+                'text', 0, 0, 0, 80, true, $_CONF_SUBSCR['pi_name']);
+        }
         if (!SUBSCR_do_upgrade_sql($current_ver)) return false;
         if (!SUBSCR_do_set_version($current_ver)) return false;
+    }
+
+    if (!COM_checkVersion($current_ver, '0.2.2')) {
+        $current_ver = '0.2.2';
+        if ($have_config) {
+            $c->add('return_url', $_SUBSCR_DEFAULTS['return_url'],
+                'text', 0, 0, 0, 80, true, $_CONF_SUBSCR['pi_name']);
+        }
+        if (!SUBSCR_do_upgrade_sql($current_ver)) return false;
+        if (!SUBSCR_do_set_version($current_ver)) return false;
+    }
+
+    // Final version update to catch updates that don't go through
+    // any of the update functions, e.g. code-only updates
+    if (!COM_checkVersion($current_ver, $installed_ver)) {
+        if (!SUBSCR_do_set_version($installed_ver)) {
+            return false;
+        }
     }
 
     return true;
@@ -108,8 +137,9 @@ function SUBSCR_do_upgrade_sql($version='')
     global $_TABLES, $_CONF_SUBSCR, $SUBSCR_UPGRADE;
 
     // If no sql statements passed in, return success
-    if (!is_array($SUBSCR_UPGRADE[$version])) {
-        return 0;
+    if (!isset($_SUBSCR_UPGRADE[$version]) ||
+            is_array($SUBSCR_UPGRADE[$version])) {
+        return true;
     }
 
     // Execute SQL now to perform the upgrade

@@ -747,7 +747,7 @@ class Product
     */
     public function MakeButton($btn_type = '')
     {
-        global $_CONF, $_CONF_DON, $_USER;
+        global $_CONF, $_CONF_SUBSCR, $_USER;
 
         $retval = '';
 
@@ -791,6 +791,9 @@ class Product
             );
             if ($add_cart) {
                 $vars['add_cart'] = $add_cart;
+            }
+            if (!empty($_CONF_SUBSCR['return_url'])) {
+                $vars['return'] = $_CONF_SUBSCR['return_url'];
             }
             $status = LGLIB_invokeService('paypal', 'genButton', $vars,
                     $output, $svc_msg);
