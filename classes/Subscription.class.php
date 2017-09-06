@@ -709,7 +709,7 @@ class Subscription
             $uid = $_USER['uid'];
         }
         $uid = (int)$uid;
-        $sql = "SELECT id, item_id FROM {$_TABLES['subscr_subscriptions']}
+        $sql = "SELECT * FROM {$_TABLES['subscr_subscriptions']}
                 WHERE uid = $uid";
         if (is_array($status)) {
             $status = array_map('intval', $status);
@@ -720,7 +720,8 @@ class Subscription
         }
         $res = DB_query($sql);
         while ($A = DB_fetchArray($res, false)) {
-            $retval[$A['item_id']] = new Subscription($A['id']);
+            $retval[$A['item_id']] = new Subscription();
+            $retval[$A['item_id']]->SetVars($A);
         }
         return $retval;
     }
