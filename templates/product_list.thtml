@@ -11,7 +11,7 @@
 <!-- BEGIN ProductBlock -->
 <div class="subProdListItem">
   <div class="subProdListItemInfo">
-    <h2>{item_id}</h2>
+    <h2><a href="{site_url}/subscription/index.php?view=detail&item_id={item_id}">{item_id}</a></h2>
     {description}
 {!if exp_msg}
     <div class="subProdListItemExpMsg">{exp_msg}</div>

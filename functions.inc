@@ -842,7 +842,7 @@ function plugin_user_move_subscription($origUID, $destUID)
 *   Provides the getItemInfo function for subscription products
 *
 *   @param  string  $id         Product ID
-*   @param  string  $fields     Comma-separated list of fields to return
+*   @param  string  $what       Comma-separated list of fields to return
 *   @param  integer $uid        User ID
 *   @param  array   $options    Not used
 *   @return array           Array of product information
