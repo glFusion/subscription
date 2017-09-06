@@ -10,7 +10,7 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
-namespace subscription;
+namespace Subscription;
 
 /**
 *   Display the subscription products available.
@@ -19,8 +19,7 @@ namespace subscription;
 */
 function SUBSCR_ProductList()
 {
-    global $_TABLES, $_CONF, $_CONF_SUBSCR, $LANG_SUBSCR, $_USER, $_PLUGINS,
-            $_IMAGE_TYPE;
+    global $_CONF, $_CONF_SUBSCR, $LANG_SUBSCR, $_USER;
 
     if (!SUBSCR_PAYPAL_ENABLED) {
         return "PayPal is required";
@@ -38,33 +37,9 @@ function SUBSCR_ProductList()
     ) );
 
     $mySubs = Subscription::getSubscriptions($_USER['uid']);
-    /*if (!empty($mySubs)) {
-        // Let current members know when they expire
-        $str = '<ul>';
-        foreach ($mySubs as $SubObj) {
-            $dt = new \Date($SubObj->expiration, $_CONF['timezone']);
-            $str .= '<li>' . $SubObj->Plan->item_id . '&nbsp;&nbsp;' .
-                $LANG_SUBSCR['expires'] . ':&nbsp;' . $dt->format($_CONF['shortdate']) . '</li>';
-        }
-        $str .= '</ul>';
-        $T->set_var('current_subs', $str);
-    }*/
+    $Products = Product::getProducts();
 
-    $options = array();
-
-    // Create product template
-    // Select products where the user either isn't subscribed, or is
-    // subscribed and the expiration is within early_renewal days from now.
-    // FIXME: this doesn't pick up non-subscribed users
-    $sql = "SELECT p.item_id
-            FROM {$_TABLES['subscr_products']} p
-            WHERE p.enabled = 1 ";
-    if (!SUBSCR_isAdmin()) {
-        $sql .= SEC_buildAccessSql();
-    }
-    //COM_errorLog($sql);
-    $result = DB_query($sql);
-    if (!$result || DB_numRows($result) < 1) {
+    if (count($Products) < 1) {
         $T->parse('output', 'prodlist');
         $retval = $T->finish($T->get_var('output', 'prodlist'));
         $retval .= '<p />' . $LANG_SUBSCR['no_products_avail'];
@@ -73,12 +48,10 @@ function SUBSCR_ProductList()
 
     $status = LGLIB_invokeService('paypal', 'getCurrency', array(),
         $currency, $svc_msg);
-
     if (empty($currency)) $currency = 'USD';
-    $T->set_block('prodlist', 'ProductBlock', 'PBlock');
 
-    while ($A = DB_fetchArray($result)) {
-        $P = new Product($A['item_id']);
+    $T->set_block('prodlist', 'ProductBlock', 'PBlock');
+    foreach ($Products as $P) {
         $description = $P->description;
         $price = (float)$P->price;
         $lang_price = $LANG_SUBSCR['price'];
@@ -92,35 +65,13 @@ function SUBSCR_ProductList()
                 "<br /><i>{$LANG_SUBSCR['your_sub_expires']} $exp_format</i>";
             if ($P->early_renewal > 0) {
                 $renew_ts = $exp_ts - ($P->early_renewal * 86400);
-                if ($renew_ts > date('U')) $ok_to_buy = false;
+                if ($renew_ts > $_CONF_SUBSCR['_dt']->toUnix())
+                    $ok_to_buy = false;
             }
         }
 
-        // Create variable array for purchase buttons
-        $vars = array(
-            'item_number'   => 'subscription:' . $P->item_id . $item_option,
-            'item_name'     => $P->short_description,
-            'short_description' => $P->short_description,
-            'amount'        => $price,
-            'quantity'      => 1,
-            'taxable'       => $P->taxable,
-            //'return' => SUBSCR_URL . '/index.php?action=ppthanks',
-            'options'       => $options,
-            'btn_type'      => 'pay_now',
-            'add_cart'      => 'true',
-            'unique'        => true,
-        );
-        if (!empty($_CONF_SUBSCR['return_url'])) {
-            $vars['return'] = $_CONF_SUBSCR['return_url'];
-        }
-
-        $buttons = '';
         if ($ok_to_buy) {
-            $status = LGLIB_invokeService('paypal', 'genButton', $vars,
-                    $output, $svc_msg);
-            if ($status == PLG_RET_OK) {
-                $buttons = implode('<br />', $output);
-            }
+            $buttons = $P->MakeButton();
         }
 
         $T->set_var(array(
@@ -153,7 +104,6 @@ function SUBSCR_popupMsg($msg)
     $msg = htmlspecialchars($msg);
     $popup = COM_showMessageText($msg);
     return $popup;
-
 }
 
 
@@ -217,7 +167,6 @@ function XSUBSCR_callbackCatOptionList($A, $sel=0, $parent_id=0, $txt='')
     $str .= $txt;
     $str .= "</option>\n";
     return $str;
-
 }
 
 
@@ -246,9 +195,7 @@ function SUBSCR_siteHeader($title='', $meta='')
         $retval .= COM_siteHeader('menu', $title, $meta);
         break;
     }
-
     return $retval;
-
 }
 
 
@@ -275,9 +222,7 @@ function SUBSCR_siteFooter()
         $retval .= COM_siteFooter(true);
         break;
     }
-
     return $retval;
-
 }
 
 ?>

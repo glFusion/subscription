@@ -930,6 +930,32 @@ class Product
         }
     }
 
+
+    /**
+    *   Get all the products that are enabled (by default).
+    *
+    *   @param  integer $enabled    1 or 0
+    *   @return array       Array of product objects
+    */
+    public static function getProducts($enabled = 1)
+    {
+        global $_TABLES;
+
+        $retval = array();
+        $enabled = $enabled == 1 ? 1 : 0;
+        $sql = "SELECT * FROM {$_TABLES['subscr_products']}
+                WHERE enabled = $enabled";
+        if (!SUBSCR_isAdmin()) {
+            $sql .= SEC_buildAccessSql();
+        }
+        $result = DB_query($sql);
+        while ($A = DB_fetchArray($result, fals)) {
+            $retval[$A['item_id']] = new self();
+            $retval[$A['item_id']]->SetVars($A);
+        }
+        return $retval;
+    }
+
 }   // class Product
 
 ?>
