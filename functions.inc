@@ -355,16 +355,44 @@ function plugin_autotags_subscription($op, $content = '', $autotag = '')
 */
 function plugin_enablestatechange_subscription($enabled)
 {
-    global $_TABLES;
+    global $_TABLES, $_PLUGINS;
 
     $enabled = $enabled == true ? 1 : 0;
-    if ($enabled == 1) return;  // Never automatically enable
 
-    $blockfns = array('phpblock_subscription_');
-    foreach ($blockfns as $blockfn) {
-        DB_query("UPDATE {$_TABLES['blocks']}
+    // If trying to enable the plugin but lgLib is not available,
+    // take no action and return
+    if ($enabled && !in_array('lglib', $_PLUGINS)) {
+        // Re-disable the plugin
+        DB_change($_TABLES['plugins'], 'pi_enabled', 0, 'pi_name', 'subscription');
+        $enabled = 0;
+    }
+
+
+    if ($enabled == 0) {    // Never automatically enable blocks
+        $blockfns = array('phpblock_subscription_');
+        foreach ($blockfns as $blockfn) {
+            DB_query("UPDATE {$_TABLES['blocks']}
                 SET is_enabled=$enabled
                 WHERE phpblockfn LIKE '{$blockfn}%'");
+        }
+    }
+}
+
+
+/**
+*   Receives notification of anothe plugin's deletion
+*
+*   @param  mixed   $id     Item ID
+*   @param  string  $type   Plugin Name
+*/
+function plugin_itemdeleted_subscription($id, $type)
+{
+    global $_TABLES;
+
+    // If the lgLib plugin is disabled or removed, disable thie plugin
+    if ($type == 'lglib' && $id == '*') {
+        plugin_enablestatechange_subscription(false);
+        DB_change($_TABLES['plugins'], 'pi_enabled', 0, 'pi_name', 'subscription');
     }
 }
 
