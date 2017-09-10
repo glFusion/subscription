@@ -2,8 +2,9 @@
 
 ## 0.2.2
 Release TBD
+- Implement class autoloader
 - Add optional return_url config item
-- Enable namespace
+- Implement namespace
 - Require glFusion 1.6+
 
 ## 0.2.1

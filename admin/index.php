@@ -10,7 +10,6 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
-namespace Subscription;
 
 /** Import core glFusion functions */
 require_once('../../../lib-common.php');
@@ -21,7 +20,6 @@ if (!in_array('subscription', $_PLUGINS)) {
 
 USES_subscription_functions();
 USES_lib_admin();
-USES_subscription_class_product();
 
 
 /**
@@ -439,8 +437,7 @@ $content = '';      // initialize variable for page content
 
 switch ($action) {
 case 'saveproduct':
-    USES_subscription_class_product();
-    $S = new Product($item_id);
+    $S = new Subscription\Product($item_id);
     $status = $S->Save($_POST);
     if ($status) {
         $view = 'products';
@@ -453,16 +450,14 @@ case 'saveproduct':
     break;
 
 case 'deleteproduct':
-    USES_subscription_class_product();
-    $S = new Product($item_id);
+    $S = new Subscription\Product($item_id);
     $S->Delete();
     $view = 'products';
     break;
 
 case 'savesubscription':
-    USES_subscription_class_subscription();
     $item_id = isset($_POST['item_id']) ? $_POST['item_id'] : '';
-    $S = new Subscription($item_id);
+    $S = new Subscription\Subscription($item_id);
     if ($S->Save($_POST)) {
         $actionval = $S->item_id;
         $view = 'subscriptions';
@@ -473,18 +468,16 @@ case 'savesubscription':
     break;
 
 case 'deletesubscription':
-    USES_subscription_class_subscription();
-    $S = new Subscription($_POST['id']);
+    $S = new Subscription\Subscription($_POST['id']);
     $S->Delete();
     $view = 'subscriptions';
     break;
 
 case 'cancelbutton_x':
 //case 'delMultiSub':
-    USES_subscription_class_subscription();
     if (isset($_POST['delitem']) && is_array($_POST['delitem'])) {
         foreach ($_POST['delitem'] as $item) {
-            Subscription::Cancel($item);
+            Subscription\Subscription::Cancel($item);
         }
     }
     echo COM_refresh(SUBSCR_ADMIN_URL.'/index.php?subscriptions=' .
@@ -494,8 +487,7 @@ case 'cancelbutton_x':
 case 'renewbutton_x':
     if (isset($_POST['delitem']) && is_array($_POST['delitem']) && 
             !empty($_POST['delitem'])) {
-        USES_subscription_class_subscription();
-        $S = new Subscription();
+        $S = new Subscription\Subscription();
         foreach ($_POST['delitem'] as $item) {
             $S->Read($item);
             $S->Add($S->uid, $S->item_id);
@@ -513,8 +505,7 @@ default:
 // Display the correct page content
 switch ($view) {
 case 'editproduct':
-    USES_subscription_class_product();
-    $P = new Product($item_id);
+    $P = new Subscription\Product($item_id);
     if (isset($_POST['short_description'])) {
         // Pick a field.  If it exists, then this is probably a rejected save
         $P->SetVars($_POST);
@@ -528,9 +519,8 @@ case 'subscriptions':
     break;
 
 case 'editsubscrip':
-    USES_subscription_class_subscription();
     $sub_id = isset($_GET['sub_id']) ? $_GET['sub_id'] : '';
-    $S = new Subscription($sub_id);
+    $S = new Subscription\Subscription($sub_id);
     $content .= SUBSCR_adminMenu($view);
     if ($actionval == 0 && isset($_POST['uid'])) {
         // Pick a field.  If it exists, then this is probably a rejected save

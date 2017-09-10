@@ -10,7 +10,6 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
-namespace Subscription;
 
 /**
 *   Display the subscription products available.
@@ -24,8 +23,6 @@ function SUBSCR_ProductList()
     if (!SUBSCR_PAYPAL_ENABLED) {
         return "PayPal is required";
     }
-    USES_subscription_class_product();
-    USES_subscription_class_subscription();
 
     $T = new \Template(SUBSCR_PI_PATH . '/templates');
     $T->set_file(array(
@@ -36,8 +33,8 @@ function SUBSCR_ProductList()
             'user_id'       => $_USER['uid'],
     ) );
 
-    $mySubs = Subscription::getSubscriptions($_USER['uid']);
-    $Products = Product::getProducts();
+    $mySubs = Subscription\Subscription::getSubscriptions($_USER['uid']);
+    $Products = Subscription\Product::getProducts();
 
     if (count($Products) < 1) {
         $T->parse('output', 'prodlist');

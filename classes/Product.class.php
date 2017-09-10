@@ -848,7 +848,6 @@ class Product
             if (in_array($this->grp_access, $_GROUPS)) {
                 $retval = true;
             }
-            USES_subscription_class_subscription();
             $mySubs = Subscription::getSubscriptions($_USER['uid']);
             if (isset($mySubs[$this->item_id])) {
                 $d = new \Date($mySubs[$this->item_id]->expiration);

@@ -183,9 +183,8 @@ function service_handlePurchase_subscription($args, &$output, &$svc_msg)
     }
 
     COM_errorLog("Processing subscription for user $uid to item {$id[1]}");
-    USES_subscription_class_subscription();
 
-    $S = new \Subscription\Subscription();
+    $S = new Subscription\Subscription();
     $upgrade = isset($id[2]) && $id[2] == 'upgrade' ? true : false;
     $status = $S->Add($uid, $id[1], 0, '', NULL, $upgrade, $ipn_data['txn_id'], $amount);
     return $status == true ? PLG_RET_OK : PLG_RET_ERROR;
@@ -222,8 +221,7 @@ function service_handleRefund_subscription($args, &$output, &$svc_msg)
             array('item_id', 'uid'),
             array($item[1], $uid));
     if (!empty($sub_id)) {
-        USES_subscription_class_subscription();
-        Subscription::Cancel($sub_id, true);
+        Subscription\Subscription::Cancel($sub_id, true);
     }
     return PLG_RET_OK;
 }
@@ -272,8 +270,7 @@ function service_getproducts_subscription($args, &$output, &$svc_msg)
     if (!$result)
         return PLG_RET_ERROR;
 
-    USES_subscription_class_product();
-    $P = new \Subscription\Product();
+    $P = new Subscription\Product();
 
     while ($A = DB_fetchArray($result)) {
         $P->Read($A['item_id']);

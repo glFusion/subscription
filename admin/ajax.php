@@ -10,7 +10,6 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
-namespace Subscription;
 
 /** Include required glFusion common functions */
 require_once '../../../lib-common.php';
@@ -25,8 +24,7 @@ switch ($_POST['action']) {
 case 'toggleEnabled':
     switch ($_POST['type']) {
     case 'subscription':
-        USES_subscription_class_product();
-        $newval = Product::toggleEnabled($_REQUEST['oldval'], $_REQUEST['id']);
+        $newval = Subscription\Product::toggleEnabled($_REQUEST['oldval'], $_REQUEST['id']);
         if ($newval != $_REQUEST['oldval']) {
             $message = sprintf($LANG_SUBSCR['msg_toggle'],
                 $newval ? $LANG_SUBSCR['enabled'] : $LANG_SUBSCR['disabled']);

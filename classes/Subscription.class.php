@@ -12,8 +12,6 @@
 */
 namespace Subscription;
 
-USES_subscription_class_product();
-
 /**
 *   Class for subscription
 *   @package subscription
@@ -296,7 +294,6 @@ class Subscription
         $this->notified = 0;
 
         // Get the product information for this subscription
-        USES_subscription_class_product();
         $P = new Product();
         if ($price == -1) {
             $price = $upgrade ? $P->upg_price : $P->price;

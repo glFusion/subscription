@@ -10,7 +10,6 @@
 *               GNU Public License v2 or later
 *   @filesource
 */
-namespace Subscription;
 
 /** Import core glFusion libraries */
 require_once '../lib-common.php';
@@ -61,8 +60,7 @@ if ($msg != '')
 switch ($view) {
 case 'detail':
     if (!empty($id)) {
-        USES_subscription_class_product();
-        $P = new Product($id);
+        $P = new Subscription\Product($id);
         if ($P->hasErrors()) {
             $display .= COM_showMessageText($P->PrintErrors(), '', true);
         } else {

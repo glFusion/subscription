@@ -76,17 +76,22 @@ if (file_exists("$langpath/custom/$langfile")) {
     include_once "$langpath/custom/$langfile";
 }
 
+/** Import services to interact with the PayPal plugin */
+require_once SUBSCR_PI_PATH . '/services.inc.php';
+
 function USES_subscription_functions()
 {   require_once SUBSCR_PI_PATH . '/subscr_functions.inc.php';   }
 
-function USES_subscription_class_product()
-{   require_once SUBSCR_PI_PATH . '/classes/Product.class.php';   }
-
-function USES_subscription_class_subscription()
-{   require_once SUBSCR_PI_PATH . '/classes/Subscription.class.php';   }
-
-/** Import services to interact with the PayPal plugin */
-require_once SUBSCR_PI_PATH . '/services.inc.php';
+spl_autoload_register(function ($class)
+{
+    if (strpos($class, 'Subscription\\') === 0) {
+        $class = str_replace('Subscription\\', '', $class);
+        $path = __DIR__ . '/classes/' . $class . '.class.php';
+        if (file_exists($path)) {
+            include $path;
+        }
+    }
+});
 
 
 /**
@@ -324,8 +329,7 @@ function plugin_autotags_subscription($op, $content = '', $autotag = '')
         case 'cart':
         case 'add_cart':
             // tag: [subscription:buynow product_id]
-            USES_subscription_class_product();
-            $P = new \Subscription\Product($autotag['parm2']);
+            $P = new Subscription\Product($autotag['parm2']);
             if ($P->canBuy()) {
                 $HTML = $P->MakeButton($option);
             }
@@ -464,9 +468,8 @@ function phpblock_subscription_subscribe()
     if ($n < 1)
         return '';
 
-    USES_subscription_class_product();
-    $T = new \Template(SUBSCR_PI_PATH . '/templates');
-    $P = new \Subscription\Product();
+    $T = new Template(SUBSCR_PI_PATH . '/templates');
+    $P = new Subscription\Product();
 
     $i = 0;
     while ($row = DB_fetchArray($r, false)) {
@@ -523,7 +526,7 @@ function plugin_profilevariablesdisplay_subscription($uid, &$T)
             WHERE s.uid = $uid";
     $res = DB_query($sql);
     if ($res && DB_numRows($res) > 0) {
-        $LT = new \Template(SUBSCR_PI_PATH . '/templates/');
+        $LT = new Template(SUBSCR_PI_PATH . '/templates/');
         $LT->set_file(array(
             'block' => 'profileblock.thtml',
         ));
@@ -608,9 +611,8 @@ function plugin_runScheduledTask_subscription()
     //COM_errorLog($sql);
     $r = DB_query($sql);
     if ($r) {
-        USES_subscription_class_subscription();
         while ($row = DB_fetchArray($r, false)) {
-            Subscription::Cancel($row['id'], true);
+            Subscription\Subscription::Cancel($row['id'], true);
         }
 
     }
@@ -728,7 +730,7 @@ function SUBSCR_notifyExpiration()
             $template_dir = "$template_base/english";
         }*/
 
-        $T = new \Template($template_base);
+        $T = new Template($template_base);
         $T->set_file('message', 'expiration.thtml');
         $T->set_var(array(
             'site_name'     => $_CONF['site_name'],
@@ -791,8 +793,7 @@ function plugin_user_create_subscription($uid = 0)
     if ($uid == 0)
         return;
 
-    USES_subscription_class_subscription();
-    $S = new Subscription();
+    $S = new Subscription\Subscription();
 
     $sql = "SELECT item_id, at_registration, trial_days
             FROM {$_TABLES['subscr_products']}
@@ -835,6 +836,23 @@ function plugin_user_move_subscription($origUID, $destUID)
             COM_errorLog("plugin_user_move_subscription SQL error: $sql",1);
         }
     }
+}
+
+
+/**
+*   Return categories for the Paypal plugin.
+*
+*   @return array   Array of category information
+*/
+function plugin_paypal_getcategories_subscription()
+{
+    return array(
+        array(
+            'name' => 'Subscriptions',
+            'count' => 0,
+            'url' => SUBSCR_URL,
+        ),
+    );
 }
 
 
