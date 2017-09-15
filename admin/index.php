@@ -320,7 +320,7 @@ function product_getListField($fieldname, $fieldvalue, $A, $icon_arr)
         break;
 
     case 'delete':
-        if (!Product::isUsed($A['item_id'])) {
+        if (!Subscription\Product::isUsed($A['item_id'])) {
             $retval .= COM_createLink(
                 '<i class="' . SUB_getIcon('trash', 'danger') . '"></i>',
                 SUBSCR_ADMIN_URL . 
