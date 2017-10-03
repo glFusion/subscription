@@ -831,7 +831,7 @@ function plugin_user_create_subscription($uid = 0)
     $res = DB_query($sql);
     while ($A = DB_fetchArray($res, false)) {
         if ($A['at_registration'] == SUBSCR_REGISTER_TRIAL) {
-            $S->Add($uid, $A['item_id'], $A['trial_days'], 'day');
+            $S->Add($uid, $A['item_id'], min($A['trial_days'], 10), 'day');
         } else {
             $S->Add($uid, $A['item_id']);
         }
