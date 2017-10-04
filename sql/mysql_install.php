@@ -45,7 +45,7 @@ $_SQL['subscr_products'] =
   `prf_type` varchar(40) DEFAULT NULL,
   `grp_access` mediumint(8) NOT NULL DEFAULT '13',
   PRIMARY KEY (`item_id`)
-)";
+) ENGINE=MyISAM";
 
 $_SQL['subscr_subscriptions'] = 
 "CREATE TABLE {$_TABLES['subscr_subscriptions']} (
@@ -60,7 +60,7 @@ $_SQL['subscr_subscriptions'] =
   KEY `subscr_itemid` (`item_id`),
   KEY `subscr_userid` (`uid`),
   KEY `subscr_expiration` (`expiration`)
-)";
+) ENGINE=MyISAM";
 
 $_SQL['subscr_history'] = 
 "CREATE TABLE {$_TABLES['subscr_history']} (
@@ -75,7 +75,7 @@ $_SQL['subscr_history'] =
   PRIMARY KEY  (`id`),
   KEY `subscr_itemid` (`item_id`),
   KEY `subscr_userid` (`uid`)
-)";
+) ENGINE=MyISAM";
 
 
 $SUBSCR_UPGRADE = array(
@@ -117,8 +117,8 @@ $SUBSCR_UPGRADE = array(
       PRIMARY KEY  (`id`),
       KEY `subscr_itemid` (`item_id`),
       KEY `subscr_userid` (`uid`)
-    )",
-    ),
+    ) ENGINE=MyISAM",
+),
 '0.1.6' => array(
     "ALTER TABLE {$_TABLES['subscr_subscriptions']}
         DROP KEY subscr_userid,
@@ -151,7 +151,7 @@ $SUBSCR_UPGRADE = array(
         PRIMARY KEY  (`id`),
         KEY `subscr_itemid` (`item_id`),
         KEY `subscr_userid` (`uid`)
-        )",
+        ) ENGINE=MyISAM",
     ),
 );
 
