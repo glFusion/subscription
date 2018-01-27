@@ -69,6 +69,8 @@ function SUBSCR_ProductList()
 
         if ($ok_to_buy) {
             $buttons = $P->MakeButton();
+        } else {
+            $buttons = '';
         }
 
         $T->set_var(array(
@@ -80,8 +82,7 @@ function SUBSCR_ProductList()
             'purchase_btn' => $buttons,
             'lang_price' => $lang_price,
         ) );
-
-        $display .= $T->parse('PBlock', 'ProductBlock', true);
+        $T->parse('PBlock', 'ProductBlock', true);
     }
 
     $T->parse('output', 'prodlist');

@@ -199,14 +199,15 @@ class Product
         $this->short_description = $row['short_description'];
         $this->description = $row['description'];
         $this->enabled = $row['enabled'];
-        $this->show_in_block = $row['show_in_block'];
-        $this->taxable = $row['taxable'];
         $this->at_registration = $row['at_registration'];
         $this->trial_days = $row['trial_days'];
         $this->price = $row['price'];
-        $this->upg_price = $row['upg_price'];
-        $this->upg_extend_exp = $row['upg_extend_exp'];
-        $this->upg_from = $row['upg_from'];
+        $this->upg_price = 0;       // TODO: see if these will be used
+        $this->upg_extend_exp = 0;
+        $this->upg_from = '';
+        //$this->upg_price = $row['upg_price'];
+        //$this->upg_extend_exp = $row['upg_extend_exp'];
+        //$this->upg_from = $row['upg_from'];
         $this->duration = $row['duration'];
         $this->duration_type = $row['duration_type'];
         if ($this->duration_type == 'fixed') {
@@ -215,10 +216,14 @@ class Product
         } else {
             $this->expiration = NULL;
         }
-        $this->prf_update = $row['prf_update'];
-        $this->prf_type = $row['prf_type'];
-        $this->dt_add = $row['dt_add'];
-        $this->views = $row['views'];
+        //$this->prf_update = $row['prf_update'];
+        $this->prf_update = 0;
+        //$this->prf_type = $row['prf_type'];
+        $this->prf_type = '';
+        //$this->dt_add = $row['dt_add'];
+        $this->dt_add = '';
+        //$this->views = $row['views'];
+        $this->views = 0;
         $this->addgroup = $row['addgroup'];
         $this->grace_days = $row['grace_days'];
         $this->early_renewal = $row['early_renewal'];
@@ -226,15 +231,21 @@ class Product
         if ($fromDB) {
             $this->buttons = $row['buttons'];
             $this->pricing = @unserialize($row['pricing']);
+            $this->show_in_block = $row['show_in_block'];
+            $this->taxable = $row['taxable'];
         } else {
+            $this->show_in_block = isset($row['show_in_block']) ? 1 : 0;
+            $this->taxable = isset($row['taxable']) ? 1 : 0;
             $this->buttons = $this->btn_types;
             $this->pricing['base'] = (float)$row['price'];
-            $disc_price = (float)$row['disc_price'];
-            if ($disc_price > 0) {
-                if (is_array($row['disc_price'])
-                    && is_array($row['disc_from'])
-                    && is_array($row['disc_to'])
-                    ) {
+            if (isset($row['disc_price'])) {
+                $disc_price = (float)$row['disc_price'];
+                if ($disc_price > 0) {
+                    if (is_array($row['disc_price'])
+                        && is_array($row['disc_from'])
+                        && is_array($row['disc_to'])
+                        ) {
+                    }
                 }
             }
         }
@@ -329,6 +340,7 @@ class Product
             $sql1 = "INSERT INTO {$_TABLES['subscr_products']} SET
                     item_id='{$this->item_id}', ";
             $sql3 = '';
+            $orig_item_id = $this->item_id;
         } else {
             SUBSCR_debug('Preparing to update product id ' . $this->item_id);
             $sql1 = "UPDATE {$_TABLES['subscr_products']} SET ";
@@ -572,7 +584,7 @@ class Product
             $reg_radio = 'register_auto_sel';
             break;
         case SUBSCR_REGISTER_OPTIONAL:
-            $$reg_radio = 'register_opt_sel';
+            $reg_radio = 'register_opt_sel';
             break;
         case SUBSCR_REGISTER_TRIAL:
             $reg_radio = 'register_trial_sel';
@@ -588,7 +600,7 @@ class Product
             'trial_days'    => $trial_days,
         ) );
 
-        if (!$this->isUsed()) {
+        if (!self::isUsed($this->item_id)) {
             $T->set_var('candelete', 'true');
         }
 
@@ -716,20 +728,11 @@ class Product
     *
     *   @return boolean     True if used, False if not
     */
-    public function isUsed($id = '')
+    public static function isUsed($id)
     {
         global $_TABLES;
 
-        if ($id == '') {
-            if (is_object($this)) {
-                $id = $this->item_id;
-            } else {
-                return;
-            }
-        } else {
-            $id = COM_sanitizeID($id, false);
-        }
-
+        $id = COM_sanitizeID($id, false);
         if (DB_count($_TABLES['subscr_subscriptions'], 'item_id', $id) > 0) {
             return true;
         } else {
@@ -948,7 +951,7 @@ class Product
             $sql .= SEC_buildAccessSql();
         }
         $result = DB_query($sql);
-        while ($A = DB_fetchArray($result, fals)) {
+        while ($A = DB_fetchArray($result, false)) {
             $retval[$A['item_id']] = new self();
             $retval[$A['item_id']]->SetVars($A);
         }

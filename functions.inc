@@ -587,7 +587,7 @@ function plugin_profilevariablesdisplay_subscription($uid, &$T)
 */
 function plugin_getheadercss_subscription()
 {
-    global $_CONF_SUBSCR;
+    global $_CONF, $_CONF_SUBSCR;
 
     $styles = array();
     $files = array('style.css');
@@ -599,7 +599,7 @@ function plugin_getheadercss_subscription()
     }
 */
     $defpath = SUBSCR_PI_PATH . '/css';
-    $layoutpath = $_CONF['layout_path'] . 'plugins/' . $_CONF_SUBSCR['pi_name'];
+    $layoutpath = $_CONF['path_layout'] . 'plugins/' . $_CONF_SUBSCR['pi_name'];
     foreach ($files as $file) {
         if (file_exists($layoutpath . '/' . $file)) {
             $styles[] = $layoutpath . '/' . $file;

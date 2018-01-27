@@ -160,9 +160,9 @@ function SUBSCR_subscriptionList($item_id)
         '</select>';
     $filter = $plans . '&nbsp;<input type="checkbox" name="showexp" ' . $frmchk . 
             ' onclick="javascript:submit();"> ' . $LANG_SUBSCR['show_exp'] . '?<br />';
-    /*$form_arr = array(
-        'top' => '<input type="checkbox" name="showexp"> Show expired?'
-    );*/
+    $form_arr = array(
+    //    'top' => '<input type="checkbox" name="showexp"> Show expired?'
+    );
     $retval .= ADMIN_list('subscription', __NAMESPACE__ . '\getListField', 
                 $header_arr,
                 $text_arr, $query_arr, $defsort_arr, $filter, '', 
@@ -269,9 +269,8 @@ function SUBSCR_productAdminList()
         'has_extras' => true,
         'form_url' => SUBSCR_ADMIN_URL . '/index.php?type=products',
     );
-
-    //$options = array('chkdelete' => 'true', 'chkfield' => 'camp_id');
-
+    $options = array();
+    $form_arr = array();
     $query_arr = array('table' => 'subscr_products',
         'sql' => "SELECT p.*, g.grp_name
                 FROM {$_TABLES['subscr_products']} p 
@@ -280,13 +279,12 @@ function SUBSCR_productAdminList()
         'query_fields' => array('item_id', 'short_description', 'description'),
         'default_filter' => ' WHERE 1=1 ',
     );
-
+    $filter = '';
     $retval .= ADMIN_list('subscription', __NAMESPACE__ . '\product_getListField', 
                     $header_arr,
                     $text_arr, $query_arr, $defsort_arr, $filter, '', 
                     $options, $form_arr);
     $retval .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
-
     return $retval;
 }
 
@@ -428,8 +426,13 @@ if ($action == 'mode') {
 
 // Get the product and subscription IDs, if any
 // item_id could be item_id_orig if the product is being updated
-$item_id = isset($_REQUEST['item_id_orig']) ?
-        $_REQUEST['item_id_orig'] : $_REQUEST['item_id'];
+if (isset($_REQUEST['item_id_orig'])) {
+    $item_id = $_REQUEST['item_id_orig'];
+} elseif (isset($_REQUEST['item_id'])) {
+    $item_id = $_REQUEST['item_id'];
+} else {
+    $item_id = '';
+}
 $item_id = COM_sanitizeId($item_id, false);
 $sub_id = isset($_REQUEST['sub_id']) ? (int)$_REQUEST['sub_id'] : 0;
 

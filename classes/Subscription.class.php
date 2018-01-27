@@ -145,12 +145,11 @@ class Subscription
     public function SetVars($row, $fromDB=false)
     {
         if (!is_array($row)) return;
-
         $this->id = $row['id'];
         $this->item_id = $row['item_id'];
         $this->uid = $row['uid'];
         $this->expiration = $row['expiration'];
-        $this->notified = $row['notified'];
+        $this->notified = isset($row['notified']) ? $row['notified'] : 0;
         $this->status = $row['status'];
     }
 
@@ -175,7 +174,7 @@ class Subscription
         $result = DB_query("SELECT *
                     FROM {$_TABLES['subscr_subscriptions']}
                     WHERE id='$id'");
-        if (!$result || DB_numRows($result != 1)) {
+        if (!$result || DB_numRows($result) != 1) {
             return false;
         } else {
             $row = DB_fetchArray($result, false);
@@ -697,7 +696,7 @@ class Subscription
     *   @param  integer $status Subscription status, Active by default
     *   @return array   Array of subscription objects
     */
-    public static function getSubscriptions($uid = 0, $status = SUBSCR_STATUS_ACTIVE)
+    public static function getSubscriptions($uid = 0, $status = SUBSCR_STATUS_ENABLED)
     {
         global $_USER, $_TABLES;
 
