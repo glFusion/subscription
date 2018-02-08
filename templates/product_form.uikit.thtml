@@ -71,7 +71,6 @@ function update_duration_type(opt)
 <div class="uk-form-row" id="fixed_exp_field" style="display:none;">
   <label class="uk-form-label" for="f_expiration">{$LANG_SUBSCR['fixed_exp']}:
     <i class="uk-icon uk-icon-question-circle tooltip" title="{$LANG_SUBSCR_HELP['fixed_exp']}"></i>
-    <span id="expiration" class="tooltip_cfg tooltipstered"></span> 
   </label>
   <div class="uk-form-controls">
     <input type=text name="expiration" value="{expiration}" id="f_expiration">
@@ -212,9 +211,7 @@ function update_duration_type(opt)
   type="submit"
   onclick="return confirm('{$LANG_SUBSCR['q_del_item']}');" />{$LANG_ADMIN['delete']}</button>
 {!endif}
-
 </form>
-
 <script type="text/javascript">
     Calendar.setup({
         inputField     :    "f_expiration",
@@ -223,32 +220,5 @@ function update_duration_type(opt)
         timeFormat     :    "24",
         button          :   "fixedexp_trigger"
     });
-
-var ConfigDocUrl = '{doc_url}';
-$(document).ready(function() {
-    $('.tooltip_cfg').tooltipster({
-        contentAsHTML: true,
-        animation: 'fade',
-        trigger: 'click',
-        iconDesktop: true,
-        iconTouch: true,
-        functionBefore: function(origin, continueTooltip) {
-            continueTooltip();
-            var attrHref = ConfigDocUrl;
-            var ajobj = $(this);
-            $.get(attrHref, function(data) {
-                var confVar = ajobj.attr('id');
-                if (data.indexOf(confVar) > 0) {
-                    var desc = $(data).find('#desc_' + confVar + ' dd:first').text();
-                    origin.tooltipster('content', desc);
-                } else {
-                    origin.tooltipster('content', 'No Help Text Found');
-                    console.log('Unable to find help text for desc_%s',confVar);
-                }
-            });
-        }
-    });
-});
-
 </script>
 {# end {templatelocation} #}
