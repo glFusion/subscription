@@ -619,31 +619,17 @@ class Subscription
     {
         global $_TABLES;
 
-        $sub_id = (int)$sub_id;
-        if ($sub_id == 0)
-            return;
+        $Sub = new self($sub_id);
+        if ($Sub->id < 1) return;
 
-        // Remove the user from the group(s) related to the subscription
-        $sql = "SELECT s.uid, s.expiration, p.addgroup, p.item_id
-                FROM {$_TABLES['subscr_subscriptions']} s
-                LEFT JOIN {$_TABLES['subscr_products']} p
-                ON s.item_id = p.item_id
-                WHERE s.id='$sub_id'";
-        //echo $sql;
-        $A = DB_fetchArray(DB_query($sql), false);
-        if (empty($A))
-            return;
-
-        USES_lib_user();
-        $groupid = (int)$A['addgroup'];
-        $uid = (int)$A['uid'];
-        USER_delGroup($groupid, $uid);
+        // Remove the subscriber from the subscription group
+        USER_delGroup($Sub->Plan->groupid, $Sub->uid);
 
         // Delete the subscription and log the activity
-        DB_delete($_TABLES['subscr_subscriptions'], 'id', $sub_id);
-        SUBSCR_auditLog("Cancelled subscription $sub_id ({$A['item_id']}) " .
-                "for user $uid (" .COM_getDisplayName($uid) . '), expiring ' .
-                $A['expiration'], $system);
+        DB_delete($_TABLES['subscr_subscriptions'], 'id', $Sub->id);
+        SUBSCR_auditLog("Cancelled subscription $Sub->id ({$Sub->Plan->item_id}) " .
+                "for user {$Sub->uid} (" .COM_getDisplayName($Sub->uid) . '), expiring ' .
+                $Sub->expiration, $system);
     }
 
 
