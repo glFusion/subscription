@@ -190,7 +190,7 @@ function getListField($fieldname, $fieldvalue, $A, $icon_arr)
 
     switch($fieldname) {
     case 'edit':
-        $retval .= COM_createLink('<i class="' . SUB_getIcon('edit', 'info') . '"></i>',
+        $retval .= COM_createLink('<i class="' . SUBSCR_getIcon('edit', 'info') . '"></i>',
             SUBSCR_ADMIN_URL . '/index.php?editsubscrip=x&amp;sub_id=' . $A['id'],
             array(
                 'class' => 'tooltip',
@@ -307,7 +307,7 @@ function product_getListField($fieldname, $fieldvalue, $A, $icon_arr)
     switch($fieldname) {
     case 'edit':
         $retval .= COM_createLink(
-            '<i class="' . SUB_getIcon('edit', 'info') . '"></i>',
+            '<i class="' . SUBSCR_getIcon('edit', 'info') . '"></i>',
             SUBSCR_ADMIN_URL . 
                 '/index.php?editproduct=x&amp;item_id=' . $A['item_id'],
             array(
@@ -320,7 +320,7 @@ function product_getListField($fieldname, $fieldvalue, $A, $icon_arr)
     case 'delete':
         if (!Subscription\Product::isUsed($A['item_id'])) {
             $retval .= COM_createLink(
-                '<i class="' . SUB_getIcon('trash', 'danger') . '"></i>',
+                '<i class="' . SUBSCR_getIcon('trash', 'danger') . '"></i>',
                 SUBSCR_ADMIN_URL . 
                 "/index.php?deleteproduct=x&amp;item_id={$A['item_id']}",
                 array(
