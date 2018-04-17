@@ -780,7 +780,7 @@ class Product
             $add_cart = true;
         }
 
-        if (SUBSCR_PAYPAL_ENABLED) {
+        if (SUBSCR_paypal_enabled()) {
             $vars = array(
                 'item_number' => 'subscription:' . $this->item_id,
                 'item_name' => $this->item_id,

@@ -20,7 +20,7 @@ function SUBSCR_ProductList()
 {
     global $_CONF, $_CONF_SUBSCR, $LANG_SUBSCR, $_USER;
 
-    if (!SUBSCR_PAYPAL_ENABLED) {
+    if (!SUBSCR_paypal_enabled()) {
         return "PayPal is required";
     }
 

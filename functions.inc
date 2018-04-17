@@ -51,14 +51,6 @@ isset($_SYSTEM['framework']) || $_SYSTEM['framework'] = 'legacy';
 $_CONF_SUBSCR['_is_uikit'] = $_SYSTEM['framework'] == 'uikit' ? 'true' : '';
 $_CONF_SUBSCR['_iconset'] = $_CONF_SUBSCR['_is_uikit'] ? 'uk-icon' : 'fa fa';
 
-// Determine if the paypal plugin is installed and integration is enabled
-if (is_array($_PLUGINS) && in_array('paypal', $_PLUGINS)) {
-    define('SUBSCR_PAYPAL_ENABLED', true);
-} else {
-    // No paypal integration enabled.  Maybe need to die here?
-    define('SUBSCR_PAYPAL_ENABLED', false);
-}
-
 // Save the current sql datetime for use throughout the plugin
 $_CONF_SUBSCR['_dt'] = new Date('now', $_CONF['timezone']);
 $_CONF_SUBSCR['now'] = $_CONF_SUBSCR['_dt']->toMySQL(true);
@@ -475,7 +467,7 @@ function phpblock_subscription_subscribe()
     $retval = '';
 
     // Paypal is required to create the purchase link
-    if (!SUBSCR_PAYPAL_ENABLED || COM_isAnonUser() || SEC_inGroup('Root')) {
+    if (!SUBSCR_paypal_enabled() || COM_isAnonUser() || SEC_inGroup('Root')) {
         return $retval;
     }
 
@@ -1042,13 +1034,29 @@ function SUBSCR_isAdmin()
 *   @param  string  $style  Style name from local CSS
 *   @return string      Class names for icon
 */
-function SUB_getIcon($name, $style='info')
+function SUBSCR_getIcon($name, $style='info')
 {
     global $_CONF_SUBSCR;
 
     if ($style != '')
         $style = ' sub-icon-' . $style;
     return $_CONF_SUBSCR['_iconset'] . '-' . $name . $style;
+}
+
+
+/**
+*   Determine if the paypal plugin is installed and integration is enabled.
+*
+*   @return boolean     True if Paypal is available, False if not.
+*/
+function SUBSCR_paypal_enabled()
+{
+    global $_PLUGINS;
+    static $enabled = NULL;
+    if ($enabled === NULL) {
+        $enabled = (isset($_PLUGINS) && is_array($_PLUGINS) && in_array('paypal', $_PLUGINS));
+    }
+    return $enabled;
 }
 
 ?>
