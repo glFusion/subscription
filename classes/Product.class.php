@@ -86,7 +86,6 @@ class Product
             $this->grp_access = 13;       // logged-in users
             $this->pricing = array();
         }
-
     }
 
 
@@ -228,14 +227,12 @@ class Product
         $this->grace_days = $row['grace_days'];
         $this->early_renewal = $row['early_renewal'];
         $this->grp_access = $row['grp_access'];
+        $this->show_in_block = isset($row['show_in_block']) ? $row['show_in_block'] : 0;
+        $this->taxable = isset($row['taxable']) ? $row['taxable'] : 0;
         if ($fromDB) {
             $this->buttons = $row['buttons'];
             $this->pricing = @unserialize($row['pricing']);
-            $this->show_in_block = $row['show_in_block'];
-            $this->taxable = $row['taxable'];
         } else {
-            $this->show_in_block = isset($row['show_in_block']) ? 1 : 0;
-            $this->taxable = isset($row['taxable']) ? 1 : 0;
             $this->buttons = $this->btn_types;
             $this->pricing['base'] = (float)$row['price'];
             if (isset($row['disc_price'])) {
@@ -284,6 +281,25 @@ class Product
             $this->isNew = false;
             return true;
         }
+    }
+
+
+    /**
+    *   Get an instance of a product
+    *
+    *   @param  integer $item_id    Product ID
+    *   @return object      Product object
+    */
+    public static function getInstance($item_id)
+    {
+        static $items = array();
+        if (!isset($items[$item_id])) {
+            $items[$item_id] = Cache::get($item_id);
+            if (!$items[$item_id]) {
+                $items[$item_id] = new self($item_id);
+            }
+        }
+        return $items[$item_id];
     }
 
 
@@ -408,6 +424,9 @@ class Product
         } else {
             $status = true;
         }
+        // Clear all products since updates may affect listings
+        Cache::clear('products');
+        Cache::set($this->item_id, $this, 'products');
 
         SUBSCR_debug('Status of last update: ' . print_r($status,true));
         if (!$this->hasErrors()) {
@@ -436,6 +455,8 @@ class Product
             return false;
 
         DB_delete($_TABLES['subscr_products'], 'item_id', $this->item_id);
+        // Clear all products since updates may affect listings
+        Cache::clear('products');
         $this->item_id = '';
         return true;
     }
@@ -943,17 +964,21 @@ class Product
     {
         global $_TABLES;
 
-        $retval = array();
         $enabled = $enabled == 1 ? 1 : 0;
-        $sql = "SELECT * FROM {$_TABLES['subscr_products']}
-                WHERE enabled = $enabled";
-        if (!SUBSCR_isAdmin()) {
-            $sql .= SEC_buildAccessSql();
-        }
-        $result = DB_query($sql);
-        while ($A = DB_fetchArray($result, false)) {
-            $retval[$A['item_id']] = new self();
-            $retval[$A['item_id']]->SetVars($A);
+        $cache_key = 'products_ena_' . $enabled;
+        $retval = Cache::get($cache_key);
+        if ($retval === NULL) {
+            $sql = "SELECT * FROM {$_TABLES['subscr_products']}
+                    WHERE enabled = $enabled";
+            if (!SUBSCR_isAdmin()) {
+                $sql .= SEC_buildAccessSql();
+            }
+            $result = DB_query($sql);
+            while ($A = DB_fetchArray($result, false)) {
+                $retval[$A['item_id']] = new self();
+                $retval[$A['item_id']]->SetVars($A);
+            }
+            Cache::set($cache_key, $retval, 'products');
         }
         return $retval;
     }

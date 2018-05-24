@@ -15,10 +15,10 @@
 global $_CONF, $_CONF_SUBSCR, $_SUBSCR_DEFAULTS, $_DB_dbms, $SUBSCR_UPGRADE;
 
 /** Include the default configuration values */
-require_once SUBSCR_PI_PATH . '/install_defaults.php';
+require_once __DIR__ . '/install_defaults.php';
 
 /** Include the table creation strings */
-require_once SUBSCR_PI_PATH . "/sql/{$_DB_dbms}_install.php";
+require_once __DIR__ . "/sql/{$_DB_dbms}_install.php";
 
 
 /**

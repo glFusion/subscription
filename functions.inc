@@ -279,9 +279,8 @@ function plugin_autouninstall_subscription()
         'php_blocks' => array('phpblock_subscription_subscribe'),
         'vars'      => array($_CONF_SUBSCR['pi_name'] . '_gid')
     );
-
+    Cache::clear();
     return $out;
-
 }
 
 
@@ -450,7 +449,8 @@ function SUBSCR_getDocURL($file='', $doclang='english')
  */
 function plugin_upgrade_subscription()
 {
-    require_once SUBSCR_PI_PATH . '/upgrade.inc.php';
+    require_once __DIR__ . '/upgrade.inc.php';
+    Subscription\Cache::clear();
     return SUBSCR_do_upgrade();
 }
 

@@ -55,7 +55,10 @@ class Subscription
         $this->dt = new \Date('now', $_CONF['timezone']);
         $this->Plan = NULL;
         $id = (int)$id;
-        if ($id < 1) {
+        if (is_array($id)) {
+            // Load variables from supplied array
+            $this->setVars($id);
+        } elseif ($id < 1) {
             $this->id = 0;
             $this->item_id = '';
             $this->uid = 0;
@@ -142,7 +145,7 @@ class Subscription
      *  @param  array   $row        Array of values, from DB or $_POST
      *  @param  boolean $fromDB     True if read from DB, false if from $_POST
      */
-    public function SetVars($row, $fromDB=false)
+    public function setVars($row, $fromDB=false)
     {
         if (!is_array($row)) return;
         $this->id = $row['id'];
@@ -171,18 +174,58 @@ class Subscription
             return false;
         }
 
-        $result = DB_query("SELECT *
+        $cache_key = 'subscr_' . $id;
+        $row = Cache::get($cache_key);
+        if ($row === NULL) {
+            $result = DB_query("SELECT *
                     FROM {$_TABLES['subscr_subscriptions']}
                     WHERE id='$id'");
-        if (!$result || DB_numRows($result) != 1) {
-            return false;
-        } else {
-            $row = DB_fetchArray($result, false);
-            $this->SetVars($row, true);
-            $this->isNew = false;
-            $this->Plan = new Product($row['item_id']);
-            return true;
+            if (!$result || DB_numRows($result) != 1) {
+                return false;
+            } else {
+                $row = DB_fetchArray($result, false);
+            }
         }
+        if (!empty($row)) {
+            $this->setVars($row, true);
+            $this->isNew = false;
+            $this->Plan = Product::getInstance($row['item_id']);
+            Cache::set($cache_key, $row, 'subscriptions');
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+    /**
+    *   Get a subscription object by user and item ID
+    *
+    *   @param  integer $uid        User ID
+    *   @param  string  $item_id    Product ID
+    *   @return object      Subscription object
+    */
+    public static function getInstance($uid, $item_id)
+    {
+        global $_TABLES;
+
+        $cache_key = "subscr_{$uid}_{$item_id}";
+        $Obj = Cache::get($cache_key);
+        if ($Obj === NULL) {
+            $uid = (int)$uid;
+            $item_id= DB_escapeString($item_id);
+            $sql = "SELECT * FROM {$_TABLES['subscr_subscriptions']}
+                    WHERE uid='{$uid}' AND item_id = '{$item_id}'";
+            $res = DB_query($sql);
+            if ($res && DB_numRows($res) == 1) {
+                $A = DB_fetchArray($res, false);
+                $Obj = new self($A);
+                Cache::set($cache_key, 'subscriptions');
+            } else {
+                $Obj = new self();
+            }
+        }
+        return $Obj;
     }
 
 
@@ -198,7 +241,7 @@ class Subscription
         global $_TABLES;
 
         if (is_array($A)) {
-            $this->SetVars($A);
+            $this->setVars($A);
         }
 
         // If cancelling an existing subscription, just call self::Cancel()
@@ -234,6 +277,7 @@ class Subscription
             //$P->updateProfile($this->expiration, $this->uid);
             $this->Read();
             $this->AddHistory();
+            Cache::clear('subscriptions');
         } else {
             $status = false;
             $this->Errors[] = 'Database error, possible duplicate key.';
@@ -243,6 +287,7 @@ class Subscription
                 COM_getDisplayName($A['uid']) . ' (' . $A['uid'] . ') ' .
                 $this->ProductName() . ", exp {$this->expiration}";*/
         SUBSCR_debug('Status of last update: ' . print_r($status,true));
+        Cache::clear('subscriptions');
         return $status;
     }
 
@@ -260,6 +305,7 @@ class Subscription
             return false;
 
         DB_delete($_TABLES['subscr_subscriptions'], 'id', $this->id);
+        Cache::clear('subscriptions');
         $this->id = 0;
         return true;
     }
@@ -293,44 +339,34 @@ class Subscription
         $this->notified = 0;
 
         // Get the product information for this subscription
-        $P = new Product();
+        $P = Product::getInstance($item_id);
         if ($price == -1) {
             $price = $upgrade ? $P->upg_price : $P->price;
         }
-        $P->checkPerms = false; // don't check permissions, may be IPN
-        $P->Read($item_id);
-        if ($P->item_id == '')
+        if ($P->isNew) {
             return false;
+        }
+        $P->checkPerms = false; // don't check permissions, may be IPN
 
         if (empty($duration_type)) $duration_type = $P->duration_type;
         $duration_type = strtoupper($duration_type);
         if ($duration == 0) $duration = $P->duration;
         $duration = (int)$duration;
 
-        // Find out if this is a new subscription or an extension
-        $sql = "SELECT id, item_id, expiration, status
-                FROM {$_TABLES['subscr_subscriptions']}
-                WHERE uid='{$this->uid}' AND item_id = '{$this->item_id}'";
-        $res = DB_query($sql, 1);
-        $A = $res ? DB_fetchArray($res, false) : array();
-
-        // Get the existing subscription ID and set that *starting* expiration
-        if (empty($A)) {
-            if ($upgrade) return false;   // Oops, nothing to upgrade
-            $this->id = 0;
+        if ($this->isNew) {
             $this->expiration = $today;
         } else {
-            $this->id = $A['id'];
-            $this->expiration = $A['expiration'] < $today ? $today :
-                        $A['expiration'];
+            if ($this->expiration < $today) {
+                $this->expiration = $today;
+            }
             // If this is an upgrade, verify that it is allowed.
             // Check that the current product is an upgrade item, and that it
             // isn't being upgraded against itself, and that there's a current
             // active subscription for it.
             if ($upgrade) {
-                if ($A['status'] > 0 ||
+                if ($this->status > 0 ||
                     $P->upg_from == '' ||
-                    $P->upg_from != $A['item_id']) {
+                    $P->upg_from != $this->item_id) {
                     return false;
                 }
             }
@@ -382,6 +418,7 @@ class Subscription
             $this->AddHistory($txn_id, $price);
             // Now have the product update the member profile
             //$P->updateProfile($this->expiration, $this->uid);
+            Cache::clear('subscriptions');
         }
         return $status;
     }
@@ -703,7 +740,7 @@ class Subscription
         $res = DB_query($sql);
         while ($A = DB_fetchArray($res, false)) {
             $retval[$A['item_id']] = new Subscription();
-            $retval[$A['item_id']]->SetVars($A);
+            $retval[$A['item_id']]->setVars($A);
         }
         return $retval;
     }
