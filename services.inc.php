@@ -258,27 +258,13 @@ function service_getproducts_subscription($args, &$output, &$svc_msg)
         $mySub = array('item_id' => '', 'expiration' => '');
     }
 
-    // Select products where the user either isn't subscribed, or is
-    // subscribed and the expiration is within early_renewal days from now.
-    // FIXME: this doesn't pick up non-subscribed users
-    $sql = "SELECT p.item_id
-            FROM {$_TABLES['subscr_products']} p
-            WHERE p.enabled = 1 ";
-    if (!SUBSCR_isAdmin()) {
-        $sql .= SEC_buildAccessSql();
-    }
-    $result = DB_query($sql);
-    if (!$result)
-        return PLG_RET_ERROR;
-
-    $P = new Subscription\Product();
-
-    while ($A = DB_fetchArray($result)) {
-        $P->Read($A['item_id']);
-
+    $Products = Subscription\Product::getProducts();
+    foreach ($Products as $P) {
         $description = $P->description;
         $short_description = $P->short_description;
 
+        // Check the expiration and early renewal period for any current
+        // subscriptions to see if the current user can purchase this item.
         $ok_to_buy = true;
         if (!empty($mySub['expiration']) && $mySub['item_id'] == $P->item_id) {
             $exp_ts = strtotime($mySub['expiration']);
@@ -311,7 +297,6 @@ function service_getproducts_subscription($args, &$output, &$svc_msg)
             );
         }
     }
-
     return PLG_RET_OK;
 }
 
