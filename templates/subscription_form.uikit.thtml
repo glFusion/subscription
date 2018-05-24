@@ -1,5 +1,5 @@
 {# begin {templatelocation} #}
-<form action="{action_url}" method="post" class="uk-form-horizontal subscriptionform">
+<form action="{action_url}" method="post" class="uk-form uk-form-horizontal subscriptionform">
 <input type=hidden name="mode" value="savesubscription">
 <input type=hidden name="id" value="{id}">
 
@@ -29,13 +29,11 @@
 </div>
 
 <div class="uk-form-row">
-  <label class="uk-form-label" for="f_expire">{$LANG_SUBSCR['expiration']}
+  <label class="uk-form-label">{$LANG_SUBSCR['expiration']}
     <i class="uk-icon uk-icon-question-circle tooltip" title="{$LANG_SUBSCR_HELP['sub_exp']}"></i>
   </label>
   <div class="uk-form-controls">
-    <input type="text" name="expiration" value="{expiration}" size="12" id="f_expire" />
-    <i class="{iconset}-calendar tooltip" id="exp_trigger"
-      title="{$LANG_SUBSCR['date_selector']}"></i>
+    <input type="text" name="expiration" value="{expiration}" size="12" id="f_expire" data-uk-datepicker="{format:'YYYY-MM-DD'}" />
   </div>
 </div>
 
@@ -53,9 +51,9 @@
     <i class="uk-icon uk-icon-question-circle tooltip" title="{$LANG_SUBSCR_HELP['sub_status']}"></i>
   </label>
   <div class="uk-form-controls">
-    <input type="radio" name="status" value="0" {status_0} />{$LANG_SUBSCR['active']}&nbsp;&nbsp;
-    <input type="radio" name="status" value="1" {status_1} />{$LANG_SUBSCR['canceled']}&nbsp;&nbsp;
-    <input type="radio" name="status" value="2" {status_2} />{$LANG_SUBSCR['expired']}
+    <input type="radio" name="status" value="0" {status_0} />&nbsp;{$LANG_SUBSCR['active']}&nbsp;&nbsp;
+    <input type="radio" name="status" value="1" {status_1} />&nbsp;{$LANG_SUBSCR['canceled']}&nbsp;&nbsp;
+    <input type="radio" name="status" value="2" {status_2} />&nbsp;{$LANG_SUBSCR['expired']}
   </div>
 </div>
 
@@ -74,12 +72,6 @@
 </form>
 
 <script type="text/javascript">
-Calendar.setup({
-    inputField     :    "f_expire",
-    ifFormat       :    "%Y-%m-%d",
-    showsTime      :    false,
-    button          :   "exp_trigger"
-});
 var ConfigDocUrl = '{doc_url}';
 $(document).ready(function() {
     $('.tooltip_cfg').tooltipster({
@@ -105,6 +97,5 @@ $(document).ready(function() {
         }
     });
 });
-
 </script>
 {# end {templatelocation} #}
