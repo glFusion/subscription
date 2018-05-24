@@ -60,9 +60,11 @@ class Product
 
         $this->isNew = true;
         $this->isAdmin = SEC_hasRights('subscription.admin') ? 1 : 0;
-        $this->item_id = $id;
 
-        if ($this->item_id != '') {
+        if (is_array($id)) {
+            $this->setVars($id, true);
+        } elseif ($this->item_id != '') {
+            $this->item_id = $id;
             if (!$this->Read($this->item_id)) {
                 $this->item_id = '';
             }
@@ -975,8 +977,7 @@ class Product
             }
             $result = DB_query($sql);
             while ($A = DB_fetchArray($result, false)) {
-                $retval[$A['item_id']] = new self();
-                $retval[$A['item_id']]->SetVars($A);
+                $retval[$A['item_id']] = new self($A);
             }
             Cache::set($cache_key, $retval, 'products');
         }
