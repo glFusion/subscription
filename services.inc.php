@@ -141,29 +141,31 @@ function service_handlePurchase_subscription($args, &$output, &$svc_msg)
     global $_CONF, $_CONF_SUBSCR, $_TABLES, $LANG_DON;
 
     // Must have an item ID following the plugin name
-    $item = $args['item'];
+    $item_id = $args['item_id'];
     $ipn_data = $args['ipn_data'];
 
     // Get rid of paypal-supplied options, not used here
-    list($id, $opts) = explode('|', $item['item_id']);
-    $id = explode(':', $id);
-    if (isset($id[1])) {
-        $subscr_id = COM_sanitizeID($id[1], false);
-        $sql = "SELECT * FROM {$_TABLES['subscr_products']}
-                WHERE item_id='{$subscr_id}'";
-        $res = DB_query($sql, 1);
-        $A = $res ? DB_fetchArray($res, false) : array();
-    } else {
+    list($item_id) = explode('|', $item_id);
+    $id_parts = explode(':', $item_id);
+    if (!isset($id_parts[1])) {
         return PLG_RET_ERROR;
     }
+
+    $product_id = $id_parts[1];
+    $P = Subscription\Product::getInstance($product_id);
+    if ($P->isNew) {
+        return PLG_RET_ERROR;
+    }
+    $upgrade = isset($id_parts[2]) && $id_parts[2] == 'upgrade' ? true : false;
 
     $amount = (float)$ipn_data['pmt_gross'];
 
     // Initialize the return array
-    $output = array('product_id' => implode(':', $id),
-            'name' => $A['name'],
-            'short_description' => $A['name'],
-            'description' => $A['description'],
+    $output = array(
+            'product_id' => $item_id,
+            'name' => $P->name,
+            'short_description' => $P->name,
+            'description' => $P->description,
             'price' =>  $amount,
             'expiration' => NULL,
             'download' => 0,
@@ -176,17 +178,16 @@ function service_handlePurchase_subscription($args, &$output, &$svc_msg)
     else
         $uid = DB_getItem($_TABLES['users'], 'email', $ipn_data['payer_email']);
 
-    if (!empty($ipn_data['memo'])) {
+    /*if (!empty($ipn_data['memo'])) {
         $memo = DB_escapeString($ipn_data['memo']);
     } else {
         $memo = '';
-    }
+    }*/
 
-    COM_errorLog("Processing subscription for user $uid to item {$id[1]}");
+    COM_errorLog("Processing subscription for user $uid to item {$product_id}");
 
-    $S = new Subscription\Subscription();
-    $upgrade = isset($id[2]) && $id[2] == 'upgrade' ? true : false;
-    $status = $S->Add($uid, $id[1], 0, '', NULL, $upgrade, $ipn_data['txn_id'], $amount);
+    $S = Subscription\Subscription::getInstance($uid, $product_id);
+    $status = $S->Add($uid, $product_id, 0, '', NULL, $upgrade, $ipn_data['txn_id'], $amount);
     return $status == true ? PLG_RET_OK : PLG_RET_ERROR;
 }
 
