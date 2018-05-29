@@ -1,6 +1,5 @@
 {# begin {templatelocation} #}
 <form action="{action_url}" method="post" class="uk-form uk-form-horizontal subscriptionform">
-<input type=hidden name="mode" value="savesubscription">
 <input type=hidden name="id" value="{id}">
 
 <fieldset>
