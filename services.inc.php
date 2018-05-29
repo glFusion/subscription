@@ -84,6 +84,7 @@ function service_productinfo_subscription($A, &$output, &$svc_msg)
 
     // Does not support remote web services, must be local only.
     if ($A['gl_svc'] !== false) return PLG_RET_PERMISSION_DENIED;
+    unset($A['gl_svc']);        // remove to prevent extra ':' in item number.
 
     // Create a return array with values to be populated later
     $output = array('product_id' => implode(':', $A),
