@@ -63,6 +63,7 @@ class Product
 
         if (is_array($id)) {
             $this->setVars($id, true);
+            $this->isNew = false;
         } elseif ($this->item_id != '') {
             $this->item_id = $id;
             if (!$this->Read($this->item_id)) {
