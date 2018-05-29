@@ -58,6 +58,7 @@ class Subscription
         if (is_array($id)) {
             // Load variables from supplied array
             $this->setVars($id);
+            $this->isNew = false;
         } elseif ($id < 1) {
             $this->id = 0;
             $this->item_id = '';
@@ -268,13 +269,13 @@ class Subscription
         DB_query($sql, 1);
 
         if (!DB_error()) {
-            /*if ($this->id == 0) {
+            if ($this->id == 0) {
+                // Save the ID of a new record
                 $this->id = DB_insertID();
-            }*/
+            }
             $status = true;
             $P = new Product($this->item_id);
             $this->AddtoGroup($P->addgroup, $this->uid);
-            //$P->updateProfile($this->expiration, $this->uid);
             $this->Read();
             $this->AddHistory();
             Cache::clear('subscriptions');
@@ -287,7 +288,6 @@ class Subscription
                 COM_getDisplayName($A['uid']) . ' (' . $A['uid'] . ') ' .
                 $this->ProductName() . ", exp {$this->expiration}";*/
         SUBSCR_debug('Status of last update: ' . print_r($status,true));
-        Cache::clear('subscriptions');
         return $status;
     }
 

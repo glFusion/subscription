@@ -459,10 +459,12 @@ case 'deleteproduct':
     break;
 
 case 'savesubscription':
+    $uid = isset($_POST['uid']) ? $_POST['uid'] : 0;
     $item_id = isset($_POST['item_id']) ? $_POST['item_id'] : '';
-    $S = new Subscription\Subscription($item_id);
+    $S = Subscription\Subscription::getInstance($uid, $item_id);
     if ($S->Save($_POST)) {
         $actionval = $S->item_id;
+        echo COM_refresh(SUBSCR_ADMIN_URL.'/index.php?subscriptions=' . $item_id);
         $view = 'subscriptions';
     } else {
         $content .= SUBSCR_errorMessage($S->PrintErrors());
