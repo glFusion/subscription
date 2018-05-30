@@ -1033,7 +1033,7 @@ function SUBSCR_isAdmin()
 *   @param  string  $style  Style name from local CSS
 *   @return string      Class names for icon
 */
-function SUBSCR_getIcon($name, $style='info')
+function SUBSCR_getIcon($name, $style='')
 {
     global $_CONF_SUBSCR;
 
