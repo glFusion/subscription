@@ -87,6 +87,33 @@ class Cache
 
 
     /**
+    *   Delete group cache after adding or removing memberships.
+    */
+    public static function clearGroup($grp_id, $uid)
+    {
+        $tags = array('menu', 'groups', 'group_' . $grp_id, 'user_' . $uid);
+        SUBSCR_debug("Clearing cache for user $uid, group $grp_id");
+        self::clearAnyTags($tags);
+    }
+
+
+    /**
+    *   Delete cache items that match any of the supplied tags.
+    *   Does not include the default "subscriptions" tag.
+    *
+    *   @param  array   $tags   Single or Array of tags
+    */
+    public static function clearAnyTags($tags)
+    {
+        if (version_compare(GVERSION, '1.8.0', '<')) {
+            return;     // caching requires glFusion 1.8.0 or higher
+        }
+        if (!is_array($tags)) $tags = array($tags);
+        \glFusion\Cache::getInstance()->deleteItemsByTags($tags);
+    }
+
+
+    /**
     *   Create a unique cache key.
     *   Intended for internal use, but public in case it is needed.
     *
