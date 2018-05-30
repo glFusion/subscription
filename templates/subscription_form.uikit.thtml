@@ -52,7 +52,6 @@
   <div class="uk-form-controls">
     <input type="radio" name="status" value="0" {status_0} />&nbsp;{$LANG_SUBSCR['active']}&nbsp;&nbsp;
     <input type="radio" name="status" value="1" {status_1} />&nbsp;{$LANG_SUBSCR['canceled']}&nbsp;&nbsp;
-    <input type="radio" name="status" value="2" {status_2} />&nbsp;{$LANG_SUBSCR['expired']}
   </div>
 </div>
 
