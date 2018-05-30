@@ -54,10 +54,10 @@ class Subscription
         $this->status = 0;
         $this->dt = new \Date('now', $_CONF['timezone']);
         $this->Plan = NULL;
-        $id = (int)$id;
         if (is_array($id)) {
             // Load variables from supplied array
             $this->setVars($id);
+            $this->Plan = Product::getInstance($this->item_id);
             $this->isNew = false;
         } elseif ($id < 1) {
             $this->id = 0;
@@ -68,7 +68,7 @@ class Subscription
             $this->txn_id = '';
             $this->purchase_date = $this->dt->format('Y-m-d');
         } else {
-            $this->id  = $id;
+            $this->id = $id;
             if (!$this->Read()) {
                 $this->id = 0;
             }
@@ -221,7 +221,7 @@ class Subscription
             if ($res && DB_numRows($res) == 1) {
                 $A = DB_fetchArray($res, false);
                 $Obj = new self($A);
-                Cache::set($cache_key, 'subscriptions');
+                Cache::set($cache_key, $Obj, 'subscriptions');
             } else {
                 $Obj = new self();
             }
@@ -245,9 +245,13 @@ class Subscription
             $this->setVars($A);
         }
 
-        // If cancelling an existing subscription, just call self::Cancel()
-        if ($this->status == SUBSCR_STATUS_CANCELED && $this->id > 0) {
-            return self::Cancel($this->uid);
+        // If cancelling an existing subscription, just call self::_doCancel()
+        if ($this->status == SUBSCR_STATUS_CANCELED) {
+            if (!$this->isNew) {
+                return self::_doCancel();
+            } else {
+                return true;    // Return success but do nothing
+            }
         }
 
         if (!$this->isValidRecord()) {
@@ -274,9 +278,8 @@ class Subscription
                 $this->id = DB_insertID();
             }
             $status = true;
-            $P = new Product($this->item_id);
-            $this->AddtoGroup($P->addgroup, $this->uid);
-            $this->Read();
+            $this->AddtoGroup();
+            //$this->Read();
             $this->AddHistory();
             Cache::clear('subscriptions');
         } else {
@@ -413,7 +416,7 @@ class Subscription
                 $this->id = DB_insertID();
             }
             $status = true;
-            $this->AddtoGroup($P->addgroup, $this->uid);
+            $this->AddtoGroup();
             $this->Read();
             $this->AddHistory($txn_id, $price);
             // Now have the product update the member profile
@@ -445,53 +448,22 @@ class Subscription
         DB_query($sql, 1);
     }
 
-           
+
     /**
     *   Adds a user to a glFusion group.
     *
     *   @param  integer $groupid    Group the user is added to
     *   @param  integer $uid        User ID being added
     */
-    public function AddtoGroup($groupid, $uid)
+    private function AddtoGroup()
     {
-        global $_TABLES;
-
-        $groupid = (int)$groupid;
-        $uid = (int)$uid;
-
-        SUBSCR_debug("Adding user $uid to group $groupid");
-        if ($groupid > 0 && $uid > 2) {
-            $groups = SEC_getUserGroups($uid);
-            if (!in_array($groupid, $groups)) {
-
-                // Set the main user value clause
-                $values_arr = array("('$groupid', '$uid')");
-
-                // If there are child accounts related to this subscriber,
-                // then try to add them to the same group
-                $status = LGLIB_invokeService('profile', 'getChildAccounts',
-                        array('uid' => $uid), $output, $svc_msg);
-                if ($status == PLG_RET_OK) {
-                    foreach ($output as $child_uid) {
-                        $values_arr[] = "('$groupid', $child_uid)";
-                        /*DB_query("INSERT INTO {$_TABLES['group_assignments']}
-                                (ug_main_grp_id, ug_uid)
-                            VALUES
-                                ('$groupid', $child_uid)");*/
-                    }
-                }
-
-                $value_str = implode(',', $values_arr);
-                DB_query("INSERT INTO {$_TABLES['group_assignments']}
-                        (ug_main_grp_id, ug_uid)
-                    VALUES
-                        $value_str");
-                        //('$groupid', $uid)");
-            } else {
-                SUBSCR_debug("User $uid is already in group $groupid");
-            }
+        if (!$this->Plan) $this->Plan = Product::getInstance($this->item_id);
+        if (!$this->Plan->isNew) {
+            SUBSCR_debug("Adding user {$this->uid} to group {$this->Plan->addgroup}");
+            Cache::clearGroup($this->Plan->addgroup, $this->uid);
+            USER_addGroup($this->Plan->addgroup, $this->uid);
         } else {
-            SUBSCR_debug("Invalid user $uid or group $groupid");
+            COM_errorLog("Error finding group for plan {$this->item_id}");
         }
     }
 
@@ -652,30 +624,63 @@ class Subscription
     *   @param  integer $sub_id     Database ID of the subscription to cancel
     *   @param  boolean $system     True if this is a system action.
     */
-    public function Cancel($sub_id, $system=false)
+    public static function Cancel($uid, $item_id, $system=false)
+    {
+        $Sub = self::getInstance($uid, $item_id);
+        return $Sub->_doCancel($system);
+    }
+
+
+    /**
+    *   Cancel a subscription.
+    *   If $system is true, then a user's name won't be logged with the message
+    *   to avoid confusion.
+    *
+    *   @param  integer $sub_id     Database ID of the subscription to cancel
+    *   @param  boolean $system     True if this is a system action.
+    */
+    public static function CancelByID($sub_id, $system=false)
+    {
+        $Sub = new self($sub_id);
+        return $Sub->_doCancel($system);
+    }
+
+
+    /**
+    *   Actually perform the functions to cancel a subscription
+    *
+    *   @see    self::Cancel()
+    *   @see    self::CancelByID()
+    *   @param  boolean $system     True if this is a system cancellation
+    *   @return boolean             True on success, False on failure
+    */
+    private function _doCancel($system = false)
     {
         global $_TABLES;
 
-        $Sub = new self($sub_id);
-        if ($Sub->id < 1) return;
+        if ($this->isNew) return false;
 
         // Remove the subscriber from the subscription group
-        USER_delGroup($Sub->Plan->groupid, $Sub->uid);
+        SUBSCR_debug("Removing user {$this->uid} from {$this->Plan->addgroup}");
+        Cache::clearGroup($this->Plan->addgroup, $this->uid);
+        USER_delGroup($this->Plan->addgroup, $this->uid);
 
         // Delete the subscription and log the activity
-        DB_delete($_TABLES['subscr_subscriptions'], 'id', $Sub->id);
-        SUBSCR_auditLog("Cancelled subscription $Sub->id ({$Sub->Plan->item_id}) " .
-                "for user {$Sub->uid} (" .COM_getDisplayName($Sub->uid) . '), expiring ' .
-                $Sub->expiration, $system);
+        DB_delete($_TABLES['subscr_subscriptions'], 'id', $this->id);
+        SUBSCR_auditLog("Cancelled subscription $this->id ({$this->Plan->item_id}) " .
+                "for user {$this->uid} (" .COM_getDisplayName($this->uid) . '), expiring ' .
+                $this->expiration, $system);
+        return true;
     }
 
 
     /**
     *   Get the product name associated with this subscription
     *
+    *   @deprecated
     *   @return string      Product name
     */
-    public function ProductName()
+    public function X_ProductName()
     {
         global $_TABLES;
         return DB_getItem($_TABLES['subscr_products'], 'item_id',
@@ -696,20 +701,6 @@ class Subscription
         }
         return $retval;
     }
-
-
-    /*function updateProfile($newtype, $newdate, $uid = 0)
-    {
-        if (function_exists('PROFILE_updateExpiration')) {
-            if (!PROFILE_updateExpiration($newdate, $uid))
-                return false;
-        }
-        if (function_exists('PROFILE_updateMembertype')) {
-            if (!PROFILE_updateMembertype($newtype, $uid))
-                return false;
-        }
-        return true;
-    }*/
 
 
     /**
@@ -739,8 +730,7 @@ class Subscription
         }
         $res = DB_query($sql);
         while ($A = DB_fetchArray($res, false)) {
-            $retval[$A['item_id']] = new Subscription();
-            $retval[$A['item_id']]->setVars($A);
+            $retval[$A['item_id']] = new self($A);
         }
         return $retval;
     }

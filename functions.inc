@@ -622,7 +622,7 @@ function plugin_runScheduledTask_subscription()
     global $_TABLES, $_CONF_SUBSCR, $_CONF;
 
     // Cancel subscriptions not renewed within the grace period
-    $sql = "SELECT s.id, s.expiration
+    $sql = "SELECT s.uid, s.item_id
             FROM {$_TABLES['subscr_subscriptions']} s
             LEFT JOIN {$_TABLES['subscr_products']} p
                 ON p.item_id = s.item_id
@@ -632,9 +632,8 @@ function plugin_runScheduledTask_subscription()
     $r = DB_query($sql);
     if ($r) {
         while ($row = DB_fetchArray($r, false)) {
-            Subscription\Subscription::Cancel($row['id'], true);
+            Subscription\Subscription::Cancel($row['uid'], $row['item_id'], true);
         }
-
     }
 
     // For the subscriptions that are left, notify the subscribers
@@ -653,7 +652,7 @@ function plugin_runScheduledTask_subscription()
 */
 function SUBSCR_auditLog($logentry = '', $system=false)
 {
-    global $_CONF, $_USER, $LANG01;
+    global $_CONF, $_USER, $LANG01, $LANG_SUBSCR;
 
     if ($logentry == '')
         return '';

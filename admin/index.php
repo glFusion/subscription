@@ -482,11 +482,10 @@ case 'cancelbutton_x':
 //case 'delMultiSub':
     if (isset($_POST['delitem']) && is_array($_POST['delitem'])) {
         foreach ($_POST['delitem'] as $item) {
-            Subscription\Subscription::Cancel($item);
+            Subscription\Subscription::CancelByID($item);
         }
     }
-    echo COM_refresh(SUBSCR_ADMIN_URL.'/index.php?subscriptions=' .
-            $_GET['item_id']);
+    echo COM_refresh(SUBSCR_ADMIN_URL.'/index.php?subscriptions=x');
     break;
 
 case 'renewbutton_x':
@@ -510,7 +509,7 @@ default:
 // Display the correct page content
 switch ($view) {
 case 'editproduct':
-    $P = new Subscription\Product($item_id);
+    $P = Subscription\Product::getInstance($item_id);
     if (isset($_POST['short_description'])) {
         // Pick a field.  If it exists, then this is probably a rejected save
         $P->SetVars($_POST);

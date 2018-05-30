@@ -158,7 +158,6 @@ function service_handlePurchase_subscription($args, &$output, &$svc_msg)
         return PLG_RET_ERROR;
     }
     $upgrade = isset($id_parts[2]) && $id_parts[2] == 'upgrade' ? true : false;
-
     $amount = (float)$ipn_data['pmt_gross'];
 
     // Initialize the return array
@@ -217,15 +216,14 @@ function service_handleRefund_subscription($args, &$output, &$svc_msg)
         $uid = (int)$paypal_data['custom']['uid'];
     else
         $uid = 1;
+    if ($uid == 1) return PLG_RET_OK;   // Nothing to do for anonymous
 
     // Get the current subscription for this product and user and cancel it
-    $sub_id = DB_getItem($_TABLES['subscr_subscriptions'],
-            array('item_id', 'uid'),
-            array($item[1], $uid));
-    if (!empty($sub_id)) {
-        Subscription\Subscription::Cancel($sub_id, true);
+    if (Subscription\Subscription::Cancel($uid, $item[1], true)) {
+        return PLG_RET_OK;
+    } else {
+        return PLG_RET_ERROR;
     }
-    return PLG_RET_OK;
 }
 
 
