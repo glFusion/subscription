@@ -64,7 +64,7 @@ class Product
         if (is_array($id)) {
             $this->setVars($id, true);
             $this->isNew = false;
-        } elseif ($this->item_id != '') {
+        } elseif ($id != '') {
             $this->item_id = $id;
             if (!$this->Read($this->item_id)) {
                 $this->item_id = '';
@@ -297,10 +297,13 @@ class Product
     {
         static $items = array();
         if (!isset($items[$item_id])) {
-            $items[$item_id] = Cache::get($item_id);
-            if (!$items[$item_id]) {
-                $items[$item_id] = new self($item_id);
+            $cache_key = 'product_' . $item_id;
+            $Obj = Cache::get($cache_key);
+            if ($Obj === NULL) {
+                $Obj = new self($item_id);
+                Cache::set($cache_key, $Obj, 'products');
             }
+            $items[$item_id] = $Obj;
         }
         return $items[$item_id];
     }
@@ -429,7 +432,8 @@ class Product
         }
         // Clear all products since updates may affect listings
         Cache::clear('products');
-        Cache::set($this->item_id, $this, 'products');
+        $cache_key = 'product_' . $this->item_id;
+        Cache::set($cache_key, $this, 'products');
 
         SUBSCR_debug('Status of last update: ' . print_r($status,true));
         if (!$this->hasErrors()) {
@@ -653,8 +657,12 @@ class Product
                 WHERE item_id='" . DB_escapeString($id) . "'";
         //echo $sql;die;
         DB_query($sql);
-
-        return DB_error() ? $oldvalue : $newvalue;
+        if (!DB_error()) {
+            Cache::clearAnyTags(array('products_ena_1', 'products_ena_0', 'product_' . $id));
+            return $newvalue;
+        } else {
+            return $oldvalue;
+        }
     }
 
 
