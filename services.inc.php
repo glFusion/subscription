@@ -141,8 +141,14 @@ function service_handlePurchase_subscription($args, &$output, &$svc_msg)
 {
     global $_CONF, $_CONF_SUBSCR, $_TABLES, $LANG_DON;
 
-    // Must have an item ID following the plugin name
-    $item_id = $args['item_id'];
+    $item_id = NULL;
+    if (isset($args['item']) && is_array($args['item'])) {
+        if (isset($args['item']['item_id']))
+            $item_id = $args['item']['item_id'];
+    }
+    // Must have an item ID and IPN data
+    if (empty($item_id)) return PLG_RET_ERROR;
+    if (!isset($args['ipn_data']) || empty($args['ipn_data'])) return PLG_RET_ERROR;
     $ipn_data = $args['ipn_data'];
 
     // Get rid of paypal-supplied options, not used here
@@ -204,7 +210,7 @@ function service_handleRefund_subscription($args, &$output, &$svc_msg)
 {
     global $_TABLES;
 
-    $item = $args['item'];      // array of item number info
+    $item = $args['item_id'];      // array of item number info
     $paypal_data = $args['ipn_data'];
 
     // Must have an item ID following the plugin name
