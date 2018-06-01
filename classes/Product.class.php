@@ -36,7 +36,7 @@ class Product
 
     /** Indicator that this is a new product vs. editing an existing one.
     *   @var boolean */
-    private $isNew;
+    public $isNew;
 
     /** Array of error messages
      *  @var array */

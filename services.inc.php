@@ -5,9 +5,9 @@
 *   as the PayPal plugin.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2011 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2011-2018 Lee Garner <lee@leegarner.com>
 *   @package    subscription
-*   @version    0.1.3
+*   @version    0.2.2
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -84,47 +84,39 @@ function service_productinfo_subscription($A, &$output, &$svc_msg)
 
     // Does not support remote web services, must be local only.
     if ($A['gl_svc'] !== false) return PLG_RET_PERMISSION_DENIED;
-    unset($A['gl_svc']);        // remove to prevent extra ':' in item number.
+    // remove to prevent extra ':' in product_id.
+    if (isset($A['gl_svc'])) unset($A['gl_svc']);
 
     // Create a return array with values to be populated later
-    $output = array('product_id' => implode(':', $A),
+    $output = array(
+            'product_id' => implode(':', $A),
             'name' => 'Unknown',
             'short_description' => 'Unknown Subscription Item',
             'description'       => '',
             'price' => '0.00',
+            'taxable' => 0,
     );
 
-    if (isset($A[1]) && !empty($A[1])) {
-        $A[1] = COM_sanitizeID($A[1]);
-        $sql = "SELECT item_id, short_description, description, price, upg_from, upg_price
-                FROM {$_TABLES['subscr_products']}
-                WHERE item_id='{$A[1]}'";
-        // Suppress sql errors to avoid breaking the IPN process, but log
-        // them for review
-        $res = DB_query($sql, 1);
-        if ($res) {
-            $info = DB_fetchArray($res, false);
-        } else {
-            COM_errorLog("service_productinfo_subscription() SQL error: $sql", 1);
-            $info = array();
-        }
-        if (!empty($info)) {
-            $output['short_description'] = $info['short_description'];
-            $output['name'] = $info['short_description'];
-            $output['description'] = $info['description'];
-            //if (isset($custom['sub_type']) &&
-            //        $custom['sub_type'] == 'upgrade' &&
-            if (isset($A[2]) && $A[2] == 'upgrade' &&
-                    !empty($info['upg_from']) &&
-                    $info['upg_price'] > 0) {
-                $output['price'] = $info['upg_price'];
-                $output['name'] .= ', ' . $LANG_SUBSCR['upgrade'];
-            } else {
-                $output['price'] = $info['price'];
-            }
-        }
+    if (!isset($A[1]) || empty($A[1])) {
+        return PLG_RET_ERROR;
     }
 
+    $P = Subscription\Product::getInstance($A[1]);
+    if ($P->isNew) {
+        COM_errorLog(__FUNCTION__ . " Item {$A[1]} not found.");
+        return PLG_RET_ERROR;
+    }
+    $output['short_description'] = $P->short_description;
+    $output['name'] = $P->short_description;
+    $output['description'] = $P->description;
+    if (isset($A[2]) && $A[2] == 'upgrade' &&
+            !empty($info['upg_from']) &&
+            $info['upg_price'] > 0) {
+        $output['price'] = $P->upg_price;
+        $output['name'] .= ', ' . $LANG_SUBSCR['upgrade'];
+    } else {
+        $output['price'] = $P->price;
+    }
     return PLG_RET_OK;
 }
 
@@ -236,12 +228,13 @@ function service_handleRefund_subscription($args, &$output, &$svc_msg)
 /**
 *   Get the products under a given category (categroy not used)
 *
+*   @deprecated - Paypal no longer includes products, only categories
 *   @param  string  $cat    Name of category (unused)
 *   @return array           Array of product info, empty string if none
 */
 function service_getproducts_subscription($args, &$output, &$svc_msg)
 {
-    global $_TABLES, $_CONF_SUBSCR;
+    global $_CONF_SUBSCR, $_CONF, $LANG_SUBSCR;
 
     // Initialize the return value as empty.
     $output = array();
@@ -252,17 +245,7 @@ function service_getproducts_subscription($args, &$output, &$svc_msg)
         return $output;
     }
 
-    // Determine if the current user is subscribed already.
-    $sql = "SELECT item_id, expiration
-            FROM {$_TABLES['subscr_subscriptions']}
-            WHERE uid = '" . (int)$_USER['uid'] . "'
-            AND status = '" . SUBSCR_STATUS_ENABLED . "'";
-    $res = DB_query($sql, 1);
-    $mySub = $res ? DB_fetchArray($res, false) : array();
-    if (empty($mySub)) {
-        $mySub = array('item_id' => '', 'expiration' => '');
-    }
-
+    $Subs = Subscription\Subscription::getSubscriptions();
     $Products = Subscription\Product::getProducts();
     foreach ($Products as $P) {
         $description = $P->description;
@@ -271,8 +254,8 @@ function service_getproducts_subscription($args, &$output, &$svc_msg)
         // Check the expiration and early renewal period for any current
         // subscriptions to see if the current user can purchase this item.
         $ok_to_buy = true;
-        if (!empty($mySub['expiration']) && $mySub['item_id'] == $P->item_id) {
-            $exp_ts = strtotime($mySub['expiration']);
+        if (isset($Subs[$P->item_id]) && $Subs[$P->item_id]->expiration > '0000') {
+            $exp_ts = strtotime($Subs[$P->item_id]->expiration);
             $exp_format = strftime($_CONF['shortdate'], $exp_ts);
             $description .=
                 "<br /><i>{$LANG_SUBSCR['your_sub_expires']} $exp_format</i>";
@@ -281,7 +264,7 @@ function service_getproducts_subscription($args, &$output, &$svc_msg)
                 if ($renew_ts > date('U')) $ok_to_buy = false;
             }
         }
-        if ($P->upg_from == $mySub['item_id'] && $P->upg_price != '') {
+        if (array_key_exists($P->upg_from, $Subs) && $P->upg_price != '') {
             $price = (float)$P->upg_price;
             $item_option = ':upgrade';
         } else {
@@ -292,6 +275,7 @@ function service_getproducts_subscription($args, &$output, &$svc_msg)
         if ($ok_to_buy) {
             $output[] = array(
                 'id'    => 'subscription:' . $P->item_id . $item_option,
+                'item_id' => $P->item_id,
                 'name' => $P->name,
                 'short_description' => $short_description,
                 'description' => $description,
@@ -299,9 +283,37 @@ function service_getproducts_subscription($args, &$output, &$svc_msg)
                 'buttons' => array('buy_now' => $P->MakeButton()),
                 'url' => COM_buildUrl(SUBSCR_URL .
                     '/index.php?view=detail&item_id=' . $P->item_id),
+                'have_detail_svc' => true,  // Tell Paypal to use it's detail page wrapper
             );
         }
     }
+    return PLG_RET_OK;
+}
+
+
+/**
+*   Get the product detail page for a specific item.
+*   Takes the item ID as a full paypal-compatible ID (subscription:id:opts)
+*   and creates the detail page for inclusion in the paypal catalog.
+*
+*   @param  array   $args   Array containing item_id=>subscription:id:opts
+*   @param  mixed   $output Output holder variable
+*   @param  string  $svc_msg    Service message (not used)
+*   @return integer         Status value
+*/
+function service_getDetailPage_subscription($args, &$output, &$svc_msg)
+{
+    $output = '';
+    if (!is_array($args) || !isset($args['item_id'])) {
+        return PLG_RET_ERROR;
+    }
+    $item_info = explode(':', $args['item_id']);
+    if (!isset($item_info[1]) || empty($item_info[1])) {    // missing item ID
+        return PLG_RET_ERROR;
+    }
+    $P = Subscription\Product::getInstance($item_info[1]);
+    if ($P->isNew) return PLG_RET_ERROR;
+    $output = $P->Detail();
     return PLG_RET_OK;
 }
 
