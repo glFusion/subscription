@@ -242,11 +242,13 @@ function service_getproducts_subscription($args, &$output, &$svc_msg)
     // If we're not configured to show campaigns in the Paypal catalog,
     // just return
     if ($_CONF_SUBSCR['show_in_pp_cat'] != 1) {
-        return $output;
+        return PLG_RET_ERROR;
     }
 
     $Subs = Subscription\Subscription::getSubscriptions();
     $Products = Subscription\Product::getProducts();
+    if (!$Products) return PLG_RET_ERROR;
+
     foreach ($Products as $P) {
         $description = $P->description;
         $short_description = $P->short_description;

@@ -985,6 +985,7 @@ class Product
                 $sql .= SEC_buildAccessSql();
             }
             $result = DB_query($sql);
+            $retval = array();
             while ($A = DB_fetchArray($result, false)) {
                 $retval[$A['item_id']] = new self($A);
             }
