@@ -3,7 +3,7 @@
 *   Plugin-specific functions for the Subscription plugin for glFusion.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2010-2016 Lee Garner
+*   @copyright  Copyright (c) 2010-2018 Lee Garner
 *   @package    subscription
 *   @version    0.2.2
 *   @license    http://opensource.org/licenses/gpl-2.0.php
@@ -49,17 +49,22 @@ function SUBSCR_ProductList()
 
     $T->set_block('prodlist', 'ProductBlock', 'PBlock');
     foreach ($Products as $P) {
+        // Skip the rare case of a fixed expiration that has passed.
+        if ($P->duration_type == 'fixed' &&
+            $P->expiration < $_CONF_SUBSCR['_dt']->format('Y-m-d', true)) {
+            continue;
+        }
         $description = $P->description;
         $price = (float)$P->price;
         $lang_price = $LANG_SUBSCR['price'];
 
         $ok_to_buy = true;
+        $exp_msg = '';
         if (isset($mySubs[$P->item_id])) {
             $d = new \Date($mySubs[$P->item_id]->expiration);
             $exp_ts = $d->toUnix();
             $exp_format = $d->format($_CONF['shortdate']);
-            $description .=
-                "<br /><i>{$LANG_SUBSCR['your_sub_expires']} $exp_format</i>";
+            $exp_msg = sprintf($LANG_SUBSCR['your_sub_expires'], $exp_format);
             if ($P->early_renewal > 0) {
                 $renew_ts = $exp_ts - ($P->early_renewal * 86400);
                 if ($renew_ts > $_CONF_SUBSCR['_dt']->toUnix())
@@ -81,6 +86,7 @@ function SUBSCR_ProductList()
             'currency'  => $currency,
             'purchase_btn' => $buttons,
             'lang_price' => $lang_price,
+            'exp_msg'   => $exp_msg,
         ) );
         $T->parse('PBlock', 'ProductBlock', true);
     }
