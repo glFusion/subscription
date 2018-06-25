@@ -13,14 +13,14 @@
   <div class="subProdListItemInfo">
     <h2><a href="{site_url}/subscription/index.php?view=detail&item_id={item_id}">{item_id}</a></h2>
     {description}
-{!if exp_msg}
-    <div class="subProdListItemExpMsg">{exp_msg}</div>
-{!endif}
   </div>
   <div class="subProdListItemBtn">
     {purchase_btn}
     <div>{lang_price}: {price} {currency}</div>
   </div>
+{!if exp_msg}
+    <div class="subProdListItemExpMsg">{exp_msg}</div>
+{!endif}
 </div>
 <!-- END ProductBlock -->
 {# end {templatelocation} #}

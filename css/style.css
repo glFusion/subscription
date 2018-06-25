@@ -79,3 +79,9 @@
 .sub-icon-unknown {
     color: #530E53;
 }
+.subProdListItemExpMsg {
+    float:right;
+    text-align:right;
+    font-style: italic;
+    clear: both;
+}
