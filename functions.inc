@@ -699,7 +699,7 @@ function SUBSCR_auditLog($logentry = '', $system=false)
 function SUBSCR_debug($msg)
 {
     global $_CONF_SUBSCR;
-    if ($_CONF_SUBSCR['debug']) {
+    if (isset($_CONF_SUBSCR['debug']) && $_CONF_SUBSCR['debug']) {
         COM_errorLog('SUBSCR DEBUG: ' . $msg);
     }
 }
@@ -1057,5 +1057,48 @@ function SUBSCR_paypal_enabled()
     }
     return $enabled;
 }
+
+
+/**
+*   Helper function to get a template object.
+*
+*   @param  string  $name   Base name of template file, e.g. "editor"
+*   @param  string  $id     ID of template, e.g. "editform"
+*   @param  string  $path   Optional path if not "templates/"
+*   @return string      Full filename, e.g. "editor.uikit.thtml"
+*/
+function SUBSCR_getTemplate($name, $id='', $path='')
+{
+    global $_CONF_SUBSCR;
+
+    $templates = array();
+
+    // Put parameters into an array if not already.
+    if (!is_array($name) && !empty($id)) {
+        $templates = array($id => $name);
+    } elseif (is_array($name)) {
+        $templates = $name;
+    }
+
+    // Add additional path info if needed
+    if (!empty($path) && $path[0] == '/') $path = substr($path, 1);
+    if (substr($path, 0, 9) != 'templates') {
+        $path = 'templates/' . $path;
+    }
+
+    // May use "switch" later, for now there are only two options
+    $tpltype = $_CONF_SUBSCR['_is_uikit'] ? '.uikit' : '';
+    foreach ($templates as $t_id =>$t_name) {
+        if (file_exists(__DIR__ . "/$path/$t_name$tpltype.thtml")) {
+            $templates[$t_id] = "$t_name$tpltype.thtml";
+        } else {
+            $templates[$t_id] = "$t_name.thtml";
+        }
+    }
+    $T = new Template(__DIR__ . '/' . $path);
+    $T->set_file($templates);
+    return $T;
+}
+
 
 ?>
