@@ -129,34 +129,6 @@ $LANG_SUBSCR = array(
 'required'      => 'Required',
 );
 
-$LANG_SUBSCR_HELP = array(
-'item_id' => 'Enter a product ID for this product. This should be short, perhaps one word, and must be unique. If left blank, or not unique, then an ID will be automatically created.',
-'duration' => 'Select the duration type, either "Fixed" or a time period.
-If "Fixed" is selected, enter the expiration date in the field to the right. If a period of time is selected, enter the number of periods in the field provided. For example, you may select "Month" and enter "6" to create a 6-month subscription.',
-'price' => 'Enter the price for this subscription.',
-'fixed_exp' => 'If this subscription has a fixed expiration date, enter it here in &apos;YYYY-MM-DD&apos; format.',
-'sub_grp' => 'Select the glFusion group to which subscribers will be automatically added. This group can then be granted additional privileges.',
-'short_dscp' => 'Enter a short description for this product. This will be used in the product listing.',
-'dscp' => 'Enter a detailed description for this product.',
-'enabled' => 'Check this box to enable this product. The subscription product will not be available for purchase if it is not enabled.',
-'in_block' => 'Check this box to have this product shown in a &quot;Subscribe&quot; block. This will only be shown to users who are not subscribed already, or whose subscription will be expiring within <i>early_renewal</i> days.',
-'taxable' => 'If this subscription product is subject to sales tax, check this box.',
-'at_reg' => 'Select the action to be taken when a new user signs up.<ul>
-        <li><b>None</b> - No action</li>
-        <li><b>Automatic</b> - The new user will be automatically subscribed</li>
-        <li><b>Trial</b> - The new user will be given a trial subscription for the specified number of days.</li>
-        </ul>',
-'trial_days' => 'If a trial subscription at registration is enabled, enter the number of days for the trial. The trial subscription expires normally after this period and the subscriber can purchase an extension.',
-'grace_days' => 'Enter the number of days after expiration that the subscription will remain active. This is intended to offer a short period during which the subscriber may renew without loss of service. Enter "0" to have the subscription terminated as soon as it expires.',
-'early_renew' => 'Enter the maximum number of days before a subscription expires that it may be renewed. In order to avoid loss of service, this should be set to at least a few days prior to expiration.',
-'purch_grp' => 'Select the user group that is allowed to purchase this subscription. Typically this will be &quot;Logged-In Users&quot;',
-'sub_name' => 'Select the subscriber by user name.',
-'sub_item' => 'Select the subscription product.',
-'sub_exp' => '>Enter the expiration date for this subscription. This must be formatted as YYYY-MM-DD.  You can click on the calendar icon to use the date picker.',
-'sub_notified' => 'Check this box to indicate that the subscriber has been notified of the impending expiration for this subscription. This will prevent further notifications from being sent until the subscription is renewed.',
-'sub_status' => 'Select the box to indicate the current status of this subscription.',
-);
-
 // Messages for the plugin upgrade
 $PLG_subscription_MESSAGE06 = 'Plugin upgrade not supported.';
 

@@ -37,7 +37,7 @@ function update_duration_type(opt)
 
 <p>
   <label for="item_id">{$LANG_SUBSCR['product_id']}:
-    <span id="item_id" class="tooltip_cfg tooltipstered"></span> 
+    <span id="item_id" class="tooltip_cfg tooltipstered"></span>
   </label>
   <input required class="fValidate['required']"  size="20"
     type="text" name="item_id" value="{item_id}" id="item_id" />
@@ -47,7 +47,7 @@ function update_duration_type(opt)
 
 <p>
   <label for="name">{$LANG_SUBSCR['name']}:
-    <span id="name" class="tooltip_cfg tooltipstered"></span> 
+    <span id="name" class="tooltip_cfg tooltipstered"></span>
   </label>
   <input required class="fValidate['required']"  size="50"
     type="text" name="name" value="{name}" id="f_name" />
@@ -55,7 +55,7 @@ function update_duration_type(opt)
 
 <p>
   <label for="f_duration">{$LANG_SUBSCR['duration']}:
-    <span id="duration" class="tooltip_cfg tooltipstered"></span> 
+    <span id="duration" class="tooltip_cfg tooltipstered"></span>
   </label>
   <input type="text" name="duration" value="{duration}" id="f_duration" />
   <select name="duration_type" onchange="javascript:update_duration_type(this.value);">
@@ -69,10 +69,10 @@ function update_duration_type(opt)
 
 <p id="fixed_exp_field" style="display:none;">
   <label for="f_expiration">{$LANG_SUBSCR['fixed_exp']}:
-    <span id="expiration" class="tooltip_cfg tooltipstered"></span> 
+    <span id="expiration" class="tooltip_cfg tooltipstered"></span>
   </label>
   <input type="text" name="expiration" value="{expiration}" id="f_expiration" />
-  <img src="{site_url}/images/datepicker.jpg" 
+  <img src="{site_url}/images/datepicker.jpg"
     id="fixedexp_trigger"
     style="cursor: pointer;"
     alt="{$LANG_SUBSCR['date_selector']}"
@@ -82,14 +82,14 @@ function update_duration_type(opt)
 
 <p>
   <label for="f_price">{$LANG_SUBSCR['price']}:
-    <span id="price" class="tooltip_cfg tooltipstered"></span> 
+    <span id="price" class="tooltip_cfg tooltipstered"></span>
   </label>
   <input type="text" name="price" value="{price}" id="f_price" />
 </p>
 
 <p>
   <label for="f_addgroup">{$LANG_SUBSCR['addgroup']}:
-    <span id="addgroup" class="tooltip_cfg tooltipstered"></span> 
+    <span id="addgroup" class="tooltip_cfg tooltipstered"></span>
   </label>
   <select name="addgroup" value="{addgroup}" id="f_addgroup">
     {addgroup_sel}
@@ -98,7 +98,7 @@ function update_duration_type(opt)
 
 <p>
   <label>{$LANG_SUBSCR['short_description']}:
-    <span id="short_description" class="tooltip_cfg tooltipstered"></span> 
+    <span id="short_dscp" class="tooltip_cfg tooltipstered"></span>
   </label>
   <input type="text" name="short_description" size="60" maxlength="255"
     value="{short_description}" />
@@ -106,37 +106,37 @@ function update_duration_type(opt)
 
 <p id="html_editarea">
   <label>{$LANG_SUBSCR['description']}:
-    <span id="desc" class="tooltip_cfg tooltipstered"></span> 
+    <span id="dscp" class="tooltip_cfg tooltipstered"></span>
   </label>
   <textarea id="description"
-      name="description" cols="35" rows="5" 
+      name="description" cols="35" rows="5"
       style="width:70%">{description}</textarea>
 </p>
 
 <p>
   <label for="f_enabled">{$LANG_SUBSCR['enabled']}?
-    <span id="enabled" class="tooltip_cfg tooltipstered"></span> 
+    <span id="enabled" class="tooltip_cfg tooltipstered"></span>
   </label>
   <input id="f_enabled" type="checkbox" name="enabled" value="1" {ena_chk} />
 </p>
 
 <p>
   <label for="f_show_in_block">{$LANG_SUBSCR['show_in_block']}?
-    <span id="show_in_block" class="tooltip_cfg tooltipstered"></span> 
+    <span id="show_in_block" class="tooltip_cfg tooltipstered"></span>
   </label>
   <input id="f_show_in_block" type="checkbox" name="show_in_block" value="1" {block_chk} />
 </p>
 
 <p>
   <label for="f_taxable">{$LANG_SUBSCR['taxable']}?
-    <span id="taxable" class="tooltip_cfg tooltipstered"></span> 
+    <span id="taxable" class="tooltip_cfg tooltipstered"></span>
   </label>
   <input if="f_taxable" type="checkbox" name="taxable" value="1" {taxable_chk} />
 </p>
 
 <p>
   <label for="f_at_registration">{$LANG_SUBSCR['at_registration']}?
-    <span id="at_registration" class="tooltip_cfg tooltipstered"></span> 
+    <span id="at_registration" class="tooltip_cfg tooltipstered"></span>
   </label>
   <input type="radio" name="at_registration" value="0" {register_none_sel} />{$LANG_SUBSCR['none']}
   <input type="radio" name="at_registration" value="1" {register_auto_sel} />{$LANG_SUBSCR['automatic']}
@@ -145,28 +145,28 @@ function update_duration_type(opt)
 
 <p>
   <label for="f_trial_days">{$LANG_SUBSCR['trial_days']}:
-    <span id="trial_days" class="tooltip_cfg tooltipstered"></span> 
+    <span id="trial_days" class="tooltip_cfg tooltipstered"></span>
   </label>
   <input type="text" name="trial_days" value="{trial_days}" id="f_trial_days" />
 </p>
 
 <p>
   <label for="f_grace_days">{$LANG_SUBSCR['grace_days']}:
-    <span id="grace_days" class="tooltip_cfg tooltipstered"></span> 
+    <span id="grace_days" class="tooltip_cfg tooltipstered"></span>
   </label>
   <input type="text" name="grace_days" value="{grace_days}" id="f_grace_days" />
 </p>
 
 <p>
   <label for="f_early_renewal">{$LANG_SUBSCR['early_renewal']}:
-    <span id="grace_days" class="tooltip_cfg tooltipstered"></span> 
+    <span id="grace_days" class="tooltip_cfg tooltipstered"></span>
   </label>
   <input id="f_grace_days" type="text" name="early_renewal" value="{early_renewal}" />
 </p>
 
 <p>
   <label for="f_grp_access">{$LANG_SUBSCR['purch_access']}:
-    <span id="purch_access" class="tooltip_cfg tooltipstered"></span> 
+    <span id="grp_access" class="tooltip_cfg tooltipstered"></span>
   </label>
   <select name="grp_access">
     {group_options}
@@ -210,11 +210,11 @@ function update_duration_type(opt)
 </fieldset>
 {!endif}
 
-<input class="lgButton green" type="submit" name="saveproduct" 
+<input class="lgButton green" type="submit" name="saveproduct"
     value="{$LANG_SUBSCR['submit']}" />
-<input class="lgButton" type="reset" name="reset" 
+<input class="lgButton" type="reset" name="reset"
     value="{$LANG_SUBSCR['clearform']}" />
-<input class="lgButton blue" type="submit" name="cancel" 
+<input class="lgButton blue" type="submit" name="cancel"
     value="{$LANG_ADMIN['cancel']}" />
 
 {!if candelete}
@@ -243,7 +243,6 @@ $(document).ready(function() {
         iconDesktop: true,
         iconTouch: true,
         functionBefore: function(origin, continueTooltip) {
-            continueTooltip();
             var attrHref = ConfigDocUrl;
             var ajobj = $(this);
             $.get(attrHref, function(data) {
@@ -255,6 +254,7 @@ $(document).ready(function() {
                     origin.tooltipster('content', 'No Help Text Found');
                     console.log('Unable to find help text for desc_%s',confVar);
                 }
+                continueTooltip();
             });
         }
     });

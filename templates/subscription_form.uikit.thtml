@@ -7,7 +7,7 @@
 
 <div class="uk-form-row">
   <label class="uk-form-label" for="uid">{$LANG_SUBSCR['subscriber']}
-    <i class="uk-icon uk-icon-question-circle tooltip" title="{$LANG_SUBSCR_HELP['sub_name']}"></i>
+    <span id="subscriber" class="tooltip_cfg tooltipstered"></span>
   </label>
   <div class="uk-form-controls">
     <select id="uid" name="uid">
@@ -18,7 +18,7 @@
 
 <div class="uk-form-row">
   <label class="uk-form-label" for="item_id">{$LANG_SUBSCR['product']}
-    <i class="uk-icon uk-icon-question-circle tooltip" title="{$LANG_SUBSCR_HELP['sub_item']}"></i>
+    <span id="product" class="tooltip_cfg tooltipstered"></span>
   </label>
   <div class="uk-form-controls">
     <select id="item_id" name="item_id">
@@ -29,7 +29,7 @@
 
 <div class="uk-form-row">
   <label class="uk-form-label">{$LANG_SUBSCR['expiration']}
-    <i class="uk-icon uk-icon-question-circle tooltip" title="{$LANG_SUBSCR_HELP['sub_exp']}"></i>
+    <span id="expiration" class="tooltip_cfg tooltipstered"></span>
   </label>
   <div class="uk-form-controls">
     <input type="text" name="expiration" value="{expiration}" size="12" id="f_expire" data-uk-datepicker="{format:'YYYY-MM-DD'}" />
@@ -38,7 +38,7 @@
 
 <div class="uk-form-row">
   <label class="uk-form-label">{$LANG_SUBSCR['user_notified']}:
-    <i class="uk-icon uk-icon-question-circle tooltip" title="{$LANG_SUBSCR_HELP['sub_notified']}"></i>
+    <span id="user_notified" class="tooltip_cfg tooltipstered"></span>
   </label>
   <div class="uk-form-controls">
   <input id="notified" type="checkbox" name="notified" value="1" {notified_chk}>
@@ -46,8 +46,8 @@
 </div>
 
 <div class="uk-form-row">
-  <label class="uk-form-label" for="f_status">{$LANG_SUBSCR['status']}:
-    <i class="uk-icon uk-icon-question-circle tooltip" title="{$LANG_SUBSCR_HELP['sub_status']}"></i>
+  <label class="uk-form-label">{$LANG_SUBSCR['status']}:
+    <span id="status" class="tooltip_cfg tooltipstered"></span>
   </label>
   <div class="uk-form-controls">
     <input type="radio" name="status" value="0" {status_0} />&nbsp;{$LANG_SUBSCR['active']}&nbsp;&nbsp;
@@ -59,11 +59,11 @@
 
 <div class="uk-form-row">
   <div class="uk-form-controls">
-    <button class="uk-button uk-button-success" type="submit" name="savesubscription" 
+    <button class="uk-button uk-button-success" type="submit" name="savesubscription"
     value="{$LANG_ADMIN['submit']}">{$LANG_ADMIN['submit']}</button>
     <button class="uk-button" type="reset" value="{$LANG_SUBSCR['clearform']}">{$LANG_SUBSCR['clearform']}</button>
-    <button class="uk-button uk-button-danger" type="submit" name="deletesubscription" 
-    value="{$LANG_ADMIN['delete']}" 
+    <button class="uk-button uk-button-danger" type="submit" name="deletesubscription"
+    value="{$LANG_ADMIN['delete']}"
     onclick="return confirm('{$LANG_SUBSCR['q_del_item']}');">{$LANG_ADMIN['delete']}</button>
   </div>
 </div>
@@ -79,7 +79,6 @@ $(document).ready(function() {
         iconDesktop: true,
         iconTouch: true,
         functionBefore: function(origin, continueTooltip) {
-            continueTooltip();
             var attrHref = ConfigDocUrl;
             var ajobj = $(this);
             $.get(attrHref, function(data) {
@@ -91,6 +90,7 @@ $(document).ready(function() {
                     origin.tooltipster('content', 'No Help Text Found');
                     console.log('Unable to find help text for desc_%s',confVar);
                 }
+                continueTooltip();
             });
         }
     });
