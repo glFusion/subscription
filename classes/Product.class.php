@@ -523,16 +523,7 @@ class Product
         }
         $id = $this->item_id;
         $action_url = SUBSCR_ADMIN_URL . '/index.php';
-
-        $T = new \Template(SUBSCR_PI_PATH . '/templates');
-        switch ($_SYSTEM['framework']) {
-        case 'uikit':
-            $T->set_file(array('product' => "product_form.uikit.thtml"));
-            break;
-        default:
-            $T->set_file(array('product' => "product_form.thtml"));
-            break;
-        }
+        $T = SUBSCR_getTemplate('product_form', 'product');
 
         // Set up the wysiwyg editor, if available
         switch (PLG_getEditorType()) {
