@@ -87,9 +87,12 @@ function service_productinfo_subscription($A, &$output, &$svc_msg)
     // remove to prevent extra ':' in product_id.
     if (isset($A['gl_svc'])) unset($A['gl_svc']);
 
+    // Verify that item id is passed in
+    if (!is_array($A) || !isset($A['item_id']) || !is_array($A['item_id'])) return PLG_RET_ERROR;
+
     // Create a return array with values to be populated later
     $output = array(
-            'product_id' => implode(':', $A),
+            'product_id' => implode(':', $A['item_id']),
             'name' => 'Unknown',
             'short_description' => 'Unknown Subscription Item',
             'description'       => '',
@@ -97,11 +100,13 @@ function service_productinfo_subscription($A, &$output, &$svc_msg)
             'taxable' => 0,
     );
 
-    if (!isset($A[1]) || empty($A[1])) {
-        return PLG_RET_ERROR;
+    $item_id = $A['item_id'][0];        // get base product ID
+    if (isset($A['item_id'][1])) {      // get modifier (new or upgrade)
+        $item_mod = $A['item_id'][1];
+    } else {
+        $item_mod = 'new';
     }
-
-    $P = Subscription\Product::getInstance($A[1]);
+    $P = Subscription\Product::getInstance($item_id);
     if ($P->isNew) {
         COM_errorLog(__FUNCTION__ . " Item {$A[1]} not found.");
         return PLG_RET_ERROR;
@@ -109,9 +114,7 @@ function service_productinfo_subscription($A, &$output, &$svc_msg)
     $output['short_description'] = $P->short_description;
     $output['name'] = $P->short_description;
     $output['description'] = $P->description;
-    if (isset($A[2]) && $A[2] == 'upgrade' &&
-            !empty($info['upg_from']) &&
-            $info['upg_price'] > 0) {
+    if ($item_mod == 'upgrade' && $P->upg_from != '' && $P->upg_price > 0) {
         $output['price'] = $P->upg_price;
         $output['name'] .= ', ' . $LANG_SUBSCR['upgrade'];
     } else {
