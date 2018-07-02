@@ -806,7 +806,7 @@ class Product
         if (SUBSCR_paypal_enabled()) {
             $vars = array(
                 'item_number' => 'subscription:' . $this->item_id,
-                'item_name' => $this->item_id,
+                'item_name' => $this->short_description,
                 'short_description' => $this->short_description,
                 'amount' => sprintf("%5.2f", (float)$this->price),
                 'no_shipping' => 1,
