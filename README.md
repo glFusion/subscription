@@ -14,3 +14,9 @@ group.
 When the payment from Paypal is processed, the buyer will be added to the
 premium group. When a subscription expires, the subscriber is removed from
 that group.
+
+### Subscribe at Registration
+You can configure a subscription product so that new users are automatically subscribed when they register.
+Check the "At Registration" checkbox and set a number of days for a trial subscription.
+When the user registers, they will be subscribed for that number of days.
+If the "Trial Days" field is empty, they will be subscribed for the normal subscription term.

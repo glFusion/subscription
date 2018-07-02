@@ -21,32 +21,26 @@ if (!defined ('GVERSION')) {
 /** Subscriptions plugin configuration defaults
 *   @global array */
 global $_SUBSCR_DEFAULTS;
-$_SUBSCR_DEFAULTS = array();
-
-// Grace period after expiration when access will terminate
-$_SUBSCR_DEFAULTS['grace_days'] = 2;
-
-// Maximum number of days before expiration that a subscription can be renewed
-$_SUBSCR_DEFAULTS['early_renewal'] = 14;
-
-// Days before expiration to notify subscribers.  -1 = "never"
-$_SUBSCR_DEFAULTS['notifydays'] = $_SUBSCR_DEFAULTS['early_renewal'];
-
-// Show subscription products in the Paypal catalog?
-$_SUBSCR_DEFAULTS['show_in_pp_cat'] = 1;
-
-// Debug the plugin?
-$_SUBSCR_DEFAULTS['debug'] = 0;
-
-// Which glFusion blocks to show in our pages
-$_SUBSCR_DEFAULTS['displayblocks'] = 3;
-
-// Defaults for new products
-$_SUBSCR_DEFAULTS['show_in_block'] = 0;
-$_SUBSCR_DEFAULTS['enabled'] = 1;
-$_SUBSCR_DEFAULTS['taxable'] = 0;
-$_SUBSCR_DEFAULTS['onmenu'] = 0;    // Show on site menu?
-$_SUBSCR_DEFAULTE['return_url'] = '';   // Optional paypal return override
+$_SUBSCR_DEFAULTS = array(
+    // Grace period after expiration when access will terminate
+    'grace_days'    => 2,
+    // Maximum number of days before expiration that a subscription can be renewed
+    'early_renewal' => 14,
+    // Days before expiration to notify subscribers.  -1 = "never"
+    'notifydays'    => 14,
+    // Show subscription products in the Paypal catalog?
+    'show_in_pp_cat' => 1,
+    // Debug the plugin?
+    'debug'         => 0,
+    // Which glFusion blocks to show in our pages
+    'displayblocks' => 3,
+    // Defaults for new products
+    'show_in_block'] = 0;
+    'enabled'       => 1,
+    'taxable'       => 0,
+    'onmenu'        => 0,    // Show on site menu?
+    'return_url'    => '',   // Optional paypal return override
+);
 
 /**
 *   Initialize Subscriptions plugin configuration

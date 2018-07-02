@@ -3,9 +3,9 @@
 *   Database creation and update statements for the Subscription plugin.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2010 Lee Garner
+*   @copyright  Copyright (c) 2010-2018 Lee Garner
 *   @package    subscription
-*   @version    0.0.1
+*   @version    0.2.2
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -152,6 +152,10 @@ $SUBSCR_UPGRADE = array(
         KEY `subscr_itemid` (`item_id`),
         KEY `subscr_userid` (`uid`)
         ) ENGINE=MyISAM",
+    ),
+'0.2.2' => array(
+    "UPDATE {$_TABLES['subscr_products']}
+        SET at_registration = 1 WHERE at_registration = 2",
     ),
 );
 

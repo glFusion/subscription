@@ -595,28 +595,7 @@ class Product
             'group_options' => COM_optionList($_TABLES['groups'],
                                 'grp_id,grp_name', $this->grp_access, 1, 'grp_id <> 1'),
             'iconset' => $_CONF_SUBSCR['_iconset'],
-        ) );
-
-        $trial_days = '';
-        switch ($this->at_registration) {
-        case SUBSCR_REGISTER_AUTO:
-            $reg_radio = 'register_auto_sel';
-            break;
-        case SUBSCR_REGISTER_OPTIONAL:
-            $reg_radio = 'register_opt_sel';
-            break;
-        case SUBSCR_REGISTER_TRIAL:
-            $reg_radio = 'register_trial_sel';
-            $trial_days = $this->trial_days;
-            break;
-        case SUBSCR_REGISTER_NONE:
-        default:
-            $reg_radio = 'register_none_sel';
-            break;
-        }
-        $T->set_var(array(
-            $reg_radio      => 'checked="checked"',
-            'trial_days'    => $trial_days,
+            'register_chk' => $this->at_registration ? 'checked="checked"' : '',
         ) );
 
         if (!self::isUsed($this->item_id)) {

@@ -36,7 +36,7 @@ function update_duration_type(opt)
 <legend>{$LANG_SUBSCR['subscription_info']}</legend>
 
 <p>
-  <label for="item_id">{$LANG_SUBSCR['product_id']}:
+  <label>{$LANG_SUBSCR['product_id']}:
     <span id="item_id" class="tooltip_cfg tooltipstered"></span>
   </label>
   <input required class="fValidate['required']"  size="20"
@@ -46,7 +46,7 @@ function update_duration_type(opt)
 </p>
 
 <p>
-  <label for="name">{$LANG_SUBSCR['name']}:
+  <label>{$LANG_SUBSCR['name']}:
     <span id="name" class="tooltip_cfg tooltipstered"></span>
   </label>
   <input required class="fValidate['required']"  size="50"
@@ -54,7 +54,7 @@ function update_duration_type(opt)
 </p>
 
 <p>
-  <label for="f_duration">{$LANG_SUBSCR['duration']}:
+  <label>{$LANG_SUBSCR['duration']}:
     <span id="duration" class="tooltip_cfg tooltipstered"></span>
   </label>
   <input type="text" name="duration" value="{duration}" id="f_duration" />
@@ -68,7 +68,7 @@ function update_duration_type(opt)
 </p>
 
 <p id="fixed_exp_field" style="display:none;">
-  <label for="f_expiration">{$LANG_SUBSCR['fixed_exp']}:
+  <label>{$LANG_SUBSCR['fixed_exp']}:
     <span id="expiration" class="tooltip_cfg tooltipstered"></span>
   </label>
   <input type="text" name="expiration" value="{expiration}" id="f_expiration" />
@@ -81,14 +81,14 @@ function update_duration_type(opt)
 </p>
 
 <p>
-  <label for="f_price">{$LANG_SUBSCR['price']}:
+  <label>{$LANG_SUBSCR['price']}:
     <span id="price" class="tooltip_cfg tooltipstered"></span>
   </label>
   <input type="text" name="price" value="{price}" id="f_price" />
 </p>
 
 <p>
-  <label for="f_addgroup">{$LANG_SUBSCR['addgroup']}:
+  <label>{$LANG_SUBSCR['addgroup']}:
     <span id="addgroup" class="tooltip_cfg tooltipstered"></span>
   </label>
   <select name="addgroup" value="{addgroup}" id="f_addgroup">
@@ -114,58 +114,56 @@ function update_duration_type(opt)
 </p>
 
 <p>
-  <label for="f_enabled">{$LANG_SUBSCR['enabled']}?
+  <label>{$LANG_SUBSCR['enabled']}?
     <span id="enabled" class="tooltip_cfg tooltipstered"></span>
   </label>
   <input id="f_enabled" type="checkbox" name="enabled" value="1" {ena_chk} />
 </p>
 
 <p>
-  <label for="f_show_in_block">{$LANG_SUBSCR['show_in_block']}?
+  <label>{$LANG_SUBSCR['show_in_block']}?
     <span id="show_in_block" class="tooltip_cfg tooltipstered"></span>
   </label>
   <input id="f_show_in_block" type="checkbox" name="show_in_block" value="1" {block_chk} />
 </p>
 
 <p>
-  <label for="f_taxable">{$LANG_SUBSCR['taxable']}?
+  <label>{$LANG_SUBSCR['taxable']}?
     <span id="taxable" class="tooltip_cfg tooltipstered"></span>
   </label>
   <input if="f_taxable" type="checkbox" name="taxable" value="1" {taxable_chk} />
 </p>
 
 <p>
-  <label for="f_at_registration">{$LANG_SUBSCR['at_registration']}?
+  <label>{$LANG_SUBSCR['at_registration']}?
     <span id="at_registration" class="tooltip_cfg tooltipstered"></span>
   </label>
-  <input type="radio" name="at_registration" value="0" {register_none_sel} />{$LANG_SUBSCR['none']}
-  <input type="radio" name="at_registration" value="1" {register_auto_sel} />{$LANG_SUBSCR['automatic']}
-  <input type="radio" name="at_registration" value="2" {register_opt_sel} />{$LANG_SUBSCR['optional']}
+  <input type="checkbox" name="at_registration" value="1" {register_chk} />
 </p>
 
 <p>
-  <label for="f_trial_days">{$LANG_SUBSCR['trial_days']}:
+  <label>{$LANG_SUBSCR['trial_days']}:
     <span id="trial_days" class="tooltip_cfg tooltipstered"></span>
   </label>
   <input type="text" name="trial_days" value="{trial_days}" id="f_trial_days" />
 </p>
 
 <p>
-  <label for="f_grace_days">{$LANG_SUBSCR['grace_days']}:
+  <label>{$LANG_SUBSCR['grace_days']}:
     <span id="grace_days" class="tooltip_cfg tooltipstered"></span>
   </label>
   <input type="text" name="grace_days" value="{grace_days}" id="f_grace_days" />
 </p>
 
 <p>
-  <label for="f_early_renewal">{$LANG_SUBSCR['early_renewal']}:
+  <label>{$LANG_SUBSCR['early_renewal']}:
     <span id="grace_days" class="tooltip_cfg tooltipstered"></span>
   </label>
   <input id="f_grace_days" type="text" name="early_renewal" value="{early_renewal}" />
 </p>
 
 <p>
-  <label for="f_grp_access">{$LANG_SUBSCR['purch_access']}:
+  <label>{$LANG_SUBSCR['purch_access']}:
     <span id="grp_access" class="tooltip_cfg tooltipstered"></span>
   </label>
   <select name="grp_access">
@@ -178,7 +176,7 @@ function update_duration_type(opt)
 <fieldset>
   <legend>{$LANG_SUBSCR['profile_integration']}</legend>
 <p>
-  <label for="prf_update">{$LANG_SUBSCR['prf_update']}:
+  <label>{$LANG_SUBSCR['prf_update']}:
     <a href="#" onclick="popupWindow('{doc_url}#desc_prf_update', 'Help', 640, 480, 1);return false;" class="toolbar">
     <img src="{layout_url}/images/button_help.png" alt="" /></a>
   </label>
@@ -199,7 +197,7 @@ function update_duration_type(opt)
   <input type="tetxt" name="prf_type" value="{prf_type}" size="40" />
 </p>
 <p>
-  <label for="enabled">{$LANG_SUBSCR['purch_access']}?
+  <label>{$LANG_SUBSCR['purch_access']}?
     <a href="#" onclick="popupWindow('{doc_url}#desc_access', 'Help', 640, 480, 1);return false;" class="toolbar">
     <img src="{layout_url}/images/button_help.png" alt="" /></a>
   </label>

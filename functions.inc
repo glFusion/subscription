@@ -801,6 +801,8 @@ function plugin_user_delete_subscription($uid)
 *   Handle a new user registration.
 *   Called by PLG_createUser (glFusion 1.1.5) to handle a new user signup.
 *   Creates an initial trial subscription for any products so configured.
+*   If the product doesn't have a value set for trial_days, then a full
+*   subscription is created.
 *
 *   @param  integer $uid    UID of new user.  Already set by glFusion
 */
@@ -813,18 +815,16 @@ function plugin_user_create_subscription($uid = 0)
         return;
 
     $S = new Subscription\Subscription();
-
-    $sql = "SELECT item_id, at_registration, trial_days
-            FROM {$_TABLES['subscr_products']}
-            WHERE at_registration IN (" .
-                SUBSCR_REGISTER_AUTO . ', ' . SUBSCR_REGISTER_TRIAL . ')';
-    //echo $sql;die;
-    $res = DB_query($sql);
-    while ($A = DB_fetchArray($res, false)) {
-        if ($A['at_registration'] == SUBSCR_REGISTER_TRIAL) {
-            $S->Add($uid, $A['item_id'], min($A['trial_days'], 10), 'day');
-        } else {
-            $S->Add($uid, $A['item_id']);
+    $Products = Subscription\Product::getProducts();
+    foreach ($Products as $P) {
+        if ($P->at_registration) {
+            // If auto-signup is enabled for this product, use the trial_days
+            // if defined, or create a full subscription
+            if ($P->trial_days > 0) {
+                $S->Add($uid, $P->item_id, $P->trial_days, 'day');
+            } else {
+                $S->Add($uid, $P->item_id);
+            }
         }
     }
 }
@@ -1099,6 +1099,5 @@ function SUBSCR_getTemplate($name, $id='', $path='')
     $T->set_file($templates);
     return $T;
 }
-
 
 ?>

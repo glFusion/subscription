@@ -3,7 +3,7 @@
 *   Upgrade routines for the Subscription plugin.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2017 Lee Garner <lee@leegarner.com>
+*   @copyright  Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
 *   @package    subscription
 *   @version    0.2.2
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
