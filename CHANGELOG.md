@@ -6,7 +6,7 @@ Release TBD
 - Implement class autoloader
 - Add optional return_url config item
 - Implement namespace
-- Require glFusion 1.7+, lgLib 1.0.8+, Paypal 0.6.0+
+- Require glFusion 1.7+, lgLib 1.0.7+, Paypal 0.6.0+
 
 ## 0.2.1
 Released 2016-11-16
