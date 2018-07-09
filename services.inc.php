@@ -88,7 +88,7 @@ function service_productinfo_subscription($A, &$output, &$svc_msg)
     if (isset($A['gl_svc'])) unset($A['gl_svc']);
 
     // Verify that item id is passed in
-    $item = LGLIB_getVar($A, 'item_id', 'array');
+    $item = SUBSCR_getVar($A, 'item_id', 'array');
     if (!is_array($item)) return PLG_RET_ERROR;
 
     // Create a return array with values to be populated later
@@ -102,7 +102,7 @@ function service_productinfo_subscription($A, &$output, &$svc_msg)
     );
 
     $item_id = $item[0];        // get base product ID
-    $item_mod = LGLIB_getVar($item, 1, 'string', 'new');
+    $item_mod = SUBSCR_getVar($item, 1, 'string', 'new');
     $P = Subscription\Product::getInstance($item_id);
     if ($P->isNew) {
         COM_errorLog(__FUNCTION__ . " Item {$item_id} not found.");
@@ -183,7 +183,7 @@ function service_handlePurchase_subscription($args, &$output, &$svc_msg)
     }*/
 
     COM_errorLog("Processing subscription for user $uid to item {$product_id}");
-    $txn_id = LGLIB_getVar($ipn_data, 'txn_id', 'string', 'undefined');
+    $txn_id = SUBSCR_getVar($ipn_data, 'txn_id', 'string', 'undefined');
     $S = Subscription\Subscription::getInstance($uid, $product_id);
     $status = $S->Add($uid, $product_id, 0, '', NULL, $upgrade, $txn_id);
     return $status == true ? PLG_RET_OK : PLG_RET_ERROR;
@@ -211,7 +211,7 @@ function service_handleRefund_subscription($args, &$output, &$svc_msg)
 
     // User ID is provided in the 'custom' field, so make sure it's numeric.
     if (isset($paypal_data['custom'])) {
-        $uid = LGLIB_getVar($paypal_data['custom'], 'uid', 'int', 1);
+        $uid = SUBSCR_getVar($paypal_data['custom'], 'uid', 'int', 1);
     } else {
         $uid = 1;
     }
