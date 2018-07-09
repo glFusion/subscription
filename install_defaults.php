@@ -35,7 +35,7 @@ $_SUBSCR_DEFAULTS = array(
     // Which glFusion blocks to show in our pages
     'displayblocks' => 3,
     // Defaults for new products
-    'show_in_block' = 0;
+    'show_in_block' => 0;
     'enabled'       => 1,
     'taxable'       => 0,
     'onmenu'        => 0,    // Show on site menu?
