@@ -3,7 +3,7 @@
 *   Common functions for the Subscription plugin.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2010-2017 Lee Garner
+*   @copyright  Copyright (c) 2010-2018 Lee Garner
 *   @package    subscription
 *   @version    0.2.2
 *   @license    http://opensource.org/licenses/gpl-2.0.php
@@ -280,6 +280,7 @@ function plugin_autouninstall_subscription()
         'vars'      => array($_CONF_SUBSCR['pi_name'] . '_gid')
     );
     Cache::clear();
+    PLG_itemDeleted('*', $_CONF_SUBSCR['pi_name']);
     return $out;
 }
 

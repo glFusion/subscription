@@ -3,7 +3,7 @@
 *   Class to manage subscription items
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2010-2017 Lee Garner
+*   @copyright  Copyright (c) 2010-2018 Lee Garner
 *   @package    subscription
 *   @version    0.2.2
 *   @license    http://opensource.org/licenses/gpl-2.0.php
@@ -434,6 +434,7 @@ class Product
         Cache::clear('products');
         $cache_key = 'product_' . $this->item_id;
         Cache::set($cache_key, $this, 'products');
+        PLG_itemSaved($this->item_id, $_CONF_SUBSCR['pi_name'], $orig_item_id);
 
         SUBSCR_debug('Status of last update: ' . print_r($status,true));
         if (!$this->hasErrors()) {
@@ -445,7 +446,6 @@ class Product
                     ' failed.');
             return false;
         }
-
     }
 
 
@@ -464,6 +464,7 @@ class Product
         DB_delete($_TABLES['subscr_products'], 'item_id', $this->item_id);
         // Clear all products since updates may affect listings
         Cache::clear('products');
+        PLG_itemDeleted($this->item_id, $_CONF_SUBSCR['pi_name']);
         $this->item_id = '';
         return true;
     }
