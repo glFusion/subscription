@@ -99,6 +99,7 @@ function service_productinfo_subscription($A, &$output, &$svc_msg)
             'description'       => '',
             'price' => '0.00',
             'taxable' => 0,
+            'have_detail_svc' => true,  // Tell Paypal to use it's detail page wrapper
     );
 
     $item_id = $item[0];        // get base product ID
@@ -117,6 +118,8 @@ function service_productinfo_subscription($A, &$output, &$svc_msg)
     } else {
         $output['price'] = $P->price;
     }
+    $output['url'] = COM_buildUrl(SUBSCR_URL .
+                    '/index.php?view=detail&item_id=' . $P->item_id);
     return PLG_RET_OK;
 }
 
