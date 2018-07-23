@@ -131,7 +131,7 @@ function service_productinfo_subscription($A, &$output, &$svc_msg)
 */
 function service_handlePurchase_subscription($args, &$output, &$svc_msg)
 {
-    global $_CONF, $_CONF_SUBSCR, $_TABLES, $LANG_DON;
+    global $_CONF, $_CONF_SUBSCR, $_TABLES;
 
     $item_id = NULL;
     if (isset($args['item']) && is_array($args['item'])) {
