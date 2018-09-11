@@ -101,6 +101,7 @@ function service_productinfo_subscription($A, &$output, &$svc_msg)
             'taxable' => 0,
             'have_detail_svc' => true,  // Tell Paypal to use it's detail page wrapper
             'buynow_qty' => 1,
+            'fixed_q' => 1,
     );
 
     $item_id = $item[0];        // get base product ID
