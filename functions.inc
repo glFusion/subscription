@@ -866,13 +866,19 @@ function plugin_user_move_subscription($origUID, $destUID)
 */
 function plugin_paypal_getcategories_subscription()
 {
-    return array(
-        array(
-            'name' => 'Subscriptions',
-            'count' => 0,
-            'url' => SUBSCR_URL,
-        ),
-    );
+    global $_CONF_SUBSCR;
+
+    if ($_CONF_SUBSCR['show_in_pp_cat']) {
+        return array(
+            array(
+                'name' => 'Subscriptions',
+                'count' => 0,
+                'url' => SUBSCR_URL,
+            ),
+        );
+    } else {
+        return array();
+    }
 }
 
 
