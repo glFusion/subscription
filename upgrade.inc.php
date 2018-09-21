@@ -12,13 +12,10 @@
 */
 
 // Required to get the ADVT_DEFAULTS config values
-global $_CONF, $_CONF_SUBSCR, $_SUBSCR_DEFAULTS, $_DB_dbms, $SUBSCR_UPGRADE;
-
-/** Include the default configuration values */
-require_once __DIR__ . '/install_defaults.php';
+global $_CONF, $_CONF_SUBSCR, $_DB_dbms, $SUBSCR_UPGRADE;
 
 /** Include the table creation strings */
-require_once __DIR__ . "/sql/{$_DB_dbms}_install.php";
+require_once __DIR__ . "/sql/mysql_install.php";
 
 
 /**
@@ -29,7 +26,7 @@ require_once __DIR__ . "/sql/{$_DB_dbms}_install.php";
 */
 function SUBSCR_do_upgrade()
 {
-    global $_TABLES, $_CONF, $_CONF_SUBSCR, $_SUBSCR_DEFAULTS, $_PLUGIN_INFO;
+    global $_TABLES, $_CONF, $_CONF_SUBSCR, $_PLUGIN_INFO;
 
     if (isset($_PLUGIN_INFO[$_CONF_SUBSCR['pi_name']])) {
         if (is_array($_PLUGIN_INFO[$_CONF_SUBSCR['pi_name']])) {
@@ -44,15 +41,8 @@ function SUBSCR_do_upgrade()
     }
     $installed_ver = plugin_chkVersion_subscription();
 
-    $c = config::get_instance();
-    $have_config = ($c->group_exists($_CONF_SUBSCR['pi_name'])) ? 1 : 0;
-
     if (!COM_checkVersion($current_ver, '0.1.0')) {
         $current_ver = '0.1.0';
-        if ($have_config) {
-            $c->add('displayblocks', $_SUBSCR_DEFAULTS['displayblocks'],
-                'select', 0, 0, 13, 210, true, $_CONF_SUBSCR['pi_name']);
-        }
         if (!SUBSCR_do_set_version($current_ver)) return false;
     }
 
@@ -76,10 +66,6 @@ function SUBSCR_do_upgrade()
 
     if (!COM_checkVersion($current_ver, '0.1.4')) {
         $current_ver = '0.1.4';
-        if ($have_config) {
-            $c->add('onmenu', $_SUBSCR_DEFAULTS['onmenu'],
-                'select', 0, 0, 3, 70, true, $_CONF_SUBSCR['pi_name']);
-        }
         if (!SUBSCR_do_upgrade_sql($current_ver)) return false;
         if (!SUBSCR_do_set_version($current_ver)) return false;
     }
@@ -92,20 +78,12 @@ function SUBSCR_do_upgrade()
 
     if (!COM_checkVersion($current_ver, '0.2.1')) {
         $current_ver = '0.2.1';
-        if ($have_config) {
-            $c->add('return_url', $_SUBSCR_DEFAULTS['return_url'],
-                'text', 0, 0, 0, 80, true, $_CONF_SUBSCR['pi_name']);
-        }
         if (!SUBSCR_do_upgrade_sql($current_ver)) return false;
         if (!SUBSCR_do_set_version($current_ver)) return false;
     }
 
     if (!COM_checkVersion($current_ver, '0.2.2')) {
         $current_ver = '0.2.2';
-        if ($have_config) {
-            $c->add('return_url', $_SUBSCR_DEFAULTS['return_url'],
-                'text', 0, 0, 0, 80, true, $_CONF_SUBSCR['pi_name']);
-        }
         if (!SUBSCR_do_upgrade_sql($current_ver)) return false;
         if (!SUBSCR_do_set_version($current_ver)) return false;
     }
@@ -117,6 +95,10 @@ function SUBSCR_do_upgrade()
             return false;
         }
     }
+
+    // Finally, sync all config elements
+    require_once __DIR__ . '/install_defaults.php';
+    _update_config('paypal', $subscrConfigData);
 
     return true;
 }

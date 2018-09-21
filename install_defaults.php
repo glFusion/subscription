@@ -19,28 +19,164 @@ if (!defined ('GVERSION')) {
 }
 
 /** Subscriptions plugin configuration defaults
-*   @global array */
-global $_SUBSCR_DEFAULTS;
-$_SUBSCR_DEFAULTS = array(
-    // Grace period after expiration when access will terminate
-    'grace_days'    => 2,
-    // Maximum number of days before expiration that a subscription can be renewed
-    'early_renewal' => 14,
-    // Days before expiration to notify subscribers.  -1 = "never"
-    'notifydays'    => 14,
-    // Show subscription products in the Paypal catalog?
-    'show_in_pp_cat' => 1,
-    // Debug the plugin?
-    'debug'         => 0,
-    // Which glFusion blocks to show in our pages
-    'displayblocks' => 3,
-    // Defaults for new products
-    'show_in_block' => 0,
-    'enabled'       => 1,
-    'taxable'       => 0,
-    'onmenu'        => 0,    // Show on site menu?
-    'return_url'    => '',   // Optional paypal return override
+ *   @global array */
+$subscrConfigData = array(
+    array(
+        'name' => 'sg_main',
+        'default_value' => NULL,
+        'type' => 'subgroup',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => NULL,
+        'sort' => 0,
+        'set' => true,
+        'group' => 'subscription',
+    ),
+    array(
+        'name' => 'fs_main',
+        'default_value' => NULL,
+        'type' => 'fieldset',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => NULL,
+        'sort' => 0,
+        'set' => true,
+        'group' => 'subscription',
+    ),
+    array(
+        'name' => 'show_in_pp_cat',
+        'default_value' => '1',
+        'type' => 'select',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 3,
+        'sort' => 10,
+        'set' => true,
+        'group' => 'subscription',
+    ),
+    array(
+        'name' => 'grace_days',
+        'default_value' => '2',
+        'type' => 'text',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 0,
+        'sort' => 20,
+        'set' => true,
+        'group' => 'subscription',
+    ),
+    array(
+        'name' => 'early_renewal',
+        'default_value' => '14',
+        'type' => 'text',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 0,
+        'sort' => 30,
+        'set' => true,
+        'group' => 'subscription',
+    ),
+    array(
+        'name' => 'notifydays',
+        'default_value' => '14',
+        'type' => 'text',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 0,
+        'sort' => 40,
+        'set' => true,
+        'group' => 'subscription',
+    ),
+    array(
+        'name' => 'debug',
+        'default_value' => '0',
+        'type' => 'select',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 3,
+        'sort' => 50,
+        'set' => true,
+        'group' => 'subscription',
+    ),
+    array(
+        'name' => 'displayblocks',
+        'default_value' => '3',
+        'type' => 'select',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 13,
+        'sort' => 60,
+        'set' => true,
+        'group' => 'subscription',
+    ),
+    array(
+        'name' => 'onmenu',
+        'default_value' => '0',
+        'type' => 'select',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 3,
+        'sort' => 70,
+        'set' => true,
+        'group' => 'subscription',
+    ),
+    array(
+        'name' => 'return_url',
+        'default_value' => '',
+        'type' => 'text',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 0,
+        'sort' => 80,
+        'set' => true,
+        'group' => 'subscription',
+    ),
+    array(
+        'name' => 'fs_defaults',
+        'default_value' => NULL,
+        'type' => 'fieldset',
+        'subgroup' => 0,
+        'fieldset' => 10,
+        'selection_array' => NULL,
+        'sort' => 0,
+        'set' => true,
+        'group' => 'subscription',
+    ),
+    array(
+        'name' => 'enabled',
+        'default_value' => '1',
+        'type' => 'select',
+        'subgroup' => 0,
+        'fieldset' => 10,
+        'selection_array' => 3,
+        'sort' => 10,
+        'set' => true,
+        'group' => 'subscription',
+    ),
+    array(
+        'name' => 'show_in_block',
+        'default_value' => '0',
+        'type' => 'select',
+        'subgroup' => 0,
+        'fieldset' => 10,
+        'selection_array' => 3,
+        'sort' => 20,
+        'set' => true,
+        'group' => 'subscription',
+    ),
+    array(
+        'name' => 'taxable',
+        'default_value' => '0',
+        'type' => 'select',
+        'subgroup' => 0,
+        'fieldset' => 10,
+        'selection_array' => 3,
+        'sort' => 30,
+        'set' => true,
+        'group' => 'subscription',
+    ),
 );
+
 
 /**
 *   Initialize Subscriptions plugin configuration
@@ -50,62 +186,25 @@ $_SUBSCR_DEFAULTS = array(
 */
 function plugin_initconfig_subscription($group_id = 0)
 {
-    global $_CONF, $_CONF_SUBSCR, $_SUBSCR_DEFAULTS;
-
-    // Use configured default if a valid group ID wasn't presented
-    if ($group_id == 0)
-        $group_id = $_SUBSCR_DEFAULTS['defgrp'];
+    global $subscrConfigData;
 
     $c = config::get_instance();
-
-    if (!$c->group_exists($_CONF_SUBSCR['pi_name'])) {
-
-        $c->add('sg_main', NULL, 'subgroup', 0, 0, NULL, 0, true, 
-                $_CONF_SUBSCR['pi_name']);
-        $c->add('fs_main', NULL, 'fieldset', 0, 0, NULL, 0, true, 
-                $_CONF_SUBSCR['pi_name']);
-
-        $c->add('show_in_pp_cat', $_SUBSCR_DEFAULTS['show_in_pp_cat'],
-                'select', 0, 0, 3, 10, true, $_CONF_SUBSCR['pi_name']);
-
-        $c->add('grace_days', $_SUBSCR_DEFAULTS['grace_days'],
-                'text', 0, 0, 0, 20, true, $_CONF_SUBSCR['pi_name']);
-
-        $c->add('early_renewal', $_SUBSCR_DEFAULTS['early_renewal'],
-                'select', 0, 0, 2, 30, true, $_CONF_SUBSCR['pi_name']);
-
-        $c->add('notifydays', $_SUBSCR_DEFAULTS['notifydays'],
-                'select', 0, 0, 2, 40, true, $_CONF_SUBSCR['pi_name']);
-
-        $c->add('debug', $_SUBSCR_DEFAULTS['debug'],
-                'select', 0, 0, 3, 50, true, $_CONF_SUBSCR['pi_name']);
-
-        $c->add('displayblocks', $_SUBSCR_DEFAULTS['displayblocks'],
-                'select', 0, 0, 13, 60, true, $_CONF_SUBSCR['pi_name']);
-
-        $c->add('onmenu', $_SUBSCR_DEFAULTS['onmenu'],
-                'select', 0, 0, 3, 70, true, $_CONF_SUBSCR['pi_name']);
-
-        $c->add('return_url', $_SUBSCR_DEFAULTS['return_url'],
-                'text', 0, 0, 0, 80, true, $_CONF_SUBSCR['pi_name']);
-
-        // Product defaults
-        $c->add('fs_defaults', NULL, 'fieldset', 0, 10, NULL, 0, true, 
-                $_CONF_SUBSCR['pi_name']);
- 
-        $c->add('enabled', $_SUBSCR_DEFAULTS['enabled'],
-                'select', 0, 10, 3, 10, true, $_CONF_SUBSCR['pi_name']);
-
-        $c->add('show_in_block', $_SUBSCR_DEFAULTS['show_in_block'],
-                'select', 0, 10, 3, 20, true, $_CONF_SUBSCR['pi_name']);
-
-        $c->add('taxable', $_SUBSCR_DEFAULTS['taxable'],
-                'select', 0, 10, 3, 30, true, $_CONF_SUBSCR['pi_name']);
-
-     }
-
-     return true;
-
+    if (!$c->group_exists('subscription')) {
+        foreach ($subscrConfigData AS $cfgItem) {
+            $c->add(
+                $cfgItem['name'],
+                $cfgItem['default_value'],
+                $cfgItem['type'],
+                $cfgItem['subgroup'],
+                $cfgItem['fieldset'],
+                $cfgItem['selection_array'],
+                $cfgItem['sort'],
+                $cfgItem['set'],
+                $cfgItem['group']
+            );
+        }
+    }
+    return true;
 }
 
 ?>
