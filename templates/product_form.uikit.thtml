@@ -19,7 +19,7 @@ function update_duration_type(opt)
 
 <link rel="stylesheet" type="text/css" href="{pi_url}/css/style.css" />
 <form action="{action_url}" method="post"
-    class="uikit-form-horizontal subscriptionForm" id="submit"
+    class="uk-form uk-form-horizontal subscriptionForm" id="submit"
     enctype="multipart/form-data">
 <input type=hidden name="mode" value="saveproduct">
 <input type=hidden name="item_id_orig" value="{item_id}">
