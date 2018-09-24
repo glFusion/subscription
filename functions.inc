@@ -640,6 +640,16 @@ function plugin_runScheduledTask_subscription()
     // For the subscriptions that are left, notify the subscribers
     // if their expiration is impending
     SUBSCR_notifyExpiration();
+
+    // Disable any fixed-expiration products that have expired
+    $exp = $_CONF_SUBSCR['_dt']->Format('Y-m-d', true);
+    $sql = "UPDATE {$_TABLES['subscr_products']}
+            SET enabled = 0
+            WHERE enabled = 1 AND duration_type = 'fixed' AND expiration <= '$exp'";
+    $res = DB_query($sql);
+    if (DB_numRows($res) > 0) {
+        \Subscription\Cache::clear();
+    }
 }
 
 
