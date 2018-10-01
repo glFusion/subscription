@@ -6,6 +6,7 @@
 *   @copyright  Copyright (c) 2018 Lee Garner <lee@leegarner.com>
 *   @package    subscription
 *   @version    0.2.2
+*   @since      0.2.2
 *   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
@@ -85,8 +86,13 @@ class Cache
 
 
     /**
-    *   Delete group cache after adding or removing memberships.
-    */
+     *   Delete group cache after adding or removing memberships.
+     *   This uses the core glFusion tags that are cleared when memberships
+     *   are changed via the admin interface.
+     *
+     *   @param integer $grp_id     ID of affected group
+     *   @param integer $uid        ID of affected user
+     */
     public static function clearGroup($grp_id, $uid)
     {
         $tags = array('menu', 'groups', 'group_' . $grp_id, 'user_' . $uid);
