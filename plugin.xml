@@ -3,8 +3,8 @@
     <name>Subscription</name>
     <description>Integrates with the PayPal plugin to provide subscriptions to site content for members.</description>
     <version>0.2.2</version>
-    <glfusionversion>1.6.0</glfusionversion>
-    <phpversion>5.6.0</phpversion>
+    <glfusionversion>1.7.0</glfusionversion>
+    <phpversion>7.1.0</phpversion>
     <url>http://www.glfusion.org</url>
     <maintainer>Lee Garner</maintainer>
     <requires>paypal,0.6.0</requires>
