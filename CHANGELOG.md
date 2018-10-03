@@ -2,9 +2,10 @@
 
 ## 0.2.2
 Release TBD
+- Add development update function
 - Change at-registration to use trial days if set
 - Implement class autoloader
-- Add optional return_url config item
+- Add optional `return_url` config item
 - Implement namespace
 - Require glFusion 1.7+, lgLib 1.0.7+, Paypal 0.6.0+
 

@@ -3,9 +3,9 @@
 *   Configuration Defaults for the Subscription plugin for glFusion.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2010 Lee Garner
+*   @copyright  Copyright (c) 2010-2018 Lee Garner
 *   @package    subscription
-*   @version    0.0.2
+*   @version    0.2.2
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -205,6 +205,18 @@ function plugin_initconfig_subscription($group_id = 0)
         }
     }
     return true;
+}
+
+
+/**
+ * Sync the configuration in the DB to the above configs
+ */
+function plugin_updateconfig_subscription()
+{
+    global $subscrConfigData;
+
+    USES_lib_install();
+    _update_config('subscription', $subscrConfigData);
 }
 
 ?>

@@ -22,9 +22,10 @@ require_once __DIR__ . "/sql/mysql_install.php";
 *   Perform the upgrade starting at the current version.
 *
 *   @since  version 0.1.0
+*   @param  boolean $dvlp   True to ignore sql errors for development update
 *   @return boolean     True on success, False on failure
 */
-function SUBSCR_do_upgrade()
+function SUBSCR_do_upgrade($dvlp=false)
 {
     global $_TABLES, $_CONF, $_CONF_SUBSCR, $_PLUGIN_INFO;
 
@@ -84,7 +85,7 @@ function SUBSCR_do_upgrade()
 
     if (!COM_checkVersion($current_ver, '0.2.2')) {
         $current_ver = '0.2.2';
-        if (!SUBSCR_do_upgrade_sql($current_ver)) return false;
+        if (!SUBSCR_do_upgrade_sql($current_ver, $dvlp)) return false;
         if (!SUBSCR_do_set_version($current_ver)) return false;
     }
 
@@ -98,7 +99,7 @@ function SUBSCR_do_upgrade()
 
     // Finally, sync all config elements
     require_once __DIR__ . '/install_defaults.php';
-    _update_config('paypal', $subscrConfigData);
+    plugin_updateconfig_subscription();
 
     return true;
 }
@@ -114,7 +115,7 @@ function SUBSCR_do_upgrade()
 *   @param  array   $sql        Array of SQL statement(s) to execute
 *   @return boolean         True on success, False on failure
 */
-function SUBSCR_do_upgrade_sql($version='')
+function SUBSCR_do_upgrade_sql($version='', $ignore_error=false)
 {
     global $_TABLES, $_CONF_SUBSCR, $SUBSCR_UPGRADE;
 
@@ -131,7 +132,7 @@ function SUBSCR_do_upgrade_sql($version='')
         DB_query($sql, 1);
         if (DB_error()) {
             COM_errorLog("SQL Error during Subscription Plugin update", 1);
-            return false;
+            if (!$ignore_error) return false;
         }
     }
     COM_errorLog("--- Subscription plugin SQL update to version $version done", 1);
