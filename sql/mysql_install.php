@@ -153,7 +153,8 @@ $SUBSCR_UPGRADE = array(
         KEY `subscr_userid` (`uid`)
         ) ENGINE=MyISAM",
     ),
-'0.2.2' => array(
+    '0.2.2' => array(
+        // idempotent since 2 is no longer a valid option
     "UPDATE {$_TABLES['subscr_products']}
         SET at_registration = 1 WHERE at_registration = 2",
     ),

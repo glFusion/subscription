@@ -6,7 +6,7 @@
 *
 *   Only updates from the previous released version.
 *
-*   @author     Mark R. Evans mark AT glfusion DOT org
+*   @author     Lee Garner <lee@leegarner.com>
 *   @copyright  Copyright (c) 2018 Lee Garner <lee@leegarner.com>
 *   @package    subscription
 *   @version    0.2.2
@@ -30,7 +30,7 @@ if (function_exists('CACHE_clear')) {
 \Subscription\Cache::clear();
 
 // Force the plugin version to the previous version and do the upgrade
-$_PLUGIN_INFO['subscription']['pi_version'] = '0.2.2';
+$_PLUGIN_INFO['subscription']['pi_version'] = '0.2.1';
 SUBSCR_do_upgrade(true);
 
 // need to clear the template cache so do it here

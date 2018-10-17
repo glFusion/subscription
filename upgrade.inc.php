@@ -12,7 +12,7 @@
 */
 
 // Required to get the ADVT_DEFAULTS config values
-global $_CONF, $_CONF_SUBSCR, $_DB_dbms, $SUBSCR_UPGRADE;
+global $_CONF, $_CONF_SUBSCR, $SUBSCR_UPGRADE;
 
 /** Include the table creation strings */
 require_once __DIR__ . "/sql/mysql_install.php";
@@ -22,7 +22,6 @@ require_once __DIR__ . "/sql/mysql_install.php";
 *   Perform the upgrade starting at the current version.
 *
 *   @since  version 0.1.0
-*   @param  boolean $dvlp   True to ignore sql errors for development update
 *   @return boolean     True on success, False on failure
 */
 function SUBSCR_do_upgrade($dvlp=false)
@@ -49,37 +48,37 @@ function SUBSCR_do_upgrade($dvlp=false)
 
     if (!COM_checkVersion($current_ver, '0.1.1')) {
         $current_ver = '0.1.1';
-        if (!SUBSCR_do_upgrade_sql($current_ver)) return false;
+        if (!SUBSCR_do_upgrade_sql($current_ver, $dvlp)) return false;
         if (!SUBSCR_do_set_version($current_ver)) return false;
     }
 
     if (!COM_checkVersion($current_ver, '0.1.2')) {
         $current_ver = '0.1.2';
-        if (!SUBSCR_do_upgrade_sql($current_ver)) return false;
+        if (!SUBSCR_do_upgrade_sql($current_ver, $dvlp)) return false;
         if (!SUBSCR_do_set_version($current_ver)) return false;
     }
 
     if (!COM_checkVersion($current_ver, '0.1.3')) {
         $current_ver = '0.1.3';
-        if (!SUBSCR_do_upgrade_sql($current_ver)) return false;
+        if (!SUBSCR_do_upgrade_sql($current_ver, $dvlp)) return false;
         if (!SUBSCR_do_set_version($current_ver)) return false;
     }
 
     if (!COM_checkVersion($current_ver, '0.1.4')) {
         $current_ver = '0.1.4';
-        if (!SUBSCR_do_upgrade_sql($current_ver)) return false;
+        if (!SUBSCR_do_upgrade_sql($current_ver, $dvlp)) return false;
         if (!SUBSCR_do_set_version($current_ver)) return false;
     }
 
     if (!COM_checkVersion($current_ver, '0.2.0')) {
         $current_ver = '0.2.0';
-        if (!SUBSCR_do_upgrade_sql($current_ver)) return false;
+        if (!SUBSCR_do_upgrade_sql($current_ver, $dvlp)) return false;
         if (!SUBSCR_do_set_version($current_ver)) return false;
     }
 
     if (!COM_checkVersion($current_ver, '0.2.1')) {
         $current_ver = '0.2.1';
-        if (!SUBSCR_do_upgrade_sql($current_ver)) return false;
+        if (!SUBSCR_do_upgrade_sql($current_ver, $dvlp)) return false;
         if (!SUBSCR_do_set_version($current_ver)) return false;
     }
 
@@ -89,6 +88,11 @@ function SUBSCR_do_upgrade($dvlp=false)
         if (!SUBSCR_do_set_version($current_ver)) return false;
     }
 
+    // Update the plugin configuration
+    USES_lib_install();
+    require_once __DIR__ . '/install_defaults.php';
+    _update_config('subscription', $subscrConfigData);
+
     // Final version update to catch updates that don't go through
     // any of the update functions, e.g. code-only updates
     if (!COM_checkVersion($current_ver, $installed_ver)) {
@@ -96,10 +100,6 @@ function SUBSCR_do_upgrade($dvlp=false)
             return false;
         }
     }
-
-    // Finally, sync all config elements
-    require_once __DIR__ . '/install_defaults.php';
-    plugin_updateconfig_subscription();
 
     return true;
 }
@@ -112,10 +112,10 @@ function SUBSCR_do_upgrade($dvlp=false)
 *
 *   @since  version 0.1.0
 *   @param  string  $version    Version being upgraded TO
-*   @param  array   $sql        Array of SQL statement(s) to execute
+*   @param  boolean $ignore_errors  True to ignore SQL errors
 *   @return boolean         True on success, False on failure
 */
-function SUBSCR_do_upgrade_sql($version='', $ignore_error=false)
+function SUBSCR_do_upgrade_sql($version='', $ignore_errors=false)
 {
     global $_TABLES, $_CONF_SUBSCR, $SUBSCR_UPGRADE;
 
@@ -132,7 +132,7 @@ function SUBSCR_do_upgrade_sql($version='', $ignore_error=false)
         DB_query($sql, 1);
         if (DB_error()) {
             COM_errorLog("SQL Error during Subscription Plugin update", 1);
-            if (!$ignore_error) return false;
+            if ($ignore_errors) return false;
         }
     }
     COM_errorLog("--- Subscription plugin SQL update to version $version done", 1);
