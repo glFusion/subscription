@@ -279,7 +279,7 @@ function plugin_autouninstall_subscription()
         'php_blocks' => array('phpblock_subscription_subscribe'),
         'vars'      => array($_CONF_SUBSCR['pi_name'] . '_gid')
     );
-    Cache::clear();
+    \Subscription\Cache::clear();
     PLG_itemDeleted('*', $_CONF_SUBSCR['pi_name']);
     return $out;
 }
@@ -321,7 +321,7 @@ function plugin_autotags_subscription($op, $content = '', $autotag = '')
         case 'cart':
         case 'add_cart':
             // tag: [subscription:buynow product_id]
-            $P = new Subscription\Product($autotag['parm2']);
+            $P = new \Subscription\Product($autotag['parm2']);
             if ($P->canBuy()) {
                 $HTML = $P->MakeButton($option);
             }
@@ -451,7 +451,7 @@ function SUBSCR_getDocURL($file='', $doclang='english')
 function plugin_upgrade_subscription()
 {
     require_once __DIR__ . '/upgrade.inc.php';
-    Subscription\Cache::clear();
+    \Subscription\Cache::clear();
     return SUBSCR_do_upgrade();
 }
 
@@ -490,7 +490,7 @@ function phpblock_subscription_subscribe()
         return '';
 
     $T = new Template(SUBSCR_PI_PATH . '/templates');
-    $P = new Subscription\Product();
+    $P = new \Subscription\Product();
 
     $i = 0;
     while ($row = DB_fetchArray($r, false)) {
@@ -633,23 +633,13 @@ function plugin_runScheduledTask_subscription()
     $r = DB_query($sql);
     if ($r) {
         while ($row = DB_fetchArray($r, false)) {
-            Subscription\Subscription::Cancel($row['uid'], $row['item_id'], true);
+            \Subscription\Subscription::Cancel($row['uid'], $row['item_id'], true);
         }
     }
 
     // For the subscriptions that are left, notify the subscribers
     // if their expiration is impending
     SUBSCR_notifyExpiration();
-
-    // Disable any fixed-expiration products that have expired
-    $exp = $_CONF_SUBSCR['_dt']->Format('Y-m-d', true);
-    $sql = "UPDATE {$_TABLES['subscr_products']}
-            SET enabled = 0
-            WHERE enabled = 1 AND duration_type = 'fixed' AND expiration <= '$exp'";
-    $res = DB_query($sql);
-    if (DB_numRows($res) > 0) {
-        \Subscription\Cache::clear();
-    }
 }
 
 
@@ -825,8 +815,8 @@ function plugin_user_create_subscription($uid = 0)
     if ($uid == 0)
         return;
 
-    $S = new Subscription\Subscription();
-    $Products = Subscription\Product::getProducts();
+    $S = new \Subscription\Subscription();
+    $Products = \Subscription\Product::getProducts();
     foreach ($Products as $P) {
         if ($P->at_registration) {
             // If auto-signup is enabled for this product, use the trial_days
