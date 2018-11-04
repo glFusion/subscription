@@ -1,7 +1,7 @@
 # Changelog for the Subscription plugin for glFusion
 
 ## 0.2.2
-Release TBD
+Release 2018-11-04
 - Add development update function
 - Change at-registration to use trial days if set
 - Implement class autoloader
