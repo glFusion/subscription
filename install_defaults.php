@@ -20,6 +20,7 @@ if (!defined ('GVERSION')) {
 
 /** Subscriptions plugin configuration defaults
  *   @global array */
+global $subscrConfigData;
 $subscrConfigData = array(
     array(
         'name' => 'sg_main',
