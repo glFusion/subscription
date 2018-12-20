@@ -1,5 +1,9 @@
 # Changelog for the Subscription plugin for glFusion
 
+## 0.2.3
+Release TBD
+- Enable web services to allow use of `PLG_invokeService()`
+
 ## 0.2.2
 Release 2018-11-04
 - Add development update function

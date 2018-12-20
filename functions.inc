@@ -1,15 +1,15 @@
 <?php
 /**
-*   Common functions for the Subscription plugin.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2010-2018 Lee Garner
-*   @package    subscription
-*   @version    0.2.2
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Common functions for the Subscription plugin.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2010-2018 Lee Garner
+ * @package     subscription
+ * @version     v0.2.2
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 if (!defined('GVERSION')) {
     die('This file can not be used on its own.');
@@ -56,8 +56,8 @@ $_CONF_SUBSCR['_dt'] = new Date('now', $_CONF['timezone']);
 $_CONF_SUBSCR['now'] = $_CONF_SUBSCR['_dt']->toMySQL(true);
 
 /**
-* Language file Include
-*/
+ * Language file Include
+ */
 $langpath = SUBSCR_PI_PATH . '/language';
 $langfile = "{$_CONF['language']}.php";
 if (!file_exists("$langpath/$langfile")) {
@@ -71,6 +71,7 @@ if (file_exists("$langpath/custom/$langfile")) {
 /** Import services to interact with the PayPal plugin */
 require_once SUBSCR_PI_PATH . '/services.inc.php';
 
+/** Load plugin-specific functions */
 function USES_subscription_functions()
 {   require_once SUBSCR_PI_PATH . '/subscr_functions.inc.php';   }
 
@@ -87,21 +88,21 @@ spl_autoload_register(function ($class)
 
 
 /**
-*   Return false since this plugin does not support webservices
-*
-*   @return boolean     True, if webservices are supported
-*/
+ * Return true to work with PLG_invokeService().
+ *
+ * @return  boolean     True, if webservices are supported
+ */
 function plugin_wsEnabled_subscription()
 {
-    return false;
+    return true;
 }
 
 
 /**
-*   Returns the items for this plugin that should appear on the main menu.
-*
-*   @return    array   Associative array of menu items to be added to menu
-*/
+ * Returns the items for this plugin that should appear on the main menu.
+ *
+ * @return  array   Associative array of menu items to be added to menu
+ */
 function plugin_getmenuitems_subscription()
 {
     global $_CONF, $_CONF_SUBSCR, $LANG_SUBSCR;
@@ -116,10 +117,10 @@ function plugin_getmenuitems_subscription()
 
 
 /**
-*   Get additional Javascript into the site header.
-*
-*   @return array   List of paths to Javascript files
-*/
+ * Get additional Javascript into the site header.
+ *
+ * @return  array   List of paths to Javascript files
+ */
 function plugin_getheaderjs_subscription()
 {
     global $_CONF, $_CONF_SUBSCR;
@@ -133,14 +134,14 @@ function plugin_getheaderjs_subscription()
 
 
 /**
-*   Shows the statistics for the plugin on stats.php.
-*   If $showsitestats is 1 then we are to only print the overall stats in
-*   the 'site statistics' box otherwise we show the detailed stats for the
-*   plugin.
-*
-*   @param  integer  $showsitestate   Flag to let us know which stats to get
-*   @return string  formatted HTML to insert in stats page
-*/
+ * Shows the statistics for the plugin on stats.php.
+ * If $showsitestats is 1 then we are to only print the overall stats in
+ * the 'site statistics' box otherwise we show the detailed stats for the
+ * plugin.
+ *
+ * @param   integer  $showsitestats   Flag to let us know which stats to get
+ * @return  string  formatted HTML to insert in stats page
+ */
 function plugin_showstats_subscription($showsitestats)
 {
     global $_CONF, $_USER, $_TABLES, $LANG_SUBSCR, $_CONF_SUBSCR;
@@ -188,10 +189,10 @@ function plugin_showstats_subscription($showsitestats)
 
 
 /**
-*   Get the values for the summary section of stats.php
-*
-*   @return array   array(title, total subscriptions)
-*/
+ * Get the values for the summary section of stats.php.
+ *
+ * @return  array   array(title, total subscriptions)
+ */
 function plugin_statssummary_subscription()
 {
     global $LANG_SUBSCR, $_TABLES;
@@ -204,11 +205,10 @@ function plugin_statssummary_subscription()
 
 
 /**
-*   This will put an option for the plugin in the command and control
-*   block on moderation.php
-*
-*   @return mixed   Array containing (name, admin_url, icon_url), or ''
-*/
+ * This will put an option for the plugin in the command and control area.
+ *
+ * @return  mixed   Array containing (name, admin_url, icon_url), or ''
+ */
 function plugin_cclabel_subscription()
 {
     global $_CONF, $_CONF_SUBSCR;
@@ -226,10 +226,10 @@ function plugin_cclabel_subscription()
 
 
 /**
-*   Returns the administrative menu option for this plugin.
-*
-*   @return mixed   Array (pi_name, pi_admin_url, # of items) or ''
-*/
+ * Returns the administrative menu option for this plugin.
+ *
+ * @return  mixed   Array (pi_name, pi_admin_url, # of items) or ''
+ */
 function plugin_getadminoption_subscription()
 {
     global $_CONF, $_TABLES, $LANG_SUBSCR, $_CONF_SUBSCR;
@@ -246,10 +246,10 @@ function plugin_getadminoption_subscription()
 
 
 /**
-*   Return the current version of code.
-*
-*   @return string      Current plugin version
-*/
+ * Return the current version of code.
+ *
+ * @return  string      Current plugin version
+ */
 function plugin_chkVersion_subscription()
 {
     global $_CONF_SUBSCR;
@@ -259,25 +259,31 @@ function plugin_chkVersion_subscription()
 
 
 /**
- *  Automatically uninstall the plugin.
+ * Automatically uninstall the plugin.
  *
- *  @return array Array of plugin elements to remove
+ * @return  array   Array of plugin elements to remove
  */
 function plugin_autouninstall_subscription()
 {
     global $_CONF_SUBSCR;
 
     $out = array (
-        'tables'    => array('subscr_products',
-                            'subscr_subscriptions',
-                        ),
-        'groups'    => array($_CONF_SUBSCR['pi_name'] . ' Admin'),
-        'features'  => array(
-                $_CONF_SUBSCR['pi_name'] . '.admin',
-                $_CONF_SUBSCR['pi_name'] . '.view',
-                        ),
-        'php_blocks' => array('phpblock_subscription_subscribe'),
-        'vars'      => array($_CONF_SUBSCR['pi_name'] . '_gid')
+        'tables' => array(
+            'subscr_products',
+            'subscr_subscriptions',
+        ),
+        'groups' => array(
+            $_CONF_SUBSCR['pi_name'] . ' Admin',
+        ),
+        'features' => array(
+            $_CONF_SUBSCR['pi_name'] . '.admin',
+            $_CONF_SUBSCR['pi_name'] . '.view',
+        ),
+        'php_blocks' => array(
+            'phpblock_subscription_subscribe'),
+        'vars' => array(
+            $_CONF_SUBSCR['pi_name'] . '_gid',
+        ),
     );
     \Subscription\Cache::clear();
     PLG_itemDeleted('*', $_CONF_SUBSCR['pi_name']);
@@ -286,10 +292,10 @@ function plugin_autouninstall_subscription()
 
 
 /**
-* Returns the URL of the plugin's icon
-*
-* @return   string      URL of the icon
-*/
+ * Returns the URL of the plugin's icon.
+ *
+ * @return  string      URL of the icon
+ */
 function plugin_geticon_subscription()
 {
     return SUBSCR_URL . '/images/subscription.png';
@@ -297,13 +303,13 @@ function plugin_geticon_subscription()
 
 
 /**
-*   Implements the [subscription:] autotag.
-*
-*   @param  string  $op         Requested operation
-*   @param  string  $content    Page content
-*   @param  string  $autotag    Autotag content
-*   @return string              $content with the autotag substitutions
-*/
+ * Implements the [subscription:] autotag.
+ *
+ * @param   string  $op         Requested operation
+ * @param   string  $content    Page content
+ * @param   string  $autotag    Autotag content
+ * @return  string              $content with the autotag substitutions
+ */
 function plugin_autotags_subscription($op, $content = '', $autotag = '')
 {
     global $_CONF, $_TABLES, $_CONF_SUBSCR;
@@ -341,10 +347,10 @@ function plugin_autotags_subscription($op, $content = '', $autotag = '')
 
 
 /**
-*   Enable or disable this plugin's blocks when the plugin is changed.
-*
-*   @param  boolean $enabled    Plugin's "enabled" state
-*/
+ * Enable or disable this plugin's blocks when the plugin is changed.
+ *
+ * @param   boolean $enabled    Plugin's "enabled" state
+ */
 function plugin_enablestatechange_subscription($enabled)
 {
     global $_TABLES, $_PLUGINS;
@@ -372,11 +378,11 @@ function plugin_enablestatechange_subscription($enabled)
 
 
 /**
-*   Receives notification of anothe plugin's deletion
-*
-*   @param  mixed   $id     Item ID
-*   @param  string  $type   Plugin Name
-*/
+ * Receives notification of anothe plugin's deletion.
+ *
+ * @param   mixed   $id     Item ID
+ * @param   string  $type   Plugin Name
+ */
 function plugin_itemdeleted_subscription($id, $type)
 {
     global $_TABLES;
@@ -390,12 +396,13 @@ function plugin_itemdeleted_subscription($id, $type)
 
 
 /**
-*   Get the URL to the configuration help file
-*
-*   @uses   SUBSCR_getDocURL()
-*   @param  string  $doclang    Document language
-*   @return string              URL to document
-*/
+ * Get the URL to the configuration help file.
+ *
+ * @uses    SUBSCR_getDocURL()
+ * @param   string  $option     Help option to display
+ * @param   string  $doclang    Document language
+ * @return  string              URL to document
+ */
 function plugin_getconfigelementhelp_subscription($option, $doclang='english')
 {
     if (version_compare(GVERSION, '1.6.0', '<')) {
@@ -410,19 +417,18 @@ function plugin_getconfigelementhelp_subscription($option, $doclang='english')
     if (!empty($option)) {
         $doc_url .= '#desc_' . $option;
     }
-
     return array($doc_url, 0);
 }
 
 
 /**
-*   Get the link to a documentation file.
-*   Returns the URL to the file, or to the directory if no file requested.
-*
-*   @param  string  $file       HTML file
-*   @param  string  $doclang    Documentation language
-*   @return string              URL to document directory or file
-*/
+ * Get the link to a documentation file.
+ * Returns the URL to the file, or to the directory if no file requested.
+ *
+ * @param   string  $file       HTML file
+ * @param   string  $doclang    Documentation language
+ * @return  string              URL to document directory or file
+ */
 function SUBSCR_getDocURL($file='', $doclang='english')
 {
     $doc_path = SUBSCR_PI_PATH . "/docs/$doclang/";
@@ -444,9 +450,9 @@ function SUBSCR_getDocURL($file='', $doclang='english')
 
 
 /**
- *  Upgrade the plugin to the currently-installed version.
+ * Upgrade the plugin to the currently-installed version.
  *
- *  @return mixed       true if successful, false or error number otherwise
+ * @return  mixed       true if successful, false or error number otherwise
  */
 function plugin_upgrade_subscription()
 {
@@ -457,10 +463,10 @@ function plugin_upgrade_subscription()
 
 
 /**
-*   Create the quick-subscribe block for products with show_in_block set.
-*
-*   @return string      HTML for the block
-*/
+ * Create the quick-subscribe block for products with show_in_block set.
+ *
+ * @return  string      HTML for the block
+ */
 function phpblock_subscription_subscribe()
 {
     global $_TABLES, $_CONF_SUBSCR, $_USER;
@@ -521,17 +527,16 @@ function phpblock_subscription_subscribe()
         $retval .= $T->finish($T->get_var('output'));
     }
     return $retval;
-
 }
 
 
 /**
-*   Displays subscriptions in the user's profile.
-*
-*   @param integer  $uid    User ID whose profile is being displayed
-*   @param object   &$T     Pointer to template object
-*   @return string          HTML to include in profile page
-*/
+ * Displays subscriptions in the user's profile.
+ *
+ * @param   integer  $uid   User ID whose profile is being displayed
+ * @param   object   &$T    Pointer to template object
+ * @return  string          HTML to include in profile page
+ */
 function plugin_profilevariablesdisplay_subscription($uid, &$T)
 {
     global $_CONF_SUBSCR, $LANG_SUBSCR, $_TABLES, $_CONF, $_USER;
@@ -573,11 +578,11 @@ function plugin_profilevariablesdisplay_subscription($uid, &$T)
 
 
 /**
-*   Get additional CSS into the site header.
-*   Allows for custom CSS to be placed by the site admin.
-*
-*   @return array   List of paths to CSS files
-*/
+ * Get additional CSS into the site header.
+ * Allows for custom CSS to be placed by the site admin.
+ *
+ * @return  array   List of paths to CSS files
+ */
 function plugin_getheadercss_subscription()
 {
     global $_CONF, $_CONF_SUBSCR;
@@ -613,11 +618,11 @@ function plugin_getheadercss_subscription()
 
 
 /**
-*   Perform scheduled functions, such as notifications and cancellations.
-*
-*   @uses   Subscription::Cancel()
-*   @uses   SUBSCR_notifyExpiration()
-*/
+ * Perform scheduled functions, such as notifications and cancellations.
+ *
+ * @uses    Subscription::Cancel()
+ * @uses    SUBSCR_notifyExpiration()
+ */
 function plugin_runScheduledTask_subscription()
 {
     global $_TABLES, $_CONF_SUBSCR, $_CONF;
@@ -644,13 +649,13 @@ function plugin_runScheduledTask_subscription()
 
 
 /**
-*   Log activity to a plugin-specific log file.
-*   Message includes the user who initiated the action, unless it's a
-*   system-generated event such as a scheduled task.
-*
-*   @param  string  $logentry   Text to log
-*   @param  boolean $system     True if this is a system-generated entry
-*/
+ * Log activity to a plugin-specific log file.
+ * Message includes the user who initiated the action, unless it's a
+ * system-generated event such as a scheduled task.
+ *
+ * @param   string  $logentry   Text to log
+ * @param   boolean $system     True if this is a system-generated entry
+ */
 function SUBSCR_auditLog($logentry = '', $system=false)
 {
     global $_CONF, $_USER, $LANG01, $LANG_SUBSCR;
@@ -693,10 +698,10 @@ function SUBSCR_auditLog($logentry = '', $system=false)
 
 
 /**
-*   Send debug info to the error log.
-*
-*   @param  string  $msg    Text message to display, may be blank.
-*/
+ * Send debug info to the error log.
+ *
+ * @param   string  $msg    Text message to display, may be blank.
+ */
 function SUBSCR_debug($msg)
 {
     global $_CONF_SUBSCR;
@@ -707,9 +712,9 @@ function SUBSCR_debug($msg)
 
 
 /**
-*   Notify users that have subscriptions soon to expire.
-*   This is in functions.inc so it can be called from runscheduledTask.
-*/
+ * Notify users that have subscriptions soon to expire.
+ * This is in functions.inc so it can be called from runscheduledTask.
+ */
 function SUBSCR_notifyExpiration()
 {
     global $_TABLES, $_CONF, $_CONF_SUBSCR, $LANG_SUBSCR;
@@ -785,11 +790,10 @@ function SUBSCR_notifyExpiration()
 
 
 /**
-*   Delete subscriptions for users that are deleted.
-*
-*   @param    int     $uid    User id of deleted user
-*   @return   void
-*/
+ * Delete subscriptions for users that are deleted.
+ *
+ * @param   integer $uid    User id of deleted user
+ */
 function plugin_user_delete_subscription($uid)
 {
     global $_TABLES;
@@ -799,14 +803,14 @@ function plugin_user_delete_subscription($uid)
 
 
 /**
-*   Handle a new user registration.
-*   Called by PLG_createUser (glFusion 1.1.5) to handle a new user signup.
-*   Creates an initial trial subscription for any products so configured.
-*   If the product doesn't have a value set for trial_days, then a full
-*   subscription is created.
-*
-*   @param  integer $uid    UID of new user.  Already set by glFusion
-*/
+ * Handle a new user registration.
+ * Called by PLG_createUser (glFusion 1.1.5) to handle a new user signup.
+ * Creates an initial trial subscription for any products so configured.
+ * If the product doesn't have a value set for trial_days, then a full
+ * subscription is created.
+ *
+ * @param   integer $uid    UID of new user.  Already set by glFusion
+ */
 function plugin_user_create_subscription($uid = 0)
 {
     global $_TABLES, $_CONF_SUBSCR;
@@ -832,11 +836,11 @@ function plugin_user_create_subscription($uid = 0)
 
 
 /**
-*   Support merging local accounts into remote accounts
-*
-*   @param  integer $origUID    Original (remote) user ID
-*   @param  integer $destUID    Merged (local) user ID
-*/
+ * Support merging local accounts into remote accounts.
+ *
+ * @param   integer $origUID    Original (remote) user ID
+ * @param   integer $destUID    Merged (local) user ID
+ */
 function plugin_user_move_subscription($origUID, $destUID)
 {
     global $_TABLES;
@@ -860,10 +864,10 @@ function plugin_user_move_subscription($origUID, $destUID)
 
 
 /**
-*   Return categories for the Paypal plugin.
-*
-*   @return array   Array of category information
-*/
+ * Return categories for the Paypal plugin.
+ *
+ * @return  array   Array of category information
+ */
 function plugin_paypal_getcategories_subscription()
 {
     global $_CONF_SUBSCR;
@@ -883,14 +887,14 @@ function plugin_paypal_getcategories_subscription()
 
 
 /**
-*   Provides the getItemInfo function for subscription products
-*
-*   @param  string  $id         Product ID
-*   @param  string  $what       Comma-separated list of fields to return
-*   @param  integer $uid        User ID
-*   @param  array   $options    Not used
-*   @return array           Array of product information
-*/
+ * Provides the getItemInfo function for subscription products.
+ *
+ * @param   string  $id         Product ID
+ * @param   string  $what       Comma-separated list of fields to return
+ * @param   integer $uid        User ID
+ * @param   array   $options    Not used
+ * @return  array           Array of product information
+ */
 function plugin_getiteminfo_subscription($id, $what, $uid=0, $options=array())
 {
     global $_TABLES, $_CONF, $LANG_SUBSCR;
@@ -1001,10 +1005,10 @@ function plugin_getiteminfo_subscription($id, $what, $uid=0, $options=array())
 
 
 /**
-*   Get the search types for the site search.
-*
-*   @return mixed   Array of typeID=>typeName, or empty string for none.
-*/
+ * Get the search types for the site search.
+ *
+ * @return  mixed   Array of typeID=>typeName, or empty string for none.
+ */
 function plugin_searchtypes_subscription()
 {
     global $_CONF, $_CONF_SUBSCR;
@@ -1017,10 +1021,10 @@ function plugin_searchtypes_subscription()
 
 
 /**
-*   Check if the current user is allowed to administer the plugin
-*
-*   @return boolean     True is user is an admin, False if not
-*/
+ * Check if the current user is allowed to administer the plugin.
+ *
+ * @return  boolean     True is user is an admin, False if not
+ */
 function SUBSCR_isAdmin()
 {
     global $_CONF_SUBSCR;
@@ -1034,12 +1038,12 @@ function SUBSCR_isAdmin()
 
 
 /**
-*   Get an icon from the CSS icon set, either UIkit or FontAwesome
-*
-*   @param  string  $name   Base name of icon, e.g. "edit" for "uk-icon-edit"
-*   @param  string  $style  Style name from local CSS
-*   @return string      Class names for icon
-*/
+ * Get an icon from the CSS icon set, either UIkit or FontAwesome.
+ *
+ * @param   string  $name   Base name of icon, e.g. "edit" for "uk-icon-edit"
+ * @param   string  $style  Style name from local CSS
+ * @return  string      Class names for icon
+ */
 function SUBSCR_getIcon($name, $style='')
 {
     global $_CONF_SUBSCR;
@@ -1051,10 +1055,10 @@ function SUBSCR_getIcon($name, $style='')
 
 
 /**
-*   Determine if the paypal plugin is installed and integration is enabled.
-*
-*   @return boolean     True if Paypal is available, False if not.
-*/
+ * Determine if the paypal plugin is installed and integration is enabled.
+ *
+ * @return  boolean     True if Paypal is available, False if not.
+ */
 function SUBSCR_paypal_enabled()
 {
     global $_PLUGINS;
@@ -1067,13 +1071,13 @@ function SUBSCR_paypal_enabled()
 
 
 /**
-*   Helper function to get a template object.
-*
-*   @param  string  $name   Base name of template file, e.g. "editor"
-*   @param  string  $id     ID of template, e.g. "editform"
-*   @param  string  $path   Optional path if not "templates/"
-*   @return string      Full filename, e.g. "editor.uikit.thtml"
-*/
+ * Helper function to get a template object.
+ *
+ * @param   string  $name   Base name of template file, e.g. "editor"
+ * @param   string  $id     ID of template, e.g. "editform"
+ * @param   string  $path   Optional path if not "templates/"
+ * @return  string      Full filename, e.g. "editor.uikit.thtml"
+ */
 function SUBSCR_getTemplate($name, $id='', $path='')
 {
     global $_CONF_SUBSCR;
@@ -1109,14 +1113,14 @@ function SUBSCR_getTemplate($name, $id='', $path='')
 
 
 /**
-*   Get an array variable, first checking whether it's set
-*
-*   @param  array   $A          Array where the variable should be
-*   @param  string  $key        Name of array element
-*   @param  string  $type       Type of return value
-*   @param  mixed   $default    Default value, if key is not set
-*   @return     Array element cast to $type, or NULL if not set
-*/
+ * Get an array variable, first checking whether it's set.
+ *
+ * @param  array   $A          Array where the variable should be
+ * @param  string  $key        Name of array element
+ * @param  string  $type       Type of return value
+ * @param  mixed   $default    Default value, if key is not set
+ * @return     Array element cast to $type, or NULL if not set
+ */
 function SUBSCR_getVar($A, $key, $type = 'string', $default = NULL)
 {
     // If the key is not set, return the default
