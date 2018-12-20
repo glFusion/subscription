@@ -1,50 +1,55 @@
 <?php
 /**
-*   Class to manage actual subscriptions
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2010-2017 Lee Garner
-*   @package    subscription
-*   @version    0.2.2
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Class to manage actual subscriptions.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2010-2017 Lee Garner
+ * @package     subscription
+ * @version     v0.2.2
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 namespace Subscription;
 
 /**
-*   Class for subscription
-*   @package subscription
-*/
+ * Class for subscriptions.
+ * @package subscription
+ */
 class Subscription
 {
-    /** Property fields.  Accessed via __set() and __get()
-    *   @var array */
+    /** Property fields accessed via __set() and __get().
+     * @var array */
     private $properties;
 
     /** Subscription plan object.
-    *   @var object */
+     * @var object */
     public $Plan;
 
     /** Indicate whether the current user is an administrator
-    *   @var boolean */
+     * @var boolean */
     private $isAdmin;
 
+    /** Flag to indicate that this is a new record.
+     * @var boolean */
     private $isNew;
-    private $dt;        // Place to keep a date value
 
-    /** Array of error messages
-     *  @var array */
+    /** Holder for a general-purpose date object.
+     * @var object */
+    private $dt;
+
+    /** Array of error messages.
+     * @var array */
     public $Errors = array();
 
 
     /**
-    *   Constructor.
-    *   Reads in the specified subscription record if $id is set.  If $id is zero,
-    *   then a new entry is being created.
-    *
-    *   @param  integer $id     Optional subscription record ID
-    */
+     * Constructor.
+     * Reads in the specified subscription record if $id is set.  If $id is zero,
+     * then a new entry is being created.
+     *
+     * @param   integer $id     Optional subscription record ID
+     */
     public function __construct($id=0)
     {
         global $_CONF_SUBSCR, $_CONF;
@@ -78,11 +83,11 @@ class Subscription
 
 
     /**
-    *   Set a property's value.
-    *
-    *   @param  string  $var    Name of property to set.
-    *   @param  mixed   $value  New value for property.
-    */
+     * Set a property's value.
+     *
+     * @param   string  $var    Name of property to set.
+     * @param   mixed   $value  New value for property.
+     */
     public function __set($var, $value='')
     {
         switch ($var) {
@@ -124,12 +129,11 @@ class Subscription
 
 
     /**
-    *   Get the value of a property.
-    *   Emulates the behaviour of __get() function in PHP 5.
-    *
-    *   @param  string  $var    Name of property to retrieve.
-    *   @return mixed           Value of property, NULL if undefined.
-    */
+     * Get the value of a property.
+     *
+     * @param   string  $var    Name of property to retrieve.
+     * @return  mixed           Value of property, NULL if undefined.
+     */
     public function __get($var)
     {
         if (array_key_exists($var, $this->properties)) {
@@ -141,10 +145,10 @@ class Subscription
 
 
     /**
-     *  Sets all variables to the matching values from $rows.
+     * Sets all variables to the matching values from $rows.
      *
-     *  @param  array   $row        Array of values, from DB or $_POST
-     *  @param  boolean $fromDB     True if read from DB, false if from $_POST
+     * @param   array   $row        Array of values, from DB or $_POST
+     * @param   boolean $fromDB     True if read from DB, false if from $_POST
      */
     public function setVars($row, $fromDB=false)
     {
@@ -159,10 +163,10 @@ class Subscription
 
 
     /**
-     *  Read a specific record and populate the local values.
+     * Read a specific record and populate the local values.
      *
-     *  @param  integer $id Optional ID.  Current ID is used if zero.
-     *  @return boolean     True if a record was read, False on failure
+     * @param   integer $id     Optional ID.  Current ID is used if zero.
+     * @return  boolean     True if a record was read, False on failure
      */
     public function Read($id = 0)
     {
@@ -200,12 +204,12 @@ class Subscription
 
 
     /**
-    *   Get a subscription object by user and item ID
-    *
-    *   @param  integer $uid        User ID
-    *   @param  string  $item_id    Product ID
-    *   @return object      Subscription object
-    */
+     * Get a subscription object by user and item ID.
+     *
+     * @param   integer $uid        User ID
+     * @param   string  $item_id    Product ID
+     * @return  object      Subscription object
+     */
     public static function getInstance($uid, $item_id)
     {
         global $_TABLES;
@@ -231,11 +235,11 @@ class Subscription
 
 
     /**
-     *  Save the current values to the database.
-     *  Appends error messages to the $Errors property.
+     * Save the current values to the database.
+     * Appends error messages to the $Errors property.
      *
-     *  @param  array   $A      Optional array of values from $_POST
-     *  @return boolean         True if no errors, False otherwise
+     * @param   array   $A      Optional array of values from $_POST
+     * @return  boolean         True if no errors, False otherwise
      */
     public function Save($A = '')
     {
@@ -296,10 +300,10 @@ class Subscription
 
 
     /**
-    *   Delete the current subscription record from the database
-    *
-    *   @return boolean True on success, False on invalid ID
-    */
+     * Delete the current subscription record from the database.
+     *
+     * @return  boolean True on success, False on invalid ID
+     */
     public function Delete()
     {
         global $_TABLES, $_CONF_SUBSCR;
@@ -315,21 +319,21 @@ class Subscription
 
 
     /**
-    *   Add a new subscription record, or extend an existing one.
-    *   This handles purchased subscriptions and calculates an expiration date.
-    *
-    *   @uses   AddtoGroup()
-    *   @uses   AddHistory()
-    *   @param  integer $uid        User ID
-    *   @param  string  $item_id    Product item ID
-    *   @param  integer $duration   Optionsl Duration (# of duration_type's)
-    *   @param  integer $duration_type  Optional Duration interval (week, month, etc.)
-    *   @param  string  $expiration Optional fixed expiration
-    *   @param  boolean $upgrade    True if this is an upgrade, default False
-    *   @param  string  $txn_id     Optional Payment transaction ID
-    *   @param  float   $price      Optional price, default to product price
-    *   @return boolean     True on successful update, False on error
-    */
+     * Add a new subscription record, or extend an existing one.
+     * This handles purchased subscriptions and calculates an expiration date.
+     *
+     * @uses    AddtoGroup()
+     * @uses    AddHistory()
+     * @param   integer $uid        User ID
+     * @param   string  $item_id    Product item ID
+     * @param   integer $duration   Optionsl Duration (# of duration_type's)
+     * @param   integer $duration_type  Optional Duration interval (week, month, etc.)
+     * @param   string  $expiration Optional fixed expiration
+     * @param   boolean $upgrade    True if this is an upgrade, default False
+     * @param   string  $txn_id     Optional Payment transaction ID
+     * @param   float   $price      Optional price, default to product price
+     * @return  boolean     True on successful update, False on error
+     */
     public function Add($uid, $item_id, $duration=0, $duration_type='',
                 $expiration=NULL, $upgrade = false, $txn_id = '', $price = -1)
     {
@@ -428,11 +432,11 @@ class Subscription
 
 
     /**
-    *   Add a history record.
-    *
-    *   @param  string  $txn_id     Transaction ID
-    *   @param  float   $price      Price paid
-    */
+     * Add a history record.
+     *
+     * @param   string  $txn_id     Transaction ID
+     * @param   float   $price      Price paid
+     */
     public function AddHistory($txn_id = '', $price = 0)
     {
         global $_TABLES;
@@ -450,11 +454,11 @@ class Subscription
 
 
     /**
-    *   Adds a user to a glFusion group.
-    *
-    *   @param  integer $groupid    Group the user is added to
-    *   @param  integer $uid        User ID being added
-    */
+     * Adds a user to a glFusion group.
+     *
+     * @param   integer $groupid    Group the user is added to
+     * @param   integer $uid        User ID being added
+     */
     private function AddtoGroup()
     {
         if (!$this->Plan) $this->Plan = Product::getInstance($this->item_id);
@@ -469,10 +473,10 @@ class Subscription
 
 
     /**
-    *   Determines if the current record is valid.
-    *
-    *   @return boolean     True if ok, False when first test fails.
-    */
+     * Determines if the current record is valid.
+     *
+     * @return  boolean     True if ok, False when first test fails.
+     */
     public function isValidRecord()
     {
         global $LANG_SUBSCR;
@@ -496,11 +500,11 @@ class Subscription
 
 
     /**
-    *   Creates the edit form.
-    *
-    *   @param  integer $id     Optional ID, current record used if zero.
-    *   @return string          HTML for edit form
-    */
+     * Creates the edit form.
+     *
+     * @param   integer $id     Optional ID, current record used if zero.
+     * @return  string          HTML for edit form
+     */
     public function Edit($id = 0)
     {
         global $_TABLES, $_CONF, $_CONF_SUBSCR, $LANG_SUBSCR,
@@ -560,10 +564,10 @@ class Subscription
 
 
     /**
-    *   Display the detail page for the product.
-    *
-    *   @return string      HTML for the product page.
-    */
+     * Display the detail page for the product.
+     *
+     * @return  string      HTML for the product page.
+     */
     public function Detail()
     {
         global $_CONF, $_CONF_SUBSCR, $_TABLES, $LANG_SUBSCR, $_USER;
@@ -599,7 +603,7 @@ class Subscription
     }
 
 
-    public function XX_Find($uid, $item_id)
+    /*public function XX_Find($uid, $item_id)
     {
         global $_TABLES;
 
@@ -613,17 +617,18 @@ class Subscription
         } else {
             return false;
         }
-    }
+    }*/
 
 
     /**
-    *   Cancel a subscription.
-    *   If $system is true, then a user's name won't be logged with the message
-    *   to avoid confusion.
-    *
-    *   @param  integer $sub_id     Database ID of the subscription to cancel
-    *   @param  boolean $system     True if this is a system action.
-    */
+     * Cancel a subscription by user and plan ID.
+     * If $system is true, then a user's name won't be logged with the message
+     * to avoid confusion.
+     *
+     * @uses    selff:_doCancel()
+     * @param   integer $sub_id     Database ID of the subscription to cancel
+     * @param   boolean $system     True if this is a system action.
+     */
     public static function Cancel($uid, $item_id, $system=false)
     {
         $Sub = self::getInstance($uid, $item_id);
@@ -632,13 +637,14 @@ class Subscription
 
 
     /**
-    *   Cancel a subscription.
-    *   If $system is true, then a user's name won't be logged with the message
-    *   to avoid confusion.
-    *
-    *   @param  integer $sub_id     Database ID of the subscription to cancel
-    *   @param  boolean $system     True if this is a system action.
-    */
+     * Cancel a subscription by subscription ID.
+     * If $system is true, then a user's name won't be logged with the message
+     * to avoid confusion.
+     *
+     * @uses    selff:_doCancel()
+     * @param   integer $sub_id     Database ID of the subscription to cancel
+     * @param   boolean $system     True if this is a system action.
+     */
     public static function CancelByID($sub_id, $system=false)
     {
         $Sub = new self($sub_id);
@@ -647,13 +653,13 @@ class Subscription
 
 
     /**
-    *   Actually perform the functions to cancel a subscription
-    *
-    *   @see    self::Cancel()
-    *   @see    self::CancelByID()
-    *   @param  boolean $system     True if this is a system cancellation
-    *   @return boolean             True on success, False on failure
-    */
+     * Actually perform the functions to cancel a subscription.
+     *
+     * @see     self::Cancel()
+     * @see     self::CancelByID()
+     * @param   boolean $system     True if this is a system cancellation
+     * @return  boolean             True on success, False on failure
+     */
     private function _doCancel($system = false)
     {
         global $_TABLES;
@@ -675,11 +681,11 @@ class Subscription
 
 
     /**
-    *   Get the product name associated with this subscription
-    *
-    *   @deprecated
-    *   @return string      Product name
-    */
+     * Get the product name associated with this subscription.
+     *
+     * @deprecated
+     * @return string      Product name
+     */
     public function X_ProductName()
     {
         global $_TABLES;
@@ -689,10 +695,10 @@ class Subscription
 
 
     /**
-    *   Create a formatted display-ready version of the error messages.
-    *
-    *   @return string      Formatted error messages.
-    */
+     * Create a formatted display-ready version of the error messages.
+     *
+     * @return  string      Formatted error messages.
+     */
     public function PrintErrors()
     {
         $retval = '';
@@ -704,12 +710,12 @@ class Subscription
 
 
     /**
-    *   Get all current subscriptions for a user
-    *
-    *   @param  integer $uid    User ID to check, current user by default
-    *   @param  integer $status Subscription status, Active by default
-    *   @return array   Array of subscription objects
-    */
+     * Get all current subscriptions for a user.
+     *
+     * @param   integer $uid    User ID to check, current user by default
+     * @param   integer $status Subscription status, Active by default
+     * @return  array       Array of subscription objects
+     */
     public static function getSubscriptions($uid = 0, $status = SUBSCR_STATUS_ENABLED)
     {
         global $_USER, $_TABLES;

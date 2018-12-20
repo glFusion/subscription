@@ -1,15 +1,15 @@
 <?php
 /**
-*   Upgrade routines for the Subscription plugin.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
-*   @package    subscription
-*   @version    0.2.2
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Upgrade routines for the Subscription plugin.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
+ * @package     subscription
+ * @version     v0.2.2
+ * @license     http://opensource.org/licenses/gpl-2.0.php 
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 // Required to get the ADVT_DEFAULTS config values
 global $_CONF, $_CONF_SUBSCR, $SUBSCR_UPGRADE;
@@ -19,11 +19,12 @@ require_once __DIR__ . "/sql/mysql_install.php";
 
 
 /**
-*   Perform the upgrade starting at the current version.
-*
-*   @since  version 0.1.0
-*   @return boolean     True on success, False on failure
-*/
+ * Perform the upgrade starting at the current version.
+ *
+ * @since   v0.1.0
+ * @param   boolean $dvlp   True to ignore errors during a development update
+ * @return  boolean     True on success, False on failure
+ */
 function SUBSCR_do_upgrade($dvlp=false)
 {
     global $_TABLES, $_CONF, $_CONF_SUBSCR, $_PLUGIN_INFO;
@@ -106,15 +107,15 @@ function SUBSCR_do_upgrade($dvlp=false)
 
 
 /**
-*   Actually perform any sql updates.
-*   Gets the sql statements from the $SUBSCR_UPGRADE array defined (maybe)
-*   in the SQL installation file.
-*
-*   @since  version 0.1.0
-*   @param  string  $version    Version being upgraded TO
-*   @param  boolean $ignore_errors  True to ignore SQL errors
-*   @return boolean         True on success, False on failure
-*/
+ * Actually perform any sql updates.
+ * Gets the sql statements from the $SUBSCR_UPGRADE array defined (maybe)
+ * in the SQL installation file.
+ *
+ * @since   v0.1.0
+ * @param   string  $version    Version being upgraded TO
+ * @param   boolean $ignore_errors  True to ignore SQL errors
+ * @return  boolean         True on success, False on failure
+ */
 function SUBSCR_do_upgrade_sql($version='', $ignore_errors=false)
 {
     global $_TABLES, $_CONF_SUBSCR, $SUBSCR_UPGRADE;
@@ -141,13 +142,13 @@ function SUBSCR_do_upgrade_sql($version='', $ignore_errors=false)
 
 
 /**
-*   Update the plugin version number in the database.
-*   Called at each version upgrade to keep up to date with
-*   successful upgrades.
-*
-*   @param  string  $ver    New version to set
-*   @return boolean         True on success, False on failure
-*/
+ * Update the plugin version number in the database.
+ * Called at each version upgrade to keep up to date with
+ * successful upgrades.
+ *
+ * @param   string  $ver    New version to set
+ * @return  boolean         True on success, False on failure
+ */
 function SUBSCR_do_set_version($ver)
 {
     global $_TABLES, $_CONF_SUBSCR;

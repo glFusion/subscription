@@ -1,17 +1,17 @@
 <?php
 /**
-*   Web service functions for the Subscription plugin.
-*   This file provides functions to be called by other plugins, such
-*   as the PayPal plugin.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2011-2018 Lee Garner <lee@leegarner.com>
-*   @package    subscription
-*   @version    0.2.2
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Web service functions for the Subscription plugin.
+ * This file provides functions to be called by other plugins, such
+ * as the PayPal plugin.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2011-2018 Lee Garner <lee@leegarner.com>
+ * @package     subscription
+ * @version     v0.2.2
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 if (!defined ('GVERSION')) {
     die ('This file can not be used on its own!');
@@ -19,15 +19,15 @@ if (!defined ('GVERSION')) {
 
 
 /**
-*   Get the query element needed when collecting data for the Profile plugin.
-*   The $output array contains the field names, the SELECT and JOIN queries,
-*   and the search fields for the ADMIN_list function.
-*
-*   @param  array   $args       Unused
-*   @param  array   &$output    Pointer to output array
-*   @param  array   &$svc_msg   Unused
-*   @return integer             Status code
-*/
+ * Get the query element needed when collecting data for the Profile plugin.
+ * The $output array contains the field names, the SELECT and JOIN queries,
+ * and the search fields for the ADMIN_list function.
+ *
+ * @param  array   $args       Unused
+ * @param  array   &$output    Pointer to output array
+ * @param  array   &$svc_msg   Unused
+ * @return integer             Status code
+ */
 function service_profilefields_subscription($args, &$output, &$svc_msg)
 {
     global $LANG_SUBSCR, $_CONF_SUBSCR, $_TABLES;
@@ -71,13 +71,15 @@ function service_profilefields_subscription($args, &$output, &$svc_msg)
     return PLG_RET_OK;
 }
 
+
 /**
-*   Get information about a specific item.
-*
-*   @param  array   $A          Item Info (pi_name, item_type, item_id)
-*   @param  array   $custom     Custom parameters
-*   @return array       Complete product ID, description, price
-*/
+ * Get information about a specific item.
+ *
+ * @param   array   $A          Item Info (pi_name, item_type, item_id)
+ * @param   array   $output     Receives the function output
+ * @param   mixed   $svc_msg    Not used
+ * @return  integer     Return code
+ */
 function service_productinfo_subscription($A, &$output, &$svc_msg)
 {
     global $_TABLES, $LANG_SUBSCR;
@@ -126,13 +128,13 @@ function service_productinfo_subscription($A, &$output, &$svc_msg)
 
 
 /**
-*   Handle the purchase of a product via IPN message.
-*
-*   @param  array   $id     Array of (pi_name, category, item_id)
-*   @param  array   $item   Array of item info for this purchase
-*   @param  array   $ipn_data    All Paypal data from IPN
-*   @return array           Array of item info, for notification
-*/
+ * Handle the purchase of a product via IPN message.
+ *
+ * @param   array   $args       Array of (pi_name, category, item_id)
+ * @param   array   $output     Array of item info for this purchase
+ * @param   mixed   $svc_msg    Not used
+ * @return  integer     Return code
+ */
 function service_handlePurchase_subscription($args, &$output, &$svc_msg)
 {
     global $_CONF, $_CONF_SUBSCR, $_TABLES;
@@ -195,13 +197,13 @@ function service_handlePurchase_subscription($args, &$output, &$svc_msg)
 
 
 /**
-*   Handle a product refund
-*
-*   @param  array   $args       Array of item and IPN data
-*   @param  array   &$output    Return array
-*   @param  string  &$svc_msg   Unused
-*   @return integer     Return value
-*/
+ * Handle a product refund.
+ *
+ * @param   array   $args       Array of item and IPN data
+ * @param   array   &$output    Return array
+ * @param   string  &$svc_msg   Unused
+ * @return  integer     Return value
+ */
 function service_handleRefund_subscription($args, &$output, &$svc_msg)
 {
     global $_TABLES;
@@ -231,13 +233,13 @@ function service_handleRefund_subscription($args, &$output, &$svc_msg)
 
 
 /**
-*   Get the products under a given category (categroy not used)
-*
-*   @deprecated - Paypal no longer includes products, only categories
-*   @param  string  $cat    Name of category (unused)
-*   @return array           Array of product info, empty string if none
-*/
-function service_getproducts_subscription($args, &$output, &$svc_msg)
+ * Get the products under a given category (categroy not used)
+ *
+ * @deprecated - Paypal no longer includes products, only categories
+ * @param  string  $cat    Name of category (unused)
+ * @return array           Array of product info, empty string if none
+ */
+/*function service_getproducts_subscription($args, &$output, &$svc_msg)
 {
     global $_CONF_SUBSCR, $_CONF, $LANG_SUBSCR;
 
@@ -296,18 +298,18 @@ function service_getproducts_subscription($args, &$output, &$svc_msg)
     }
     return PLG_RET_OK;
 }
-
+ */
 
 /**
-*   Get the product detail page for a specific item.
-*   Takes the item ID as a full paypal-compatible ID (subscription:id:opts)
-*   and creates the detail page for inclusion in the paypal catalog.
-*
-*   @param  array   $args   Array containing item_id=>subscription:id:opts
-*   @param  mixed   $output Output holder variable
-*   @param  string  $svc_msg    Service message (not used)
-*   @return integer         Status value
-*/
+ * Get the product detail page for a specific item.
+ * Takes the item ID as a full paypal-compatible ID (subscription:id:opts)
+ * and creates the detail page for inclusion in the paypal catalog.
+ *
+ * @param   array   $args   Array containing item_id=>subscription:id:opts
+ * @param   mixed   $output Output holder variable
+ * @param   string  $svc_msg    Service message (not used)
+ * @return  integer         Status value
+ */
 function service_getDetailPage_subscription($args, &$output, &$svc_msg)
 {
     $output = '';

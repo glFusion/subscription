@@ -1,15 +1,15 @@
 <?php
 /**
-*   Automatic installation functions for the Subscriptions plugin.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2010 Lee Garner
-*   @package    subscription
-*   @version    0.0.1
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Automatic installation functions for the Subscriptions plugin.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2010 Lee Garner
+ * @package     subscription
+ * @version     v0.0.1
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 if (!defined ('GVERSION')) {
     die ('This file can not be used on its own.');
@@ -35,69 +35,86 @@ require_once $pi_path . '/language/' . $language . '.php';
 
 $INSTALL_plugin['subscription'] = array(
     'installer' => array(
-            'type' => 'installer', 
-            'version' => '1', 
-            'mode' => 'install'),
+        'type' => 'installer',
+        'version' => '1',
+        'mode' => 'install',
+    ),
 
     'plugin' => array(
-            'type' => 'plugin', 
-            'name' => $_CONF_SUBSCR['pi_name'],
-            'ver' => $_CONF_SUBSCR['pi_version'], 
-            'gl_ver' => $_CONF_SUBSCR['gl_version'],
-            'url' => $_CONF_SUBSCR['pi_url'], 
-            'display' => $_CONF_SUBSCR['pi_display_name']),
+        'type' => 'plugin',
+        'name' => $_CONF_SUBSCR['pi_name'],
+        'ver' => $_CONF_SUBSCR['pi_version'],
+        'gl_ver' => $_CONF_SUBSCR['gl_version'],
+        'url' => $_CONF_SUBSCR['pi_url'],
+        'display' => $_CONF_SUBSCR['pi_display_name'],
+    ),
 
-    array(  'type' => 'table', 
-            'table' => $_TABLES['subscr_products'], 
-            'sql' => $_SQL['subscr_products']),
+    array(
+        'type' => 'table',
+        'table' => $_TABLES['subscr_products'],
+        'sql' => $_SQL['subscr_products'],
+    ),
 
-    array(  'type' => 'table', 
-            'table' => $_TABLES['subscr_subscriptions'], 
-            'sql' => $_SQL['subscr_subscriptions']),
+    array(
+        'type' => 'table',
+        'table' => $_TABLES['subscr_subscriptions'],
+        'sql' => $_SQL['subscr_subscriptions'],
+    ),
 
-    array(  'type' => 'group', 
-            'group' => $_CONF_SUBSCR['pi_name'] . ' Admin', 
-            'desc' => 'Users in this group can administer the Subscriptions plugin',
-            'variable' => 'admin_group_id', 
-            'admin' => true,
-            'addroot' => true),
+    array(
+        'type' => 'group',
+        'group' => $_CONF_SUBSCR['pi_name'] . ' Admin',
+        'desc' => 'Users in this group can administer the Subscriptions plugin',
+        'variable' => 'admin_group_id',
+        'admin' => true,
+        'addroot' => true,
+    ),
 
-    array(  'type' => 'feature', 
-            'feature' => 'subscription.admin', 
-            'desc' => 'Ability to administer the Subscriptions plugin',
-            'variable' => 'admin_feature_id'),
+    array(
+        'type' => 'feature',
+        'feature' => 'subscription.admin',
+        'desc' => 'Ability to administer the Subscriptions plugin',
+        'variable' => 'admin_feature_id',
+    ),
 
-    array(  'type' => 'feature', 
-            'feature' => 'subscription.view', 
-            'desc' => 'Ability to view Subscriptions entries',
-            'variable' => 'view_feature_id'),
+    array(
+        'type' => 'feature',
+        'feature' => 'subscription.view',
+        'desc' => 'Ability to view Subscriptions entries',
+        'variable' => 'view_feature_id',
+    ),
 
-    array(  'type' => 'mapping', 
-            'group' => 'admin_group_id', 
-            'feature' => 'admin_feature_id',
-            'log' => 'Adding Admin feature to the admin group'),
+    array(
+        'type' => 'mapping',
+        'group' => 'admin_group_id',
+        'feature' => 'admin_feature_id',
+        'log' => 'Adding Admin feature to the admin group',
+    ),
 
-    array(  'type' => 'mapping', 
-            'findgroup' => 'Logged-in Users', 
-            'feature' => 'view_feature_id',
-            'log' => 'Adding View feature to the Logged-in Users group'),
+    array(
+        'type' => 'mapping',
+        'findgroup' => 'Logged-in Users',
+        'feature' => 'view_feature_id',
+        'log' => 'Adding View feature to the Logged-in Users group',
+    ),
 
-    array(  'type' => 'block', 
-            'name' => 'subscription_subscribe', 
-            'title' => $LANG_SUBSCR['subscribe'],
-            'phpblockfn' => 'phpblock_subscription_subscribe', 
-            'block_type' => 'phpblock',
-            'group_id' => 'admin_group_id'),
-
+    array(
+        'type' => 'block',
+        'name' => 'subscription_subscribe',
+        'title' => $LANG_SUBSCR['subscribe'],
+        'phpblockfn' => 'phpblock_subscription_subscribe',
+        'block_type' => 'phpblock',
+        'group_id' => 'admin_group_id',
+    ),
 );
 
 
 /**
-*   Puts the datastructures for this plugin into the glFusion database.
-*   Note: Corresponding uninstall routine is in functions.inc.
-*
-*   @return boolean     True if successful, False otherwise
-*/
+ * Puts the datastructures for this plugin into the glFusion database.
+ * Note: Corresponding uninstall routine is in functions.inc.
+ *
+ * @return  boolean     True if successful, False otherwise
+ */
 function plugin_install_subscription()
 {
     global $INSTALL_plugin, $_CONF_SUBSCR;
@@ -117,10 +134,10 @@ function plugin_install_subscription()
 
 
 /**
-*   Loads the configuration records for the Online Config Manager.
-*
-*   @return boolean     True = proceed, False = an error occured
-*/
+ * Loads the configuration records for the Online Config Manager.
+ *
+ * @return  boolean     True = proceed, False = an error occured
+ */
 function plugin_load_configuration_subscription()
 {
     global $_CONF, $_CONF_SUBSCR, $_TABLES;
@@ -134,9 +151,9 @@ function plugin_load_configuration_subscription()
 
 
 /**
-*   Plugin-specific post-installation function
-*   Creates the subscription log file
-*/
+ * Plugin-specific post-installation function.
+ * Creates the subscription log file.
+ */
 function plugin_postinstall_subscription()
 {
     global $_CONF, $_CONF_SUBSCR, $_SUBSCR_DEFAULTS;
@@ -159,13 +176,13 @@ function plugin_postinstall_subscription()
 
 
 /**
-*   Recursively create directories.  Included here since the 'recursive'
-*   option wasn't added to mkdir() until PHP 5
-*
-*   @param  string  $pathname   Path to create
-*   @param  integer $mode       Creation mode
-*   @return boolean             Result from latest mkdir() call
-*/
+ * Recursively create directories.
+ * Included here since the 'recursive' option wasn't added to mkdir() until PHP 5.
+ *
+ * @param   string  $pathname   Path to create
+ * @param   integer $mode       Creation mode
+ * @return  boolean             Result from latest mkdir() call
+ */
 function mkdir_recursive($pathname, $mode=0777)
 {
     COM_errorLog("mkdir: creating $pathname");

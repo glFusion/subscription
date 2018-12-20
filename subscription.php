@@ -1,18 +1,18 @@
 <?php
 /**
-*   Global configuration items for the Subscriptions plugin.
-*   These are either static items, such as the plugin name and table
-*   definitions, or are items that don't lend themselves well to the 
-*   glFusion configuration system, such as allowed file types.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2010-2017 Lee Garner
-*   @package    subscription
-*   @version    0.2.3
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Global configuration items for the Subscriptions plugin.
+ * These are either static items, such as the plugin name and table
+ * definitions, or are items that don't lend themselves well to the
+ * glFusion configuration system, such as allowed file types.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2010-2017 Lee Garner
+ * @package     subscription
+ * @version     v0.2.3
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 if (!defined ('GVERSION')) {
     die ('This file can not be used on its own.');

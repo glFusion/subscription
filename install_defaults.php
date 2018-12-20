@@ -1,16 +1,15 @@
 <?php
 /**
-*   Configuration Defaults for the Subscription plugin for glFusion.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2010-2018 Lee Garner
-*   @package    subscription
-*   @version    0.2.2
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
-*               GNU Public License v2 or later
-*   @filesource
-*
-*/
+ * Configuration Defaults for the Subscription plugin for glFusion.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2010-2018 Lee Garner
+ * @package     subscription
+ * @version     v0.2.2
+ * @license     http://opensource.org/licenses/gpl-2.0.php 
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 
 // This file can't be used on its own
@@ -18,8 +17,8 @@ if (!defined ('GVERSION')) {
     die ('This file can not be used on its own.');
 }
 
-/** Subscriptions plugin configuration defaults
- *   @global array */
+/** Subscriptions plugin configuration defaults.
+ * @global array */
 global $subscrConfigData;
 $subscrConfigData = array(
     array(
@@ -180,11 +179,11 @@ $subscrConfigData = array(
 
 
 /**
-*   Initialize Subscriptions plugin configuration
-*
-*   @param  integer $group_id   Group ID to use as the plugin's admin group
-*   @return boolean             true: success; false: an error occurred
-*/
+ * Initialize Subscriptions plugin configuration.
+ *
+ * @param   integer $group_id   Group ID to use as the plugin's admin group
+ * @return  boolean             true: success; false: an error occurred
+ */
 function plugin_initconfig_subscription($group_id = 0)
 {
     global $subscrConfigData;
@@ -210,7 +209,7 @@ function plugin_initconfig_subscription($group_id = 0)
 
 
 /**
- * Sync the configuration in the DB to the above configs
+ * Sync the configuration in the DB to the above configs.
  */
 function plugin_updateconfig_subscription()
 {

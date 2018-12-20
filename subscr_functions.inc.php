@@ -1,21 +1,21 @@
 <?php
 /**
-*   Plugin-specific functions for the Subscription plugin for glFusion.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2010-2018 Lee Garner
-*   @package    subscription
-*   @version    0.2.2
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Plugin-specific functions for the Subscription plugin for glFusion.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2010-2018 Lee Garner
+ * @package     subscription
+ * @version     v0.2.2
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 /**
-*   Display the subscription products available.
-*
-*   @return string      HTML for product catalog.
-*/
+ * Display the subscription products available.
+ *
+ * @return  string      HTML for product catalog.
+ */
 function SUBSCR_ProductList()
 {
     global $_CONF, $_CONF_SUBSCR, $LANG_SUBSCR, $_USER;
@@ -43,8 +43,9 @@ function SUBSCR_ProductList()
         return $retval;
     }
 
-    $status = LGLIB_invokeService('paypal', 'getCurrency', array(),
-        $currency, $svc_msg);
+    /*$status = LGLIB_invokeService('paypal', 'getCurrency', array(),
+        $currency, $svc_msg);*/
+    $currency = PLG_callFunctionForOnePlugin('plugin_getCurrency_paypal');
     if (empty($currency)) $currency = 'USD';
 
     $T->set_block('prodlist', 'ProductBlock', 'PBlock');
@@ -97,9 +98,9 @@ function SUBSCR_ProductList()
 
 
 /**
- *  Display a popup text message
+ * Display a popup text message.
  *
- *  @param string $msg Text to display
+ * @param   string  $msg    Text to display
  */
 function SUBSCR_popupMsg($msg)
 {
@@ -112,14 +113,14 @@ function SUBSCR_popupMsg($msg)
 
 
 /**
-*   Display an error message in an alert-style box.
-*   The incoming $msg parameter should be a string of list items
-*   enclosed in &lt;li&gt; tags.  This will be enclosed in &lt;ul&gt; tags
-*   to create a list of errors.
-*
-*   @param  string  $msg    Message to be displayed.
-*   @return string          Formatted message ready for display.
-*/
+ * Display an error message in an alert-style box.
+ * The incoming $msg parameter should be a string of list items
+ * enclosed in &lt;li&gt; tags.  This will be enclosed in &lt;ul&gt; tags
+ * to create a list of errors.
+ *
+ * @param   string  $msg    Message to be displayed.
+ * @return  string          Formatted message ready for display.
+ */
 function SUBSCR_errorMessage($msg)
 {
     $retval = '';
@@ -133,15 +134,15 @@ function SUBSCR_errorMessage($msg)
 
 
 /**
-*   Callback function to create text for option list items.
-*
-*   @deprecated
-*   @param  array   $A      Complete category record
-*   @param  integer $sel    Selectd item (optional)
-*   @param  integer $parent_id  Parent ID from which we've started searching
-*   @param  string  $txt    Different text to use for category name.
-*   @return string          Option list element for a category
-*/
+ * Callback function to create text for option list items.
+ *
+ * @deprecated
+ * @param  array   $A      Complete category record
+ * @param  integer $sel    Selectd item (optional)
+ * @param  integer $parent_id  Parent ID from which we've started searching
+ * @param  string  $txt    Different text to use for category name.
+ * @return string          Option list element for a category
+ */
 function XSUBSCR_callbackCatOptionList($A, $sel=0, $parent_id=0, $txt='')
 {
     if ($sel > 0 && $A['cat_id'] == $sel) {
@@ -175,12 +176,12 @@ function XSUBSCR_callbackCatOptionList($A, $sel=0, $parent_id=0, $txt='')
 
 
 /**
-*   Display the site header, with or without blocks according to configuration.
-*
-*   @param  string  $title  Title to put in header
-*   @param  string  $meta   Optional header code
-*   @return string          HTML for site header, from COM_siteHeader()
-*/
+ * Display the site header, with or without blocks according to configuration.
+ *
+ * @param   string  $title  Title to put in header
+ * @param   string  $meta   Optional header code
+ * @return  string          HTML for site header, from COM_siteHeader()
+ */
 function SUBSCR_siteHeader($title='', $meta='')
 {
     global $_CONF_SUBSCR;
@@ -204,10 +205,10 @@ function SUBSCR_siteHeader($title='', $meta='')
 
 
 /**
-*   Display the site footer, with or without blocks as configured.
-*
-*   @return string      HTML for site footer, from COM_siteFooter()
-*/
+ * Display the site footer, with or without blocks as configured.
+ *
+ * @return  string      HTML for site footer, from COM_siteFooter()
+ */
 function SUBSCR_siteFooter()
 {
     global $_CONF_SUBSCR;

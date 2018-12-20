@@ -1,20 +1,20 @@
 <?php
 /**
-*   Apply updates to Subscription during development.
-*   Calls upgrade function with "ignore_errors" set so repeated SQL statements
-*   won't cause functions to abort.
-*
-*   Only updates from the previous released version.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2018 Lee Garner <lee@leegarner.com>
-*   @package    subscription
-*   @version    0.2.2
-*   @since      0.2.2
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Apply updates to Subscription during development.
+ * Calls upgrade function with "ignore_errors" set so repeated SQL statements
+ * won't cause functions to abort.
+ *
+ * Only updates from the previous released version.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2018 Lee Garner <lee@leegarner.com>
+ * @package     subscription
+ * @version     v0.2.2
+ * @since       v0.2.2
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 require_once '../../../lib-common.php';
 if (!SEC_inGroup('Root')) {

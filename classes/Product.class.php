@@ -1,59 +1,58 @@
 <?php
 /**
-*   Class to manage subscription items
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2010-2018 Lee Garner
-*   @package    subscription
-*   @version    0.2.2
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Class to manage subscription plans.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2010-2018 Lee Garner
+ * @package     subscription
+ * @version     v0.2.2
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 namespace Subscription;
 
 /**
-*   Class for subscription product items
-*
-*   @package subscription
-*/
+ * Class for subscription product items.
+ * @package subscription
+ */
 class Product
 {
-    /** Property fields.  Accessed via __set() and __get()
-    *   @var array */
+    /** Property fields accessed via __set() and __get().
+     * @var array */
     private $properties = array();
 
-    /** Indicate whether the current user is an administrator
-    *   @var boolean */
+    /** Indicate whether the current user is an administrator.
+     * @var boolean */
     private $isAdmin = false;
 
-    /** Should permissions be checked?
-    *   Normally yes, but if the product is instantiated by an IPN message,
-    *   then checking permissions would break the process.
-    *   Public to be called from the Subscription class
-    *   @var boolean */
+    /**
+     * Should permissions be checked?
+     * Normally yes, but if the product is instantiated by an IPN message,
+     * then checking permissions would break the process.
+     * Public to be called from the Subscription class
+     * @var boolean */
     public $checkPerms = true;
 
     /** Indicator that this is a new product vs. editing an existing one.
-    *   @var boolean */
+     * @var boolean */
     public $isNew;
 
-    /** Array of error messages
-     *  @var array */
+    /** Array of error messages.
+     * @var array */
     public $Errors = array();
 
-    /**
-    *   Array form of pricing options
-    */
+    /** Array form of pricing options.
+     * @var array */
     public $pricing = array();
 
     /**
-    *   Constructor.
-    *   Reads in the specified class, if $id is set.  If $id is zero,
-    *   then a new entry is being created.
-    *
-    *   @param integer  $id     Optional product ID
-    */
+     * Constructor.
+     * Reads in the specified class, if $id is set.  If $id is zero,
+     * then a new entry is being created.
+     *
+     * @param   integer  $id     Optional product ID
+     */
     public function __construct($id = '')
     {
         global $_CONF_SUBSCR, $LANG_SUBSCR;
@@ -93,11 +92,11 @@ class Product
 
 
     /**
-    *   Set a property's value.
-    *
-    *   @param  string  $var    Name of property to set.
-    *   @param  mixed   $value  New value for property.
-    */
+     * Set a property's value.
+     *
+     * @param   string  $var    Name of property to set.
+     * @param   mixed   $value  New value for property.
+     */
     public function __set($var, $value='')
     {
         switch ($var) {
@@ -172,11 +171,11 @@ class Product
 
 
     /**
-    *   Get the value of a property.
-    *
-    *   @param  string  $var    Name of property to retrieve.
-    *   @return mixed           Value of property, NULL if undefined.
-    */
+     * Get the value of a property.
+     *
+     * @param   string  $var    Name of property to retrieve.
+     * @return  mixed           Value of property, NULL if undefined.
+     */
     public function __get($var)
     {
         if (array_key_exists($var, $this->properties)) {
@@ -188,11 +187,11 @@ class Product
 
 
     /**
-    *   Sets all variables to the matching values from $rows.
-    *
-    *   @param  array   $row        Array of values, from DB or $_POST
-    *   @param  boolean $fromDB     True if read from DB, false if from $_POST
-    */
+     * Sets all variables to the matching values from $rows.
+     *
+     * @param   array   $row        Array of values, from DB or $_POST
+     * @param   boolean $fromDB     True if read from DB, false if from $_POST
+     */
     public function SetVars($row, $fromDB=false)
     {
         if (!is_array($row)) return;
@@ -238,6 +237,7 @@ class Product
         } else {
             $this->buttons = $this->btn_types;
             $this->pricing['base'] = (float)$row['price'];
+            // TODO: This isn't doing anything here....
             if (isset($row['disc_price'])) {
                 $disc_price = (float)$row['disc_price'];
                 if ($disc_price > 0) {
@@ -253,13 +253,13 @@ class Product
 
 
     /**
-    *   Read a specific record and populate the local values.
-    *   Also sets the private $isNew value to false if the product is read
-    *   successfully.
-    *
-    *   @param  integer $id Optional ID.  Current ID is used if zero.
-    *   @return boolean     True if a record was read, False on failure
-    */
+     * Read a specific record and populate the local values.
+     * Also sets the private $isNew value to false if the product is read
+     * successfully.
+     *
+     * @param   integer $id Optional ID.  Current ID is used if zero.
+     * @return  boolean     True if a record was read, False on failure
+     */
     public function Read($id = '')
     {
         global $_TABLES;
@@ -288,11 +288,11 @@ class Product
 
 
     /**
-    *   Get an instance of a product
-    *
-    *   @param  integer $item_id    Product ID
-    *   @return object      Product object
-    */
+     * Get an instance of a product.
+     *
+     * @param   integer $item_id    Product ID
+     * @return  object      Product object
+     */
     public static function getInstance($item_id)
     {
         static $items = array();
@@ -310,12 +310,12 @@ class Product
 
 
     /**
-    *   Save the current values to the database.
-    *   Appends error messages to the $Errors property.
-    *
-    *   @param  array   $A      Optional array of values from $_POST
-    *   @return boolean         True if no errors, False otherwise
-    */
+     * Save the current values to the database.
+     * Appends error messages to the $Errors property.
+     *
+     * @param   array   $A      Optional array of values from $_POST
+     * @return  boolean         True if no errors, False otherwise
+     */
     public function Save($A = '')
     {
         global $_TABLES;
@@ -450,10 +450,10 @@ class Product
 
 
     /**
-    *  Delete the current product record from the database.
-    *
-    *   @return boolean     True on success, False if item not valid
-    */
+     * Delete the current product record from the database.
+     *
+     * @return  boolean     True on success, False if item not valid
+     */
     public function Delete()
     {
         global $_TABLES, $_CONF_SUBSCR;
@@ -471,12 +471,12 @@ class Product
 
 
     /**
-    *   Determines if the current record is valid.
-    *   Error messages are added to the Errors array.  The array isn't cleared
-    *   first, so existing errors will cause this function to return False.
-    *
-    *   @return boolean     True if ok, False if any test fails.
-    */
+     * Determines if the current record is valid.
+     * Error messages are added to the Errors array.  The array isn't cleared
+     * first, so existing errors will cause this function to return False.
+     *
+     * @return  boolean     True if ok, False if any test fails.
+     */
     private function isValidRecord()
     {
         global $LANG_SUBSCR;
@@ -505,11 +505,11 @@ class Product
 
 
     /**
-    *   Creates the edit form.
-    *
-    *   @param  integer $id     Optional ID, current record used if zero.
-    *   @return string          HTML for edit form
-    */
+     * Creates the edit form.
+     *
+     * @param   integer $id     Optional ID, current record used if zero.
+     * @return  string          HTML for edit form
+     */
     public function Edit($id = '')
     {
         global $_TABLES, $_CONF, $_CONF_SUBSCR, $LANG_SUBSCR,
@@ -610,18 +610,20 @@ class Product
 
 
     /**
-    *   Set a boolean field to the specified value.
-    *
-    *   @param  integer $id ID number of element to modify
-    *   @param  integer $value New value to set
-    *   @return         New value, or old value upon failure
-    */
+     * Set a boolean field to the opposite of the specified value.
+     *
+     * @param   integer $oldvalue   Original value to change
+     * @param   string  $varname    Field name to change
+     * @param   integer $id         ID number of plan to modify
+     * @return          New value, or old value upon failure
+     */
     private static function _toggle($oldvalue, $varname, $id)
     {
         global $_TABLES;
 
         // Determing the new value (opposite the old)
         $newvalue = $oldvalue == 1 ? 0 : 1;
+        $id = COM_sanitizeID($id);
 
         $sql = "UPDATE {$_TABLES['subscr_products']}
                 SET $varname=$newvalue
@@ -638,21 +640,23 @@ class Product
 
 
     /**
-    *   Display the product detail page.
-    *
-    *   @return string      HTML for product detail
-    */
+     * Display the product detail page.
+     *
+     * @return  string      HTML for product detail
+     */
     public function Detail()
     {
         global $_TABLES, $_CONF, $_USER, $_CONF_SUBSCR, $LANG_SUBSCR;
 
-        $status = LGLIB_invokeService('paypal', 'getCurrency', array(),
+        $currency = PLG_callFunctionForOnePlugin('plugin_getCurrency_paypal');
+        /*$status = LGLIB_invokeService('paypal', 'getCurrency', array(),
             $output, $svc_msg);
         if ($status == PLG_RET_OK) {
             $currency = $output;
         } else {
             $currency = 'USD';
-        }
+        }*/
+        if (empty($currency)) $currency = 'USD';
 
         $buttons = '';
 
@@ -709,28 +713,27 @@ class Product
 
 
     /**
-    *   Sets the "enabled" field to the specified value.
-    *
-    *   @uses   _toggle()
-    *   @param  integer $id ID number of element to modify
-    *   @param  integer $value New value to set
-    *   @return         New value, or old value upon failure
-    */
+     * Sets the "enabled" field to the opposite of the specified value.
+     *
+     * @uses    _toggle()
+     * @param   integer $oldvalue   Original value to change
+     * @param   integer $id         ID number of element to modify
+     * @return          New value, or old value upon failure
+     */
     public static function toggleEnabled($oldvalue, $id)
     {
         $oldvalue = $oldvalue == 1 ? 1 : 0;
-        $id = COM_sanitizeID($id);
         return self::_toggle($oldvalue, 'enabled', $id);
     }
 
 
     /**
-    *   Determine if this product is mentioned in any purchase records.
-    *   Typically used to prevent deletion of product records that have
-    *   dependencies.
-    *
-    *   @return boolean     True if used, False if not
-    */
+     * Determine if a product is mentioned in any purchase records.
+     * Typically used to prevent deletion of product records that have dependencies.
+     *
+     * @param   string  $id     Plan ID to check
+     * @return  boolean     True if used, False if not
+     */
     public static function isUsed($id)
     {
         global $_TABLES;
@@ -745,12 +748,12 @@ class Product
 
 
     /**
-    *   Create a purchase-now button.
-    *
-    *   This plugin only uses one type of button, so that's all that we return.
-    *
-    *   @return string      Button code
-    */
+     * Create a purchase-now button.
+     * This plugin only uses one type of button, so that's all that we return.
+     *
+     * @param   string  $btn_type   Type of button. Ignored in this plugin.
+     * @return  string      Button code
+     */
     public function MakeButton($btn_type = '')
     {
         global $_CONF, $_CONF_SUBSCR, $_USER;
@@ -801,11 +804,14 @@ class Product
             if (!empty($_CONF_SUBSCR['return_url'])) {
                 $vars['return'] = $_CONF_SUBSCR['return_url'];
             }
-            $status = LGLIB_invokeService('paypal', 'genButton', $vars,
+            /*$status = LGLIB_invokeService('paypal', 'genButton', $vars,
                     $output, $svc_msg);
-            if ($status == PLG_RET_OK && is_array($output)) {
+            if ($status == PLG_RET_OK && is_array($output)) {*/
+            $output = PLG_callFunctionForOnePlugin('plugin_genButton_paypal', $vars);
+            if (is_array($output)) {
                 foreach ($output as $button) {
-                    $retval .= $button . '<br />';
+                    //$retval .= $button . '<br />';
+                    $retval .= $button . LB;
                 }
             }
         }
@@ -814,10 +820,10 @@ class Product
 
 
     /**
-    *   Create a formatted display-ready version of the error messages.
-    *
-    *   @return string      Formatted error messages.
-    */
+     * Create a formatted display-ready version of the error messages.
+     *
+     * @return  string      Formatted error messages.
+     */
     public function PrintErrors()
     {
         $retval = '';
@@ -829,10 +835,10 @@ class Product
 
 
     /**
-    *   Check if this item has any error messages
-    *
-    *   @return boolean     True if Errors[] is not empty, false if it is.
-    */
+     * Check if this item has any error messages.
+     *
+     * @return  boolean     True if Errors[] is not empty, false if it is.
+     */
     public function hasErrors()
     {
         return (!empty($this->Errors));
@@ -840,11 +846,11 @@ class Product
 
 
     /**
-    *   Determine if the current user can purchase this item.
-    *   Also ensures that the current object is a valid item.
-    *
-    *   @return boolean     True if allowed, False if not
-    */
+     * Determine if the current user can purchase this item.
+     * Also ensures that the current object is a valid item.
+     *
+     * @return  boolean     True if allowed, False if not
+     */
     public function canBuy()
     {
         global $_GROUPS, $_USER, $_CONF_SUBSCR;
@@ -870,13 +876,13 @@ class Product
 
 
     /**
-    *   Update the Profile plugin data with the membership type and expiration.
-    *
-    *   @deprecated 0.2.0
-    *   @param  string  $newdate    Subscription expiration date
-    *   @param  integer $uid        User ID
-    *   @return integer             Result from LGLIB_invokeService()
-    */
+     * Update the Profile plugin data with the membership type and expiration.
+     *
+     * @deprecated  0.2.0
+     * @param   string  $newdate    Subscription expiration date
+     * @param   integer $uid        User ID
+     * @return  integer             Result from LGLIB_invokeService()
+     */
     public function DEPRECATED_updateProfile($newdate, $uid)
     {
         $args = array(
@@ -937,11 +943,11 @@ class Product
 
 
     /**
-    *   Get all the products that are enabled (by default).
-    *
-    *   @param  integer $enabled    1 or 0
-    *   @return array       Array of product objects
-    */
+     * Get all the products that are enabled (by default).
+     *
+     * @param   integer $enabled    1 or 0
+     * @return  array       Array of product objects
+     */
     public static function getProducts($enabled = 1)
     {
         global $_TABLES;
