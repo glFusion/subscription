@@ -239,7 +239,7 @@ function service_handleRefund_subscription($args, &$output, &$svc_msg)
  * @param  string  $cat    Name of category (unused)
  * @return array           Array of product info, empty string if none
  */
-/*function service_getproducts_subscription($args, &$output, &$svc_msg)
+function service_getproducts_subscription($args, &$output, &$svc_msg)
 {
     global $_CONF_SUBSCR, $_CONF, $LANG_SUBSCR;
 
@@ -292,13 +292,13 @@ function service_handleRefund_subscription($args, &$output, &$svc_msg)
                 'buttons' => array('buy_now' => $P->MakeButton()),
                 'url' => COM_buildUrl(SUBSCR_URL .
                     '/index.php?view=detail&item_id=' . $P->item_id),
-                'have_detail_svc' => true,  // Tell Paypal to use it's detail page wrapper
+                'have_detail_svc' => true,  // Tell Shop to use it's detail page wrapper
             );
         }
     }
     return PLG_RET_OK;
 }
- */
+
 
 /**
  * Get the product detail page for a specific item.
