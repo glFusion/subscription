@@ -474,7 +474,7 @@ function phpblock_subscription_subscribe()
     $retval = '';
 
     // Paypal is required to create the purchase link
-    if (!SUBSCR_paypal_enabled() || COM_isAnonUser() || SEC_inGroup('Root')) {
+    if (!SUBSCR_shop_enabled() || COM_isAnonUser() || SEC_inGroup('Root')) {
         return $retval;
     }
 
@@ -1059,12 +1059,13 @@ function SUBSCR_getIcon($name, $style='')
  *
  * @return  boolean     True if Paypal is available, False if not.
  */
-function SUBSCR_paypal_enabled()
+function SUBSCR_shop_enabled()
 {
     global $_PLUGINS;
     static $enabled = NULL;
     if ($enabled === NULL) {
-        $enabled = (isset($_PLUGINS) && is_array($_PLUGINS) && in_array('paypal', $_PLUGINS));
+        $enabled = function_exists('plugin_chkVersion_shop') ||
+            function_exists('plugin_chkVersion_paypal');
     }
     return $enabled;
 }

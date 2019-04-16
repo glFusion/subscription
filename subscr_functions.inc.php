@@ -20,8 +20,8 @@ function SUBSCR_ProductList()
 {
     global $_CONF, $_CONF_SUBSCR, $LANG_SUBSCR, $_USER;
 
-    if (!SUBSCR_paypal_enabled()) {
-        return "PayPal is required";
+    if (!SUBSCR_shop_enabled()) {
+        return "PayPal or Shop plugin is required";
     }
 
     $T = new \Template(SUBSCR_PI_PATH . '/templates');

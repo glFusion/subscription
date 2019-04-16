@@ -786,7 +786,7 @@ class Product
             $add_cart = true;
         }
 
-        if (SUBSCR_paypal_enabled()) {
+        if (SUBSCR_shop_enabled()) {
             $vars = array(
                 'item_number' => 'subscription:' . $this->item_id,
                 'item_name' => $this->short_description,
@@ -804,11 +804,11 @@ class Product
             if (!empty($_CONF_SUBSCR['return_url'])) {
                 $vars['return'] = $_CONF_SUBSCR['return_url'];
             }
-            /*$status = LGLIB_invokeService('paypal', 'genButton', $vars,
+            $status = LGLIB_invokeService('paypal', 'genButton', $vars,
                     $output, $svc_msg);
-            if ($status == PLG_RET_OK && is_array($output)) {*/
-            $output = PLG_callFunctionForOnePlugin('plugin_genButton_paypal', $vars);
-            if (is_array($output)) {
+            if ($status == PLG_RET_OK && is_array($output)) {
+            //$output = PLG_callFunctionForOnePlugin('plugin_genButton_paypal', $vars);
+            //if (is_array($output)) {
                 foreach ($output as $button) {
                     //$retval .= $button . '<br />';
                     $retval .= $button . LB;
