@@ -465,6 +465,7 @@ class Subscription
         if (!$this->Plan->isNew) {
             SUBSCR_debug("Adding user {$this->uid} to group {$this->Plan->addgroup}");
             Cache::clearGroup($this->Plan->addgroup, $this->uid);
+            USES_lib_user();
             USER_addGroup($this->Plan->addgroup, $this->uid);
         } else {
             COM_errorLog("Error finding group for plan {$this->item_id}");
