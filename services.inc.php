@@ -2,12 +2,12 @@
 /**
  * Web service functions for the Subscription plugin.
  * This file provides functions to be called by other plugins, such
- * as the PayPal plugin.
+ * as the Shop plugin.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2011-2018 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2011-2019 Lee Garner <lee@leegarner.com>
  * @package     subscription
- * @version     v0.2.2
+ * @version     v0.2.3
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -101,8 +101,10 @@ function service_productinfo_subscription($A, &$output, &$svc_msg)
             'description'       => '',
             'price' => '0.00',
             'taxable' => 0,
-            'have_detail_svc' => true,  // Tell Paypal to use it's detail page wrapper
+            'have_detail_svc' => true,  // Tell Shop to use it's detail page wrapper
             'fixed_q' => 1,         // Purchase qty fixed at 1
+            'isUnique' => true,     // Only on purchase of this item allowed
+            'supportsRatings' => true,
     );
 
     $item_id = $item[0];        // get base product ID
@@ -145,11 +147,16 @@ function service_handlePurchase_subscription($args, &$output, &$svc_msg)
             $item_id = $args['item']['item_id'];
     }
     // Must have an item ID and IPN data
-    if (empty($item_id)) return PLG_RET_ERROR;
-    if (!isset($args['ipn_data']) || empty($args['ipn_data'])) return PLG_RET_ERROR;
+    if (
+        empty($item_id) ||
+        !isset($args['ipn_data']) ||
+        empty($args['ipn_data'])
+    ) {
+        return PLG_RET_ERROR;
+    }
     $ipn_data = $args['ipn_data'];
 
-    // Get rid of paypal-supplied options, not used here
+    // Get rid of shop-supplied options, not used here
     list($item_id) = explode('|', $item_id);
     $id_parts = explode(':', $item_id);
     if (!isset($id_parts[1])) {
@@ -177,10 +184,15 @@ function service_handlePurchase_subscription($args, &$output, &$svc_msg)
     );
 
     // User ID is returned in the 'custom' field, so make sure it's numeric.
-    if (is_numeric($ipn_data['custom']['uid']))
+    if (is_numeric($ipn_data['custom']['uid'])) {
         $uid = (int)$ipn_data['custom']['uid'];
-    else
-        $uid = DB_getItem($_TABLES['users'], 'email', $ipn_data['payer_email']);
+    } else {
+        $uid = DB_getItem(
+            $_TABLES['users'],
+            'uid',
+            "email = '" . DB_escapeString($ipn_data['payer_email']) . "'"
+        );
+    }
 
     /*if (!empty($ipn_data['memo'])) {
         $memo = DB_escapeString($ipn_data['memo']);
@@ -209,15 +221,15 @@ function service_handleRefund_subscription($args, &$output, &$svc_msg)
     global $_TABLES;
 
     $item = $args['item_id'];      // array of item number info
-    $paypal_data = $args['ipn_data'];
+    $shop_data = $args['ipn_data'];
 
     // Must have an item ID following the plugin name
     if (!is_array($item) || !isset($item[1]))
         return PLG_RET_ERROR;
 
     // User ID is provided in the 'custom' field, so make sure it's numeric.
-    if (isset($paypal_data['custom'])) {
-        $uid = SUBSCR_getVar($paypal_data['custom'], 'uid', 'int', 1);
+    if (isset($shop_data['custom'])) {
+        $uid = SUBSCR_getVar($shop_data['custom'], 'uid', 'int', 1);
     } else {
         $uid = 1;
     }
@@ -235,7 +247,7 @@ function service_handleRefund_subscription($args, &$output, &$svc_msg)
 /**
  * Get the products under a given category (categroy not used)
  *
- * @deprecated - Paypal no longer includes products, only categories
+ * @deprecated - Shop no longer includes products, only categories
  * @param  string  $cat    Name of category (unused)
  * @return array           Array of product info, empty string if none
  */
@@ -246,7 +258,7 @@ function service_getproducts_subscription($args, &$output, &$svc_msg)
     // Initialize the return value as empty.
     $output = array();
 
-    // If we're not configured to show campaigns in the Paypal catalog,
+    // If we're not configured to show campaigns in the Shop catalog,
     // just return
     if ($_CONF_SUBSCR['show_in_pp_cat'] != 1) {
         return PLG_RET_ERROR;
@@ -266,11 +278,14 @@ function service_getproducts_subscription($args, &$output, &$svc_msg)
         if (isset($Subs[$P->item_id]) && $Subs[$P->item_id]->expiration > '0000') {
             $exp_ts = strtotime($Subs[$P->item_id]->expiration);
             $exp_format = strftime($_CONF['shortdate'], $exp_ts);
-            $description .=
-                "<br /><i>{$LANG_SUBSCR['your_sub_expires']} $exp_format</i>";
+            $description .= '<br /><i>' .
+                sprintf($LANG_SUBSCR['your_sub_expires'], $exp_format) .
+                '</i>';
             if ($P->early_renewal > 0) {
                 $renew_ts = $exp_ts - ($P->early_renewal * 86400);
-                if ($renew_ts > date('U')) $ok_to_buy = false;
+                if ($renew_ts > $_CONF['_now']->toUnix()) {
+                    $ok_to_buy = false;
+                }
             }
         }
         if (array_key_exists($P->upg_from, $Subs) && $P->upg_price != '') {
@@ -302,8 +317,8 @@ function service_getproducts_subscription($args, &$output, &$svc_msg)
 
 /**
  * Get the product detail page for a specific item.
- * Takes the item ID as a full paypal-compatible ID (subscription:id:opts)
- * and creates the detail page for inclusion in the paypal catalog.
+ * Takes the item ID as a full shop-compatible ID (subscription:id:opts)
+ * and creates the detail page for inclusion in the shop catalog.
  *
  * @param   array   $args   Array containing item_id=>subscription:id:opts
  * @param   mixed   $output Output holder variable

@@ -3,9 +3,9 @@
  * Common functions for the Subscription plugin.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2010-2018 Lee Garner
+ * @copyright   Copyright (c) 2010-2019 Lee Garner
  * @package     subscription
- * @version     v0.2.2
+ * @version     v0.2.3
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -68,7 +68,7 @@ if (file_exists("$langpath/custom/$langfile")) {
     include_once "$langpath/custom/$langfile";
 }
 
-/** Import services to interact with the PayPal plugin */
+/** Import services to interact with the Shop plugin */
 require_once SUBSCR_PI_PATH . '/services.inc.php';
 
 /** Load plugin-specific functions */
@@ -473,7 +473,7 @@ function phpblock_subscription_subscribe()
 
     $retval = '';
 
-    // Paypal is required to create the purchase link
+    // Shop is required to create the purchase link
     if (!SUBSCR_shop_enabled() || COM_isAnonUser() || SEC_inGroup('Root')) {
         return $retval;
     }
@@ -503,7 +503,7 @@ function phpblock_subscription_subscribe()
         $P->Read($row['item_id']);
         if ($P->item_id == '') continue;     // no access to this product
 
-        $status = LGLIB_invokeService('paypal', 'getCurrency', array(),
+        $status = LGLIB_invokeService('shop', 'getCurrency', array(),
                     $currency, $svc_msg);
         if (empty($currency)) $currency = 'USD';
 
@@ -864,11 +864,11 @@ function plugin_user_move_subscription($origUID, $destUID)
 
 
 /**
- * Return categories for the Paypal plugin.
+ * Return categories for the Shop plugin.
  *
  * @return  array   Array of category information
  */
-function plugin_paypal_getcategories_subscription()
+function plugin_shop_getcategories_subscription()
 {
     global $_CONF_SUBSCR;
 
@@ -1021,6 +1021,19 @@ function plugin_searchtypes_subscription()
 
 
 /**
+ * Updates the product table with the new rating and vote count.
+ *
+ * @param   mixed   $id     Product ID
+ * @param   float   $rating Rating Value
+ * @param   integer $votes  Number of votes cast
+ */
+function plugin_itemrated_subscription($id, $rating, $votes)
+{
+    return Subscription\Product::updateRating($id, $rating, $votes);
+}
+
+
+/**
  * Check if the current user is allowed to administer the plugin.
  *
  * @return  boolean     True is user is an admin, False if not
@@ -1055,17 +1068,16 @@ function SUBSCR_getIcon($name, $style='')
 
 
 /**
- * Determine if the paypal plugin is installed and integration is enabled.
+ * Determine if the Shop plugin is installed and integration is enabled.
  *
- * @return  boolean     True if Paypal is available, False if not.
+ * @return  boolean     True if Shop is available, False if not.
  */
 function SUBSCR_shop_enabled()
 {
-    global $_PLUGINS;
     static $enabled = NULL;
     if ($enabled === NULL) {
         $enabled = function_exists('plugin_chkVersion_shop') ||
-            function_exists('plugin_chkVersion_paypal');
+            function_exists('plugin_chkVersion_shop');
     }
     return $enabled;
 }

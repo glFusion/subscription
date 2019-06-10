@@ -3,6 +3,7 @@
 ## 0.2.3
 Release TBD
 - Enable web services to allow use of `PLG_invokeService()`
+- Change from Paypal to Shop integration
 
 ## 0.2.2
 Release 2018-11-04

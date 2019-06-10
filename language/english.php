@@ -3,9 +3,9 @@
 *   Default English Language file for the Subscription plugin.
 *
 *   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2010 Lee Garner
+*   @copyright  Copyright (c) 2010-2019 Lee Garner
 *   @package    subscription
-*   @version    0.0.1
+*   @version    0.2.3
 *   @license    http://opensource.org/licenses/gpl-2.0.php 
 *               GNU Public License v2 or later
 *   @filesource
@@ -58,7 +58,7 @@ $LANG_SUBSCR = array(
 'subscribe'     => 'Subscribe',
 'subscriber'    => 'Subscriber',
 'amount'        => 'Amount Paid',
-'reset_buttons' => 'Reset Paypal Buttons',
+'reset_buttons' => 'Reset Shop Buttons',
 'txn_id'        => 'Transaction ID',
 'uid'           => 'User ID',
 'q_del_item'    => 'Are you sure that you want to delete this item?',
@@ -101,7 +101,7 @@ $LANG_SUBSCR = array(
 'exp_notice'    => 'Subscription Expiration Notice',
 'confirm_renew' => 'Are you sure you want to renew the selected subscriptions?',
 'system_task'   => 'System Task',
-'pp_account'    => 'PayPal Account',
+'pp_account'    => 'Shop Account',
 'permissions_msg' => 'The permissions will determine who may view and purchase the subscription product.  The "Write" permission is not used.',
 'invalid_product_id' => 'Invalid product ID requested',
 'upg_from'      => 'Upgrade From',
@@ -143,7 +143,7 @@ $LANG_confignames['subscription'] = array(
     'early_renewal' => 'Early Renewal (days)',
     'notifydays'    => 'Days before expiration to send notifications',
     'debug'         => 'Debugging?',
-    'show_in_pp_cat' => 'Show in PayPal product catalog?',
+    'show_in_pp_cat' => 'Show in Shop product catalog?',
     'show_in_block' => 'Show product in block?',
     'enabled'       => 'Product is enabled?',
     'taxable'       => 'Product is taxable?',

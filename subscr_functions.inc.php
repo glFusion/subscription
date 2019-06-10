@@ -3,7 +3,7 @@
  * Plugin-specific functions for the Subscription plugin for glFusion.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2010-2018 Lee Garner
+ * @copyright   Copyright (c) 2010-2019 Lee Garner
  * @package     subscription
  * @version     v0.2.2
  * @license     http://opensource.org/licenses/gpl-2.0.php
@@ -21,7 +21,7 @@ function SUBSCR_ProductList()
     global $_CONF, $_CONF_SUBSCR, $LANG_SUBSCR, $_USER;
 
     if (!SUBSCR_shop_enabled()) {
-        return "PayPal or Shop plugin is required";
+        return "Shop plugin is required";
     }
 
     $T = new \Template(SUBSCR_PI_PATH . '/templates');
@@ -43,9 +43,9 @@ function SUBSCR_ProductList()
         return $retval;
     }
 
-    /*$status = LGLIB_invokeService('paypal', 'getCurrency', array(),
+    /*$status = LGLIB_invokeService('shop', 'getCurrency', array(),
         $currency, $svc_msg);*/
-    $currency = PLG_callFunctionForOnePlugin('plugin_getCurrency_paypal');
+    $currency = PLG_callFunctionForOnePlugin('plugin_getCurrency_shop');
     if (empty($currency)) $currency = 'USD';
 
     $T->set_block('prodlist', 'ProductBlock', 'PBlock');
