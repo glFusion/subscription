@@ -1,9 +1,10 @@
 # Changelog for the Subscription plugin for glFusion
 
 ## 0.2.3
-Release TBD
+Release 2019-08-04
 - Enable web services to allow use of `PLG_invokeService()`
 - Change from Paypal to Shop integration
+- Enable product ratings
 
 ## 0.2.2
 Release 2018-11-04
