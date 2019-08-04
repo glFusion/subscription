@@ -132,6 +132,19 @@ $subscrConfigData = array(
         'group' => 'subscription',
     ),
     array(
+        'name' => 'ena_ratings',
+        'default_value' => 0,
+        'type' => 'select',
+        'subgroup' => 0,
+        'fieldset' => 0,
+        'selection_array' => 3,
+        'sort' => 90,
+        'set' => true,
+        'group' => 'subscription',
+    ),
+
+    // New Product Defaults
+    array(
         'name' => 'fs_defaults',
         'default_value' => NULL,
         'type' => 'fieldset',

@@ -150,6 +150,7 @@ $LANG_confignames['subscription'] = array(
     'displayblocks' => 'Display glFusion Blocks',
     'onmenu'        => 'Show on default glFusion menu?',
     'return_url'    => 'Optional after-payment URL',
+    'ena_ratings'   => 'Enable Ratings?',
 );
 
 $LANG_configsubgroups['subscription'] = array(

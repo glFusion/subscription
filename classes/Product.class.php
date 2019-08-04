@@ -691,25 +691,27 @@ class Product
             }
         }
 
-        $ratedIds = RATING_getRatedIds($_CONF_SUBSCR['pi_name']);
-        if (in_array($this->item_id, $ratedIds)) {
-            $static = true;
-            $voted = 1;
-        } elseif (plugin_canuserrate_shop($this->item_id, $_USER['uid'])) {
-            $static = 0;
-            $voted = 0;
-        } else {
-            $static = 1;
-            $voted = 0;
+        if ($_CONF_SUBSCR['ena_ratings']) {
+            $ratedIds = RATING_getRatedIds($_CONF_SUBSCR['pi_name']);
+            if (in_array($this->item_id, $ratedIds)) {
+                $static = true;
+                $voted = 1;
+            } elseif (plugin_canuserrate_shop($this->item_id, $_USER['uid'])) {
+                $static = 0;
+                $voted = 0;
+            } else {
+                $static = 1;
+                $voted = 0;
+            }
+            $rating_box = RATING_ratingBar(
+                $_CONF_SUBSCR['pi_name'],
+                $this->item_id,
+                $this->votes,
+                $this->rating,
+                $voted, 5, $static, 'sm'
+            );
+            $T->set_var('rating_bar', $rating_box);
         }
-        $rating_box = RATING_ratingBar(
-            $_CONF_SUBSCR['pi_name'],
-            $this->item_id,
-            $this->votes,
-            $this->rating,
-            $voted, 5, $static, 'sm'
-        );
-        $T->set_var('rating_bar', $rating_box);
 
         $T->set_var(array(
                 'pi_url'        => SUBSCR_URL,

@@ -25,6 +25,8 @@
   {description}
   </p>
 </div>
+{!if rating_bar}
 <div>{rating_bar}</div>
+{!endif}
 {# end {templatelocation} #}
 
