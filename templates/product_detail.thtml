@@ -9,9 +9,9 @@
     <b>{$LANG_SUBSCR['duration']}:</b> {duration} {duration_type}
     {!endif}
   </div>
-  {!if exp_date}
+  {!if exp_msg}
     <div class="expmessage">
-      {$LANG_SUBSCR['your_sub_expires']} {exp_date}
+      {exp_msg}
       {!if renew_now}
       <br />
       <span class="renewnow">{$LANG_SUBSCR['renew_now']}</span>
@@ -25,5 +25,6 @@
   {description}
   </p>
 </div>
+<div>{rating_bar}</div>
 {# end {templatelocation} #}
 

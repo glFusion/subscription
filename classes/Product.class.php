@@ -535,7 +535,7 @@ class Product
             break;
         case 'tinymce' :
             $T->set_var('show_htmleditor',true);
-            PLG_requestEditor('paypal','subscr_entry','tinymce_subscription.thtml');
+            PLG_requestEditor('subscription','subscr_entry','tinymce_subscription.thtml');
             PLG_templateSetVars('subscr_entry', $T);
             break;
         default :
@@ -648,14 +648,7 @@ class Product
     {
         global $_TABLES, $_CONF, $_USER, $_CONF_SUBSCR, $LANG_SUBSCR;
 
-        $currency = PLG_callFunctionForOnePlugin('plugin_getCurrency_paypal');
-        /*$status = LGLIB_invokeService('paypal', 'getCurrency', array(),
-            $output, $svc_msg);
-        if ($status == PLG_RET_OK) {
-            $currency = $output;
-        } else {
-            $currency = 'USD';
-        }*/
+        $currency = PLG_callFunctionForOnePlugin('plugin_getCurrency_shop');
         if (empty($currency)) $currency = 'USD';
 
         $buttons = '';
@@ -680,7 +673,13 @@ class Product
             $A = DB_fetchArray(DB_query($sql), false);
             if (!empty($A)) {
                 $dt = new \Date($A['exp_date'], $_CONF['timezone']);
-                $T->set_var('exp_date', $dt->Format($_CONF['shortdate']));
+                $T->set_var(
+                    'exp_msg',
+                    sprintf(
+                        $LANG_SUBSCR['your_sub_expires'],
+                        $dt->Format($_CONF['shortdate'])
+                    )
+                );
                 $tm = time();
                 if ($A['early_renewal'] < $tm ||
                     ($A['late_renewal'] > $tm && $A['exp_date'] <= $tm)) {
@@ -691,6 +690,26 @@ class Product
                 $buttons = $this->MakeButton();
             }
         }
+
+        $ratedIds = RATING_getRatedIds($_CONF_SUBSCR['pi_name']);
+        if (in_array($this->item_id, $ratedIds)) {
+            $static = true;
+            $voted = 1;
+        } elseif (plugin_canuserrate_shop($this->item_id, $_USER['uid'])) {
+            $static = 0;
+            $voted = 0;
+        } else {
+            $static = 1;
+            $voted = 0;
+        }
+        $rating_box = RATING_ratingBar(
+            $_CONF_SUBSCR['pi_name'],
+            $this->item_id,
+            $this->votes,
+            $this->rating,
+            $voted, 5, $static, 'sm'
+        );
+        $T->set_var('rating_bar', $rating_box);
 
         $T->set_var(array(
                 'pi_url'        => SUBSCR_URL,
@@ -804,11 +823,14 @@ class Product
             if (!empty($_CONF_SUBSCR['return_url'])) {
                 $vars['return'] = $_CONF_SUBSCR['return_url'];
             }
-            $status = LGLIB_invokeService('paypal', 'genButton', $vars,
-                    $output, $svc_msg);
+            $status = LGLIB_invokeService(
+                'shop',
+                'genButton',
+                $vars,
+                $output,
+                $svc_msg
+            );
             if ($status == PLG_RET_OK && is_array($output)) {
-            //$output = PLG_callFunctionForOnePlugin('plugin_genButton_paypal', $vars);
-            //if (is_array($output)) {
                 foreach ($output as $button) {
                     //$retval .= $button . '<br />';
                     $retval .= $button . LB;
@@ -953,14 +975,14 @@ class Product
         global $_TABLES;
 
         $enabled = $enabled == 1 ? 1 : 0;
-        $cache_key = 'products_ena_' . $enabled;
+        $sql = "SELECT * FROM {$_TABLES['subscr_products']}
+            WHERE enabled = $enabled";
+        if (!SUBSCR_isAdmin()) {
+            $sql .= SEC_buildAccessSql();
+        }
+        $cache_key = 'products_' . md5($sql);
         $retval = Cache::get($cache_key);
         if ($retval === NULL) {
-            $sql = "SELECT * FROM {$_TABLES['subscr_products']}
-                    WHERE enabled = $enabled";
-            if (!SUBSCR_isAdmin()) {
-                $sql .= SEC_buildAccessSql();
-            }
             $result = DB_query($sql);
             $retval = array();
             while ($A = DB_fetchArray($result, false)) {
@@ -970,6 +992,35 @@ class Product
         }
         return $retval;
     }
+
+
+    /**
+     * Update a product rating and perform related housekeeping tasks.
+     *
+     * @see     plugin_itemrated_shop()
+     * @param   integer $id     Product ID
+     * @param   integer $rating New rating value
+     * @param   integer $votes  New total number of votes
+     * @return  boolean     True on success, False on DB error
+     */
+    public static function updateRating($id, $rating, $votes)
+    {
+        global $_TABLES;
+
+        return true;
+
+        $id = (int)$id;
+        $rating = number_format($rating, 2, '.', '');
+        $votes = (int)$votes;
+        $sql = "UPDATE {$_TABLES['shop.products']}
+                SET rating = $rating, votes = $votes
+                WHERE id = $id";
+        DB_query($sql);
+        Cache::clear('products');
+        return DB_error() ? false : true;
+    }
+
+
 
 }   // class Product
 
