@@ -733,6 +733,198 @@ class Subscription
         return $retval;
     }
 
+
+    /**
+    *   Create an admin list of subscriptions for a product
+    *
+    *   @return string  HTML for list
+    */
+    public static function adminList($item_id)
+    {
+        global $_CONF, $_TABLES, $LANG_ADMIN, $LANG_ACCESS;
+        global $_CONF_SUBSCR, $LANG_SUBSCR, $_IMAGE_TYPE, $LANG01;
+
+        USES_lib_admin();
+
+        $retval = '';
+
+        $header_arr = array(      # display 'text' and use table field 'field'
+            array(
+                'field' => 'edit',
+                'text' => $LANG_ADMIN['edit'],
+                'sort' => false,
+                'align' => 'center'
+            ),
+            array(
+                'field' => 'subscriber',
+                'text' => $LANG_SUBSCR['subscriber'],
+                'sort' => false,
+            ),
+            array(
+                'field' => 'plan',
+                'text' => $LANG_SUBSCR['plan'],
+                'sort' => true,
+            ),
+            array(
+                'field' => 'expiration',
+                'text' => $LANG_SUBSCR['expires'],
+                'sort' => true,
+            ),
+        );
+
+        $defsort_arr = array('field' => 'expiration', 'direction' => 'desc');
+        $title = $LANG_SUBSCR['admin_hdr'];
+        if (!empty($item_id)) {
+            $title .= " :: $item_id";
+            $item_query = " s.item_id = '".DB_escapeString($item_id)."' ";
+        } else {
+            $title  .= " :: All";
+            $item_query = ' 1=1 ';
+        }
+
+        $retval .= COM_startBlock(
+            $title, '',
+            COM_getBlockTemplate('_admin_block', 'header')
+        );
+        $retval .= Menu::Admin('subscriptions');
+        $retval .= COM_createLink(
+            $LANG_SUBSCR['new_subscription'],
+            SUBSCR_ADMIN_URL . '/index.php?editsubscrip=x',
+            array(
+                'class' => 'uk-button uk-button-success',
+                'style' => 'float:left',
+            )
+        );
+
+        $text_arr = array(
+            'has_extras' => true,
+            'form_url' => SUBSCR_ADMIN_URL .
+                '/index.php?subscriptions='.$item_id,
+        );
+
+        $options = array('chkdelete' => 'true', 'chkfield' => 'id',
+            'chkactions' => '<input name="cancelbutton" type="image" src="'
+                . $_CONF['layout_url'] . '/images/admin/delete.' . $_IMAGE_TYPE
+                . '" style="vertical-align:text-bottom;" title="' . $LANG01[124]
+                . '" class="gl_mootip"'
+                . ' data-uk-tooltip="{pos:\'top-left\'}"'
+                . ' onclick="return confirm(\'' . $LANG01[125] . '\');"'
+                . '/>&nbsp;' . $LANG_ADMIN['delete'] . '&nbsp;&nbsp;' .
+
+                '<input name="renewbutton" type="image" src="'
+                . SUBSCR_URL . '/images/renew.png'
+                . '" style="vertical-align:text-bottom;" title="' . $LANG_SUBSCR['renew_all']
+                . '" class="gl_mootip"'
+                . ' data-uk-tooltip="{pos:\'top-left\'}"'
+                . ' onclick="return confirm(\'' . $LANG_SUBSCR['confirm_renew']
+                . '\');"'
+                . '/>&nbsp;' . $LANG_SUBSCR['renew'],
+        );
+
+        if (isset($_POST['showexp'])) {
+            $frmchk = 'checked="checked"';
+            $exp_query = '';
+        } else {
+            $frmchk = '';
+            $exp_query = ' AND s.status = ' . SUBSCR_STATUS_ENABLED;
+        }
+
+        $query_arr = array('table' => 'subscr_subscriptions',
+            'sql' => "SELECT s.*, p.item_id as plan, u.username, u.fullname
+                FROM {$_TABLES['subscr_subscriptions']} s
+                LEFT JOIN {$_TABLES['subscr_products']} p
+                    ON s.item_id = p.item_id
+                LEFT JOIN {$_TABLES['users']} u
+                    ON s.uid = u.uid
+                WHERE $item_query
+                $exp_query",
+            'query_fields' => array('username', 'fullname',),
+            'default_filter' => '',
+        );
+        //echo $query_arr['sql'];die;
+
+        $plans = $LANG_SUBSCR['plan'] .
+            ': <select name="item_id" onchange=\'window.location.href="' .
+                SUBSCR_ADMIN_URL . '/index.php?subscriptions="+this.value\'><option value="0">' . $LANG_SUBSCR['all_plans'] .
+            '</option>' .
+            COM_optionList($_TABLES['subscr_products'], "item_id,item_id", $item_id) .
+            '</select>';
+        $filter = $plans . '&nbsp;<input type="checkbox" name="showexp" ' . $frmchk .
+            ' onclick="javascript:submit();"> ' . $LANG_SUBSCR['show_exp'] . '?<br />';
+        $form_arr = array(
+        //    'top' => '<input type="checkbox" name="showexp"> Show expired?'
+        );
+        $retval .= ADMIN_list(
+            'subscription',
+            array(__CLASS__, 'getAdminListField'),
+            $header_arr,
+            $text_arr, $query_arr, $defsort_arr, $filter, '',
+            $options, $form_arr
+        );
+        $retval .= COM_endBlock();
+        return $retval;
+    }
+
+
+    /**
+    *   Get a single field for the Subscription admin list.
+    *
+    *   @param  string  $fieldname  Name of field
+    *   @param  mixed   $fieldvalud Value of field
+    *   @param  array   $A          Array of all fields
+    *   @param  array   $icon_arr   Array of system icons
+    *   @return string              HTML content for field display
+    */
+    public static function getAdminListField($fieldname, $fieldvalue, $A, $icon_arr)
+    {
+        global $_CONF, $LANG_ACCESS, $LANG_SUBSCR, $_CONF_SUBSCR;
+
+        $retval = '';
+
+        switch($fieldname) {
+        case 'edit':
+            $retval .= COM_createLink(
+                '<i class="uk-icon-edit uk-icon-hover"></i>',
+                SUBSCR_ADMIN_URL . '/index.php?editsubscrip=x&amp;sub_id=' . $A['id'],
+                array(
+                    'class' => 'tooltip',
+                    'title' => $LANG_SUBSCR['edit'],
+                )
+            );
+            break;
+
+        case 'uid':
+            $retval = COM_createLink(
+                $fieldvalue,
+                $_CONF['site_url'] . '/users.php?mode=profile&uid=' . $fieldvalue
+            );
+            break;
+
+        case 'subscriber':
+            $retval = COM_createLink(
+                COM_getDisplayName($A['uid']),
+                $_CONF['site_url'] . '/users.php?mode=profile&uid=' .$A['uid']
+            );
+            break;
+
+        case 'expiration':
+            if ($A['status'] > SUBSCR_STATUS_ENABLED) {
+                $retval = '<span class="expired">' . $fieldvalue . '</span>';
+            } elseif ($fieldvalue < date('Y-m-d')) {
+                $retval .= '<span class="ingrace">' . $fieldvalue . '</span>';
+            } else {
+                $retval = $fieldvalue;
+            }
+            break;
+
+        default:
+            $retval = $fieldvalue;
+            break;
+        }
+
+        return $retval;
+    }
+
 }   // class Subscription
 
 ?>

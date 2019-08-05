@@ -1020,6 +1020,196 @@ class Plan
         return DB_error() ? false : true;
     }
 
+
+    /**
+    *   Create an admin list of plans.
+    *
+    *   @return string  HTML for list
+    */
+    public static function adminList()
+    {
+        global $_CONF, $_TABLES, $LANG_ADMIN, $LANG_ACCESS;
+        global $_CONF_SUBSCR, $LANG_SUBSCR, $LANG28;
+
+        USES_lib_admin();
+
+        $retval = '';
+
+        $header_arr = array(      # display 'text' and use table field 'field'
+            array(
+                'field' => 'edit',
+                'text' => $LANG_ADMIN['edit'],
+                'sort' => false,
+            ),
+            array(
+                'field' => 'enabled',
+                'text' => $LANG_SUBSCR['enabled'],
+                'sort' => false,
+                'align' => 'center',
+            ),
+            array(
+                'field' => 'item_id',
+                'text' => $LANG_SUBSCR['product_id'],
+                'sort' => true,
+            ),
+            array(
+                'field' => 'duration',
+                'text' => $LANG_SUBSCR['duration'],
+                'sort' => false,
+            ),
+            array(
+                'field' => 'grp_name',
+                'text' => $LANG28[101],
+                'sort' => false,
+            ),
+            array(
+                'field' => 'price',
+                'text' => $LANG_SUBSCR['price'],
+                'sort' => true,
+            ),
+            array(
+                'field' => 'subscriptions',
+                'text' => $LANG_SUBSCR['subscriptions'],
+                'sort' => true,
+            ),
+            array(
+                'field' => 'delete',
+                'text' => $LANG_ADMIN['delete'] .
+                    '&nbsp;<i class="uk-icon-question-circle tooltip" title="' .
+                    $LANG_SUBSCR['hlp_admin_del'] . '"></i>',
+                'sort' => false,
+                'align' => 'center',
+            ),
+        );
+
+        $defsort_arr = array('field' => 'item_id', 'direction' => 'asc');
+
+        $retval .= COM_startBlock(
+            $LANG_SUBSCR['admin_hdr'] . ' v' . $_CONF_SUBSCR['pi_version'],
+            COM_getBlockTemplate('_admin_block', 'header')
+        );
+        $retval .= Menu::Admin('products');
+        $retval .= COM_createLink(
+            $LANG_SUBSCR['new_product'],
+            SUBSCR_ADMIN_URL . '/index.php?editproduct=x',
+            array(
+                'class' => 'uk-button uk-button-success',
+                'style' => 'float:left',
+            )
+        );
+        $text_arr = array(
+            'has_extras' => true,
+            'form_url' => SUBSCR_ADMIN_URL . '/index.php?type=products',
+        );
+        $options = array();
+        $form_arr = array();
+        $query_arr = array('table' => 'subscr_products',
+            'sql' => "SELECT p.*, g.grp_name
+                FROM {$_TABLES['subscr_products']} p
+                LEFT JOIN {$_TABLES['groups']} g
+                    ON g.grp_id=p.addgroup",
+            'query_fields' => array('item_id', 'short_description', 'description'),
+            'default_filter' => ' WHERE 1=1 ',
+        );
+        $filter = '';
+        $retval .= ADMIN_list(
+            'subscription',
+            array(__CLASS__, 'getAdminListField'),
+            $header_arr,
+            $text_arr, $query_arr, $defsort_arr, $filter, '',
+            $options, $form_arr
+        );
+        $retval .= COM_endBlock();
+        return $retval;
+    }
+
+
+    /**
+    *   Get a single field for the Subscription Plan admin list.
+    *
+    *   @param  string  $fieldname  Name of field
+    *   @param  mixed   $fieldvalud Value of field
+    *   @param  array   $A          Array of all fields
+    *   @param  array   $icon_arr   Array of system icons
+    *   @return string              HTML content for field display
+    */
+    public static function getAdminListField($fieldname, $fieldvalue, $A, $icon_arr)
+    {
+        global $_CONF, $LANG_ACCESS, $LANG_SUBSCR, $_CONF_SUBSCR, $_TABLES;
+
+        $retval = '';
+
+        switch($fieldname) {
+        case 'edit':
+            $retval .= COM_createLink(
+                '<i class="uk-icon-edit uk-icon-hover"></i>',
+                SUBSCR_ADMIN_URL .
+                    '/index.php?editproduct=x&amp;item_id=' . $A['item_id'],
+                array(
+                    'class' => 'tooltip',
+                    'title' => $LANG_SUBSCR['new_product'],
+                )
+            );
+            break;
+
+        case 'delete':
+            if (!self::isUsed($A['item_id'])) {
+                $retval .= COM_createLink(
+                    '<i class="uk-icon-trash uk-text-danger"></i>',
+                    SUBSCR_ADMIN_URL .
+                        "/index.php?deleteproduct=x&amp;item_id={$A['item_id']}",
+                    array(
+                        'class' => 'tooltip',
+                        'title' => $LANG_SUBSCR['delete'],
+                    )
+                );
+            }
+            break;
+
+        case 'enabled':
+            $enabled = $fieldvalue == 1 ? 1 : 0;
+            $chk = $enabled ? 'checked="checked"' : '';
+            $retval = "<input type=\"checkbox\" name=\"togena{$A['item_id']}\"
+                id=\"togena{$A['item_id']}\" $chk
+                onchange='SUBSCR_toggleEnabled(this, \"{$A['item_id']}\",
+                \"subscription\");' />";
+            break;
+
+        case 'item_id':
+            $retval = COM_createLink(
+                $fieldvalue,
+                SUBSCR_ADMIN_URL . '/index.php?subscriptions=' . $A['item_id'],
+                array(
+                    'class' => 'tooltip',
+                    'title' => $LANG_SUBSCR['tt_view_subscribers'],
+                )
+            );
+            break;
+
+        case 'duration':
+            if ($A['expiration'] !== NULL) {
+                $retval = $LANG_SUBSCR['expires'] . ' ' . $A['expiration'];
+            } else {
+                $retval = $fieldvalue . ' ' . $LANG_SUBSCR[$A['duration_type']];
+            }
+            break;
+
+        case 'subscriptions':
+            $retval = (int)DB_count(
+                $_TABLES['subscr_subscriptions'],
+                'item_id',
+                $A['item_id']
+            );
+            break;
+
+        default:
+            $retval = $fieldvalue;
+            break;
+        }
+
+        return $retval;
+    }
+
 }   // class Plan
 
 ?>

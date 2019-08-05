@@ -127,6 +127,7 @@ $LANG_SUBSCR = array(
 'tt_view_subscribers' => 'Click to view subscribers',
 'date_selector' => 'Date Selector',
 'required'      => 'Required',
+'hlp_admin_del' => 'Only plans which have no associated subscriptions may be deleted.',
 );
 
 // Messages for the plugin upgrade
