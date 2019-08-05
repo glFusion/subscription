@@ -114,6 +114,27 @@ class Menu
         return $retval;
     }
 
+
+    /**
+     * Display an error message in an alert-style box.
+     * The incoming $msg parameter should be a string of list items
+     * enclosed in &lt;li&gt; tags.  This will be enclosed in &lt;ul&gt; tags
+     * to create a list of errors.
+     *
+     * @param   string  $msg    Message to be displayed.
+     * @return  string          Formatted message ready for display.
+     */
+    public static function errorMessage($msg)
+    {
+        $retval = '';
+        if (!empty($msg)) {
+            $retval .= '<span class="alert">' . "\n";
+            $retval .= "<ul>$msg</ul>\n";
+            $retval .= "</span>\n";
+        }
+        return $retval;
+    }
+
 }
 
 ?>

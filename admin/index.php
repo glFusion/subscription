@@ -437,7 +437,7 @@ case 'saveproduct':
     if ($status) {
         $view = 'products';
     } else {
-        $content .= SUBSCR_errorMessage($S->PrintErrors());
+        $content .= Subscription\Menu::errorMessage($S->PrintErrors());
         $view = 'editproduct';
         // Force the submitted item ID to be the original
         $_POST['item_id'] = $_POST['item_id_orig'];
@@ -459,7 +459,7 @@ case 'savesubscription':
         echo COM_refresh(SUBSCR_ADMIN_URL.'/index.php?subscriptions=' . $item_id);
         $view = 'subscriptions';
     } else {
-        $content .= SUBSCR_errorMessage($S->PrintErrors());
+        $content .= Subscription\Menu::errorMessage($S->PrintErrors());
         $view = 'editsubscrip';
     }
     break;

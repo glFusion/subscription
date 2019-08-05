@@ -1,5 +1,11 @@
 # Changelog for the Subscription plugin for glFusion
 
+## 1.0.0
+Release TBD
+- Fix link to subscriptions admin list.
+- Change from `Product` to `Plan`.
+- Implement Menu class to show menus and messages.
+
 ## 0.2.3
 Release 2019-08-04
 - Enable web services to allow use of `PLG_invokeService()`

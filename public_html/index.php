@@ -22,9 +22,9 @@ if (!in_array('subscription', $_PLUGINS)) {
 USES_subscription_functions();
 
 if (COM_isAnonUser()) {
-    echo SUBSCR_siteHeader();
+    echo COM_siteHeader();
     echo SEC_loginRequiredForm();
-    echo SUBSCR_siteFooter();
+    echo COM_siteFooter();
     exit;
 }
 
@@ -52,7 +52,7 @@ if (isset($_REQUEST['item_id'])) {
 if (empty($view)) $view = 'list';
 
 $pageTitle = $LANG_SUBSCR['subscriptions'];  // Set basic page title
-$display = SUBSCR_siteHeader($pageTitle);
+$display = Subscription\Menu::siteHeader($pageTitle);
 
 if ($msg != '')
     $display .= COM_showMessage($msg, $_CONF_SUBSCR['pi_name']);
@@ -77,7 +77,7 @@ default:
     break;
 }
 
-$display .= SUBSCR_siteFooter();
+$display .= Subscription\Menu::siteFooter();
 echo $display;
 
 ?>

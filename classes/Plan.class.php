@@ -519,7 +519,7 @@ class Plan
         if ($id != '') {
             // If an id is passed in, then read that record
             if (!$this->Read($id)) {
-                return SUBSCR_errorMessage($LANG_SUBSCR['invalid_product_id'], 'info');
+                return Menu::errorMessage($LANG_SUBSCR['invalid_product_id'], 'info');
             }
         }
         $id = $this->item_id;

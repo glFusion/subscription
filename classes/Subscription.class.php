@@ -515,7 +515,7 @@ class Subscription
         if ($id > 0) {
             // If an id is passed in, then read that record
             if (!$this->Read($id)) {
-                return SUBSCR_errorMessage($LANG_SUBSCR['invalid_subscr_id'], 'info');
+                return menu::errorMessage($LANG_SUBSCR['invalid_subscr_id'], 'info');
             }
             $sel_opts = '';
         } else {
@@ -566,7 +566,7 @@ class Subscription
 
         $id = $this->id;
         if ($item_id < 1) {
-            return SUBSCR_errorMessage($LANG_SUBSCR['invalid_subscr_id'], 'info');
+            return Menu::errorMessage($LANG_SUBSCR['invalid_subscr_id'], 'info');
         }
 
         $retval = COM_startBlock();
