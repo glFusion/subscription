@@ -19,8 +19,6 @@ if (!in_array('subscription', $_PLUGINS)) {
     COM_404();
 }
 
-USES_subscription_functions();
-
 if (COM_isAnonUser()) {
     echo COM_siteHeader();
     echo SEC_loginRequiredForm();

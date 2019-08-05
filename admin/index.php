@@ -18,8 +18,6 @@ if (!in_array('subscription', $_PLUGINS)) {
     COM_404();
 }
 
-USES_subscription_functions();
-
 /**
 *   Create an admin list of subscriptions for a product
 *
@@ -168,7 +166,8 @@ function getListField($fieldname, $fieldvalue, $A, $icon_arr)
 
     switch($fieldname) {
     case 'edit':
-        $retval .= COM_createLink('<i class="' . SUBSCR_getIcon('edit') . ' uk-icon-hover"></i>',
+        $retval .= COM_createLink(
+            '<i class="uk-icon-edit uk-icon-hover"></i>',
             SUBSCR_ADMIN_URL . '/index.php?editsubscrip=x&amp;sub_id=' . $A['id'],
             array(
                 'class' => 'tooltip',
@@ -299,7 +298,7 @@ function product_getListField($fieldname, $fieldvalue, $A, $icon_arr)
     switch($fieldname) {
     case 'edit':
         $retval .= COM_createLink(
-            '<i class="' . SUBSCR_getIcon('edit') . ' uk-icon-hover"></i>',
+            '<i class="uk-icon-edit uk-icon-hover"></i>',
             SUBSCR_ADMIN_URL .
                 '/index.php?editproduct=x&amp;item_id=' . $A['item_id'],
             array(
@@ -312,7 +311,7 @@ function product_getListField($fieldname, $fieldvalue, $A, $icon_arr)
     case 'delete':
         if (!Subscription\Plan::isUsed($A['item_id'])) {
             $retval .= COM_createLink(
-                '<i class="' . SUBSCR_getIcon('trash', 'danger') . '"></i>',
+                '<i class="uk-icon-trash uk-text-danger"></i>',
                 SUBSCR_ADMIN_URL .
                 "/index.php?deleteproduct=x&amp;item_id={$A['item_id']}",
                 array(

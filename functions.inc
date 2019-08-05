@@ -45,12 +45,6 @@ if (file_exists(SUBSCR_PI_PATH . '/config.php')) {
     include_once SUBSCR_PI_PATH . '/config.php';
 }
 
-// This is temporary, and will be included in glFusion 1.6.0
-isset($_SYSTEM['framework']) || $_SYSTEM['framework'] = 'legacy';
-
-$_CONF_SUBSCR['_is_uikit'] = $_SYSTEM['framework'] == 'uikit' ? 'true' : '';
-$_CONF_SUBSCR['_iconset'] = $_CONF_SUBSCR['_is_uikit'] ? 'uk-icon' : 'fa fa';
-
 // Save the current sql datetime for use throughout the plugin
 $_CONF_SUBSCR['_dt'] = new Date('now', $_CONF['timezone']);
 $_CONF_SUBSCR['now'] = $_CONF_SUBSCR['_dt']->toMySQL(true);
@@ -70,10 +64,6 @@ if (file_exists("$langpath/custom/$langfile")) {
 
 /** Import services to interact with the Shop plugin */
 require_once SUBSCR_PI_PATH . '/services.inc.php';
-
-/** Load plugin-specific functions */
-function USES_subscription_functions()
-{   require_once SUBSCR_PI_PATH . '/subscr_functions.inc.php';   }
 
 spl_autoload_register(function ($class)
 {
@@ -1051,23 +1041,6 @@ function SUBSCR_isAdmin()
 
 
 /**
- * Get an icon from the CSS icon set, either UIkit or FontAwesome.
- *
- * @param   string  $name   Base name of icon, e.g. "edit" for "uk-icon-edit"
- * @param   string  $style  Style name from local CSS
- * @return  string      Class names for icon
- */
-function SUBSCR_getIcon($name, $style='')
-{
-    global $_CONF_SUBSCR;
-
-    if ($style != '')
-        $style = ' sub-icon-' . $style;
-    return $_CONF_SUBSCR['_iconset'] . '-' . $name . $style;
-}
-
-
-/**
  * Determine if the Shop plugin is installed and integration is enabled.
  *
  * @return  boolean     True if Shop is available, False if not.
@@ -1080,48 +1053,6 @@ function SUBSCR_shop_enabled()
             function_exists('plugin_chkVersion_shop');
     }
     return $enabled;
-}
-
-
-/**
- * Helper function to get a template object.
- *
- * @param   string  $name   Base name of template file, e.g. "editor"
- * @param   string  $id     ID of template, e.g. "editform"
- * @param   string  $path   Optional path if not "templates/"
- * @return  string      Full filename, e.g. "editor.uikit.thtml"
- */
-function SUBSCR_getTemplate($name, $id='', $path='')
-{
-    global $_CONF_SUBSCR;
-
-    $templates = array();
-
-    // Put parameters into an array if not already.
-    if (!is_array($name) && !empty($id)) {
-        $templates = array($id => $name);
-    } elseif (is_array($name)) {
-        $templates = $name;
-    }
-
-    // Add additional path info if needed
-    if (!empty($path) && $path[0] == '/') $path = substr($path, 1);
-    if (substr($path, 0, 9) != 'templates') {
-        $path = 'templates/' . $path;
-    }
-
-    // May use "switch" later, for now there are only two options
-    $tpltype = $_CONF_SUBSCR['_is_uikit'] ? '.uikit' : '';
-    foreach ($templates as $t_id =>$t_name) {
-        if (file_exists(__DIR__ . "/$path/$t_name$tpltype.thtml")) {
-            $templates[$t_id] = "$t_name$tpltype.thtml";
-        } else {
-            $templates[$t_id] = "$t_name.thtml";
-        }
-    }
-    $T = new Template(__DIR__ . '/' . $path);
-    $T->set_file($templates);
-    return $T;
 }
 
 
