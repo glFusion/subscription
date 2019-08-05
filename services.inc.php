@@ -185,7 +185,9 @@ function service_handlePurchase_subscription($args, &$output, &$svc_msg)
     );
 
     // User ID is returned in the 'custom' field, so make sure it's numeric.
-    if (is_numeric($ipn_data['custom']['uid'])) {
+    if (!empty($ipn_data['Order'])) {
+        $uid = $ipn_data['Order']->uid;
+     } elseif (is_numeric($ipn_data['custom']['uid'])) {
         $uid = (int)$ipn_data['custom']['uid'];
     } else {
         $uid = DB_getItem(
