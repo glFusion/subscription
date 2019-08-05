@@ -16,7 +16,7 @@ namespace Subscription;
  * Class for subscription product items.
  * @package subscription
  */
-class Product
+class Plan
 {
     /** Property fields accessed via __set() and __get().
      * @var array */
@@ -290,18 +290,18 @@ class Product
     /**
      * Get an instance of a product.
      *
-     * @param   integer $item_id    Product ID
-     * @return  object      Product object
+     * @param   integer $item_id    Plan ID
+     * @return  object      Plan object
      */
     public static function getInstance($item_id)
     {
         static $items = array();
         if (!isset($items[$item_id])) {
-            $cache_key = 'product_' . $item_id;
+            $cache_key = 'plan_' . $item_id;
             $Obj = Cache::get($cache_key);
             if ($Obj === NULL) {
                 $Obj = new self($item_id);
-                Cache::set($cache_key, $Obj, 'products');
+                Cache::set($cache_key, $Obj, 'plan');
             }
             $items[$item_id] = $Obj;
         }
@@ -524,7 +524,8 @@ class Product
         }
         $id = $this->item_id;
         $action_url = SUBSCR_ADMIN_URL . '/index.php';
-        $T = SUBSCR_getTemplate('product_form', 'product');
+        $T = new \Template(SUBSCR_PI_PATH . '/templates');
+        $T->set_file('plan', 'plan_form.thtml');
 
         // Set up the wysiwyg editor, if available
         switch (PLG_getEditorType()) {
@@ -546,10 +547,8 @@ class Product
 
         if ($id != '') {
             $retval = COM_startBlock($LANG_SUBSCR['edit'] . ': ' . $this->item_id);
-
         } else {
             $retval = COM_startBlock($LANG_SUBSCR['new_product']);
-
         }
 
         /*if (function_exists('USES_profile_functions')) {
@@ -569,7 +568,7 @@ class Product
             'early_renewal' => $this->early_renewal,
             'pi_admin_url'  => SUBSCR_ADMIN_URL,
             'pi_url'        => SUBSCR_URL,
-            'doc_url'       => SUBSCR_getDocURL('product_form.html',
+            'doc_url'       => SUBSCR_getDocURL('plan_form.html',
                                             $_CONF['language']),
             'ena_chk'       => $this->enabled == 1 ?
                                     ' checked="checked"' : '',
@@ -595,7 +594,6 @@ class Product
             'prf_type' => $this->prf_type,
             'group_options' => COM_optionList($_TABLES['groups'],
                                 'grp_id,grp_name', $this->grp_access, 1, 'grp_id <> 1'),
-            'iconset' => $_CONF_SUBSCR['_iconset'],
             'register_chk' => $this->at_registration ? 'checked="checked"' : '',
         ) );
 
@@ -603,7 +601,7 @@ class Product
             $T->set_var('candelete', 'true');
         }
 
-        $retval .= $T->parse('output', 'product');
+        $retval .= $T->parse('output', 'plan');
         $retval .= COM_endBlock();
         return $retval;
     }   // function Edit()
@@ -972,7 +970,7 @@ class Product
      * @param   integer $enabled    1 or 0
      * @return  array       Array of product objects
      */
-    public static function getProducts($enabled = 1)
+    public static function getPlans($enabled = 1)
     {
         global $_TABLES;
 
@@ -1000,7 +998,7 @@ class Product
      * Update a product rating and perform related housekeeping tasks.
      *
      * @see     plugin_itemrated_shop()
-     * @param   integer $id     Product ID
+     * @param   integer $id     Plan ID
      * @param   integer $rating New rating value
      * @param   integer $votes  New total number of votes
      * @return  boolean     True on success, False on DB error
@@ -1022,8 +1020,6 @@ class Product
         return DB_error() ? false : true;
     }
 
-
-
-}   // class Product
+}   // class Plan
 
 ?>

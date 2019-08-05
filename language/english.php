@@ -16,7 +16,7 @@
 * @global array $LANG_SUBSCR
 */
 $LANG_SUBSCR = array(
-'product_id'    => 'Product ID',
+'product_id'    => 'Plan ID',
 'name'          => 'Name',
 'enabled'       => 'Enabled',
 'show_in_block' => 'Show in Block',
@@ -83,9 +83,9 @@ $LANG_SUBSCR = array(
 'grace_days'    => 'Grace Period (days)',
 'early_renewal' => 'Early Renewal (days)',
 'trial_days'    => 'Trial Period (days)',
-'products'      => 'Products',
-'product'       => 'Product',
-'new_product'   => 'New Product',
+'products'      => 'Plans',
+'product'       => 'Plan',
+'new_product'   => 'New Plan',
 'new_subscription' => 'New Subscription',
 'select'        => 'Select',
 'date_selector' => 'Select Date',
@@ -145,8 +145,8 @@ $LANG_confignames['subscription'] = array(
     'debug'         => 'Debugging?',
     'show_in_pp_cat' => 'Show in Shop product catalog?',
     'show_in_block' => 'Show product in block?',
-    'enabled'       => 'Product is enabled?',
-    'taxable'       => 'Product is taxable?',
+    'enabled'       => 'Plan is enabled?',
+    'taxable'       => 'Plan is taxable?',
     'displayblocks' => 'Display glFusion Blocks',
     'onmenu'        => 'Show on default glFusion menu?',
     'return_url'    => 'Optional after-payment URL',
@@ -159,7 +159,7 @@ $LANG_configsubgroups['subscription'] = array(
 
 $LANG_fs['subscription'] = array(
     'fs_main' => 'Main Settings',
-    'fs_defaults' => 'Product Defaults',
+    'fs_defaults' => 'Plan Defaults',
 );
 
 // Note: entries 0, 1, and 12 are the same as in $LANG_configselects['Core']

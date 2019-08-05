@@ -60,20 +60,20 @@ if ($msg != '')
 switch ($view) {
 case 'detail':
     if (!empty($id)) {
-        $P = new Subscription\Product($id);
+        $P = new Subscription\Plan($id);
         if ($P->hasErrors()) {
             $display .= COM_showMessageText($P->PrintErrors(), '', true);
         } else {
             $display .= $P->Detail();
         }
     } else {
-        $display .= SUBSCR_ProductList();
+        $display .= Subscription\Catalog::Render();
     }
     break;
 
 case 'list':
 default:
-    $display .= SUBSCR_ProductList();
+    $display .= Subscription\Catalog::Render();
     break;
 }
 

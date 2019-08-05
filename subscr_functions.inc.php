@@ -16,7 +16,7 @@
  *
  * @return  string      HTML for product catalog.
  */
-function SUBSCR_ProductList()
+function SUBSCR_PlanList()
 {
     global $_CONF, $_CONF_SUBSCR, $LANG_SUBSCR, $_USER;
 
@@ -34,9 +34,9 @@ function SUBSCR_ProductList()
     ) );
 
     $mySubs = Subscription\Subscription::getSubscriptions($_USER['uid']);
-    $Products = Subscription\Product::getProducts();
+    $Plans = Subscription\Plan::getPlans();
 
-    if (count($Products) < 1) {
+    if (count($Plans) < 1) {
         $T->parse('output', 'prodlist');
         $retval = $T->finish($T->get_var('output', 'prodlist'));
         $retval .= '<p />' . $LANG_SUBSCR['no_products_avail'];
@@ -48,8 +48,8 @@ function SUBSCR_ProductList()
     $currency = PLG_callFunctionForOnePlugin('plugin_getCurrency_shop');
     if (empty($currency)) $currency = 'USD';
 
-    $T->set_block('prodlist', 'ProductBlock', 'PBlock');
-    foreach ($Products as $P) {
+    $T->set_block('prodlist', 'PlanBlock', 'PBlock');
+    foreach ($Plans as $P) {
         // Skip the rare case of a fixed expiration that has passed.
         if ($P->duration_type == 'fixed' &&
             $P->expiration < $_CONF_SUBSCR['_dt']->format('Y-m-d', true)) {
@@ -89,7 +89,7 @@ function SUBSCR_ProductList()
             'lang_price' => $lang_price,
             'exp_msg'   => $exp_msg,
         ) );
-        $T->parse('PBlock', 'ProductBlock', true);
+        $T->parse('PBlock', 'PlanBlock', true);
     }
 
     $T->parse('output', 'prodlist');

@@ -8,7 +8,7 @@
     </span>
 {!endif}
 </div>
-<!-- BEGIN ProductBlock -->
+<!-- BEGIN PlanBlock -->
 <div class="subProdListItem">
   <div class="subProdListItemInfo">
     <h2><a href="{site_url}/subscription/index.php?view=detail&item_id={item_id}">{item_id}</a></h2>
@@ -22,5 +22,5 @@
     <div class="subProdListItemExpMsg">{exp_msg}</div>
 {!endif}
 </div>
-<!-- END ProductBlock -->
+<!-- END PlanBlock -->
 {# end {templatelocation} #}

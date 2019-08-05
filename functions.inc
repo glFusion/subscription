@@ -327,7 +327,7 @@ function plugin_autotags_subscription($op, $content = '', $autotag = '')
         case 'cart':
         case 'add_cart':
             // tag: [subscription:buynow product_id]
-            $P = new \Subscription\Product($autotag['parm2']);
+            $P = new \Subscription\Plan($autotag['parm2']);
             if ($P->canBuy()) {
                 $HTML = $P->MakeButton($option);
             }
@@ -496,7 +496,7 @@ function phpblock_subscription_subscribe()
         return '';
 
     $T = new Template(SUBSCR_PI_PATH . '/templates');
-    $P = new \Subscription\Product();
+    $P = new \Subscription\Plan();
 
     $i = 0;
     while ($row = DB_fetchArray($r, false)) {
@@ -820,8 +820,8 @@ function plugin_user_create_subscription($uid = 0)
         return;
 
     $S = new \Subscription\Subscription();
-    $Products = \Subscription\Product::getProducts();
-    foreach ($Products as $P) {
+    $Plans = \Subscription\Plan::getPlans();
+    foreach ($Plans as $P) {
         if ($P->at_registration) {
             // If auto-signup is enabled for this product, use the trial_days
             // if defined, or create a full subscription
@@ -889,7 +889,7 @@ function plugin_shop_getcategories_subscription()
 /**
  * Provides the getItemInfo function for subscription products.
  *
- * @param   string  $id         Product ID
+ * @param   string  $id         Plan ID
  * @param   string  $what       Comma-separated list of fields to return
  * @param   integer $uid        User ID
  * @param   array   $options    Not used
@@ -1023,13 +1023,13 @@ function plugin_searchtypes_subscription()
 /**
  * Updates the product table with the new rating and vote count.
  *
- * @param   mixed   $id     Product ID
+ * @param   mixed   $id     Plan ID
  * @param   float   $rating Rating Value
  * @param   integer $votes  Number of votes cast
  */
 function plugin_itemrated_subscription($id, $rating, $votes)
 {
-    return Subscription\Product::updateRating($id, $rating, $votes);
+    return Subscription\Plan::updateRating($id, $rating, $votes);
 }
 
 

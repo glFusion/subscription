@@ -95,21 +95,22 @@ function service_productinfo_subscription($A, &$output, &$svc_msg)
 
     // Create a return array with values to be populated later
     $output = array(
-            'product_id' => implode(':', $item),
-            'name' => 'Unknown',
-            'short_description' => 'Unknown Subscription Item',
-            'description'       => '',
-            'price' => '0.00',
-            'taxable' => 0,
-            'have_detail_svc' => true,  // Tell Shop to use it's detail page wrapper
-            'fixed_q' => 1,         // Purchase qty fixed at 1
-            'isUnique' => true,     // Only on purchase of this item allowed
-            'supportsRatings' => true,
+        'product_id' => implode(':', $item),
+        'name' => 'Unknown',
+        'short_description' => 'Unknown Subscription Item',
+        'description'       => '',
+        'price' => '0.00',
+        'taxable' => 0,
+        'have_detail_svc' => true,  // Tell Shop to use it's detail page wrapper
+        'fixed_q' => 1,         // Purchase qty fixed at 1
+        'isUnique' => true,     // Only on purchase of this item allowed
+        'supportsRatings' => true,
+        'cancel_url' => SUBSCR_URL . '/index.php',
     );
 
     $item_id = $item[0];        // get base product ID
     $item_mod = SUBSCR_getVar($item, 1, 'string', 'new');
-    $P = Subscription\Product::getInstance($item_id);
+    $P = Subscription\Plan::getInstance($item_id);
     if ($P->isNew) {
         COM_errorLog(__FUNCTION__ . " Item {$item_id} not found.");
         return PLG_RET_ERROR;
@@ -164,7 +165,7 @@ function service_handlePurchase_subscription($args, &$output, &$svc_msg)
     }
 
     $product_id = $id_parts[1];
-    $P = Subscription\Product::getInstance($product_id);
+    $P = Subscription\Plan::getInstance($product_id);
     if ($P->isNew) {
         return PLG_RET_ERROR;
     }
@@ -265,10 +266,10 @@ function service_getproducts_subscription($args, &$output, &$svc_msg)
     }
 
     $Subs = Subscription\Subscription::getSubscriptions();
-    $Products = Subscription\Product::getProducts();
-    if (!$Products) return PLG_RET_ERROR;
+    $Plans = Subscription\Plan::getPlans();
+    if (!$Plans) return PLG_RET_ERROR;
 
-    foreach ($Products as $P) {
+    foreach ($Plans as $P) {
         $description = $P->description;
         $short_description = $P->short_description;
 
@@ -335,7 +336,7 @@ function service_getDetailPage_subscription($args, &$output, &$svc_msg)
     if (!isset($item_info[1]) || empty($item_info[1])) {    // missing item ID
         return PLG_RET_ERROR;
     }
-    $P = Subscription\Product::getInstance($item_info[1]);
+    $P = Subscription\Plan::getInstance($item_info[1]);
     if ($P->isNew) return PLG_RET_ERROR;
     $output = $P->Detail();
     return PLG_RET_OK;

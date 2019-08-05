@@ -143,7 +143,7 @@ $subscrConfigData = array(
         'group' => 'subscription',
     ),
 
-    // New Product Defaults
+    // New Plan Defaults
     array(
         'name' => 'fs_defaults',
         'default_value' => NULL,

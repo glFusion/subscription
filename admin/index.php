@@ -6,7 +6,7 @@
 *   @copyright  Copyright (c) 2010 Lee Garner
 *   @package    subscription
 *   @version    0.0.1
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
+*   @license    http://opensource.org/licenses/gpl-2.0.php
 *               GNU Public License v2 or later
 *   @filesource
 */
@@ -19,51 +19,6 @@ if (!in_array('subscription', $_PLUGINS)) {
 }
 
 USES_subscription_functions();
-USES_lib_admin();
-
-
-/**
-*   Basic admin menu for Subscription administration
-*
-*   @param  string  $instr  Specific text instructions to show
-*   @return string          HTML for admin menu
-*/
-function SUBSCR_adminMenu($view = '')
-{
-    global $_CONF, $LANG_ADMIN, $LANG_SUBSCR;
-
-    $menu_arr = array (
-        array('url' => $_CONF['site_admin_url'],
-                'text' => $LANG_ADMIN['admin_home']),
-    );
-    if ($view == 'products') {
-        $menu_arr[] = array('url' => SUBSCR_ADMIN_URL . '/index.php?editproduct=x',
-                'text' => '<span class="subNewAdminItem">' . $LANG_SUBSCR['new_product'] . '</span>');
-    } else {
-        $menu_arr[] = array('url' => SUBSCR_ADMIN_URL . '/index.php',
-                'text' => $LANG_SUBSCR['products']);
-    }
-    if ($view == 'subscriptions') {
-        $menu_arr[] = array('url' => SUBSCR_ADMIN_URL . '/index.php?editsubscrip=x',
-                'text' => '<span class="subNewAdminItem">' . $LANG_SUBSCR['new_subscription'] . '</span>');
-    } else {
-        $menu_arr[] = array('url' => SUBSCR_ADMIN_URL . '/index.php?subscriptions=0',
-                'text' => $LANG_SUBSCR['subscriptions']);
-    }
-
-    if (isset($LANG_SUBSCR['admin_txt_' . $view])) {
-        $hdr_txt = $LANG_SUBSCR['admin_txt_' . $view];
-    } else {
-        $hdr_txt = $LANG_SUBSCR['admin_txt'];
-    }
-
-    $retval = ADMIN_createMenu($menu_arr, $hdr_txt, 
-            plugin_geticon_subscription());
-
-    return $retval;
-
-}
-
 
 /**
 *   Create an admin list of subscriptions for a product
@@ -78,16 +33,27 @@ function SUBSCR_subscriptionList($item_id)
     $retval = '';
 
     $header_arr = array(      # display 'text' and use table field 'field'
-        array('field' => 'edit', 'text' => $LANG_ADMIN['edit'], 
-            'sort' => false, 'align' => 'center'),
-        //array('field' => 'uid', 
-        //    'text' => $LANG_SUBSCR['uid'], 'sort' => true),
-        array('field' => 'subscriber',
-            'text' => $LANG_SUBSCR['subscriber'], 'sort' => false),
-        array('field' => 'plan', 
-            'text' => $LANG_SUBSCR['plan'], 'sort' => true),
-        array('field' => 'expiration', 
-            'text' => $LANG_SUBSCR['expires'], 'sort' => true),
+        array(
+            'field' => 'edit',
+            'text' => $LANG_ADMIN['edit'],
+            'sort' => false,
+            'align' => 'center'
+        ),
+        array(
+            'field' => 'subscriber',
+            'text' => $LANG_SUBSCR['subscriber'],
+            'sort' => false,
+        ),
+        array(
+            'field' => 'plan',
+            'text' => $LANG_SUBSCR['plan'],
+            'sort' => true,
+        ),
+        array(
+            'field' => 'expiration',
+            'text' => $LANG_SUBSCR['expires'],
+            'sort' => true,
+        ),
     );
 
     $defsort_arr = array('field' => 'expiration', 'direction' => 'desc');
@@ -100,14 +66,23 @@ function SUBSCR_subscriptionList($item_id)
         $item_query = ' 1=1 ';
     }
 
-    $retval .= COM_startBlock($title, '', 
-            COM_getBlockTemplate('_admin_block', 'header'));
-
-    $retval .= SUBSCR_adminMenu('subscriptions');
+    $retval .= COM_startBlock(
+        $title, '',
+        COM_getBlockTemplate('_admin_block', 'header')
+    );
+    $retval .= Subscription\Menu::Admin('subscriptions');
+    $retval .= COM_createLink(
+        $LANG_SUBSCR['new_subscription'],
+        SUBSCR_ADMIN_URL . '/index.php?editsubscrip=x',
+        array(
+            'class' => 'uk-button uk-button-success',
+            'style' => 'float:left',
+        )
+    );
 
     $text_arr = array(
         'has_extras' => true,
-        'form_url' => SUBSCR_ADMIN_URL . 
+        'form_url' => SUBSCR_ADMIN_URL .
                 '/index.php?subscriptions='.$item_id,
     );
 
@@ -122,14 +97,14 @@ function SUBSCR_subscriptionList($item_id)
 
             '<input name="renewbutton" type="image" src="'
             . SUBSCR_URL . '/images/renew.png'
-            . '" style="vertical-align:text-bottom;" title="' . $LANG_SUBSCR['renew_all'] 
-            . '" class="gl_mootip"' 
+            . '" style="vertical-align:text-bottom;" title="' . $LANG_SUBSCR['renew_all']
+            . '" class="gl_mootip"'
             . ' data-uk-tooltip="{pos:\'top-left\'}"'
             . ' onclick="return confirm(\'' . $LANG_SUBSCR['confirm_renew']
             . '\');"'
             . '/>&nbsp;' . $LANG_SUBSCR['renew'],
     );
-    
+
     if (isset($_POST['showexp'])) {
         $frmchk = 'checked="checked"';
         $exp_query = '';
@@ -158,15 +133,18 @@ function SUBSCR_subscriptionList($item_id)
         '</option>' .
         COM_optionList($_TABLES['subscr_products'], "item_id,item_id", $item_id) .
         '</select>';
-    $filter = $plans . '&nbsp;<input type="checkbox" name="showexp" ' . $frmchk . 
+    $filter = $plans . '&nbsp;<input type="checkbox" name="showexp" ' . $frmchk .
             ' onclick="javascript:submit();"> ' . $LANG_SUBSCR['show_exp'] . '?<br />';
     $form_arr = array(
     //    'top' => '<input type="checkbox" name="showexp"> Show expired?'
     );
-    $retval .= ADMIN_list('subscription', __NAMESPACE__ . '\getListField', 
-                $header_arr,
-                $text_arr, $query_arr, $defsort_arr, $filter, '', 
-                $options, $form_arr);
+    $retval .= ADMIN_list(
+        'subscription',
+        __NAMESPACE__ . '\getListField',
+        $header_arr,
+        $text_arr, $query_arr, $defsort_arr, $filter, '',
+        $options, $form_arr
+    );
     $retval .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
 
     return $retval;
@@ -200,13 +178,17 @@ function getListField($fieldname, $fieldvalue, $A, $icon_arr)
         break;
 
     case 'uid':
-        $retval = COM_createLink($fieldvalue, 
-            $_CONF['site_url'] . '/users.php?mode=profile&uid=' . $fieldvalue);
+        $retval = COM_createLink(
+            $fieldvalue,
+            $_CONF['site_url'] . '/users.php?mode=profile&uid=' . $fieldvalue
+        );
         break;
 
     case 'subscriber':
-        $retval = COM_createLink(COM_getDisplayName($A['uid']), 
-            $_CONF['site_url'] . '/users.php?mode=profile&uid=' .$A['uid']);
+        $retval = COM_createLink(
+            COM_getDisplayName($A['uid']),
+            $_CONF['site_url'] . '/users.php?mode=profile&uid=' .$A['uid']
+        );
         break;
 
     case 'expiration':
@@ -240,18 +222,18 @@ function SUBSCR_productAdminList()
     $retval = '';
 
     $header_arr = array(      # display 'text' and use table field 'field'
-        array('field' => 'edit', 
+        array('field' => 'edit',
             'text' => $LANG_ADMIN['edit'], 'sort' => false),
-        array('field' => 'enabled', 
+        array('field' => 'enabled',
             'text' => $LANG_SUBSCR['enabled'], 'sort' => false,
             'align' => 'center'),
-        array('field' => 'item_id', 
+        array('field' => 'item_id',
             'text' => $LANG_SUBSCR['product_id'], 'sort' => true),
-        array('field' => 'duration', 
+        array('field' => 'duration',
             'text' => $LANG_SUBSCR['duration'], 'sort' => false),
         array('field' => 'grp_name',
             'text' => $LANG28[101], 'sort' => false),
-        array('field' => 'price', 
+        array('field' => 'price',
             'text' => $LANG_SUBSCR['price'], 'sort' => true),
         array('field' => 'subscriptions',
             'text' => $LANG_SUBSCR['subscriptions'], 'sort' => true),
@@ -262,8 +244,15 @@ function SUBSCR_productAdminList()
     $defsort_arr = array('field' => 'item_id', 'direction' => 'asc');
 
     $retval .= COM_startBlock($LANG_SUBSCR['admin_hdr'], '', COM_getBlockTemplate('_admin_block', 'header'));
-
-    $retval .= SUBSCR_adminMenu('products');
+    $retval .= Subscription\Menu::Admin('products');
+    $retval .= COM_createLink(
+        $LANG_SUBSCR['new_product'],
+        SUBSCR_ADMIN_URL . '/index.php?editproduct=x',
+        array(
+            'class' => 'uk-button uk-button-success',
+            'style' => 'float:left',
+        )
+    );
 
     $text_arr = array(
         'has_extras' => true,
@@ -273,24 +262,27 @@ function SUBSCR_productAdminList()
     $form_arr = array();
     $query_arr = array('table' => 'subscr_products',
         'sql' => "SELECT p.*, g.grp_name
-                FROM {$_TABLES['subscr_products']} p 
+                FROM {$_TABLES['subscr_products']} p
                 LEFT JOIN {$_TABLES['groups']} g
-                    ON g.grp_id=p.addgroup", 
+                    ON g.grp_id=p.addgroup",
         'query_fields' => array('item_id', 'short_description', 'description'),
         'default_filter' => ' WHERE 1=1 ',
     );
     $filter = '';
-    $retval .= ADMIN_list('subscription', __NAMESPACE__ . '\product_getListField', 
-                    $header_arr,
-                    $text_arr, $query_arr, $defsort_arr, $filter, '', 
-                    $options, $form_arr);
+    $retval .= ADMIN_list(
+        'subscription',
+        __NAMESPACE__ . '\product_getListField',
+        $header_arr,
+        $text_arr, $query_arr, $defsort_arr, $filter, '',
+        $options, $form_arr
+    );
     $retval .= COM_endBlock(COM_getBlockTemplate('_admin_block', 'footer'));
     return $retval;
 }
 
 
 /**
-*   Get a single field for the Subscription Product admin list.
+*   Get a single field for the Subscription Plan admin list.
 *
 *   @param  string  $fieldname  Name of field
 *   @param  mixed   $fieldvalud Value of field
@@ -308,20 +300,20 @@ function product_getListField($fieldname, $fieldvalue, $A, $icon_arr)
     case 'edit':
         $retval .= COM_createLink(
             '<i class="' . SUBSCR_getIcon('edit') . ' uk-icon-hover"></i>',
-            SUBSCR_ADMIN_URL . 
+            SUBSCR_ADMIN_URL .
                 '/index.php?editproduct=x&amp;item_id=' . $A['item_id'],
             array(
                 'class' => 'tooltip',
-                'title' => $LANG_SUBSCR['edit'],
+                'title' => $LANG_SUBSCR['new_product'],
             )
         );
         break;
 
     case 'delete':
-        if (!Subscription\Product::isUsed($A['item_id'])) {
+        if (!Subscription\Plan::isUsed($A['item_id'])) {
             $retval .= COM_createLink(
                 '<i class="' . SUBSCR_getIcon('trash', 'danger') . '"></i>',
-                SUBSCR_ADMIN_URL . 
+                SUBSCR_ADMIN_URL .
                 "/index.php?deleteproduct=x&amp;item_id={$A['item_id']}",
                 array(
                     'class' => 'tooltip',
@@ -360,7 +352,7 @@ function product_getListField($fieldname, $fieldvalue, $A, $icon_arr)
         break;
 
     case 'subscriptions':
-        $retval = (int)DB_count($_TABLES['subscr_subscriptions'], 
+        $retval = (int)DB_count($_TABLES['subscr_subscriptions'],
                 'item_id', $A['item_id']);
         break;
 
@@ -379,7 +371,7 @@ function product_getListField($fieldname, $fieldvalue, $A, $icon_arr)
 */
 // Only let admin users access this page
 if (!SEC_inGroup($_CONF_SUBSCR['pi_name'] . ' Admin')) {
-    COM_errorLog("Attempted unauthorized access the Subscription Admin page." . 
+    COM_errorLog("Attempted unauthorized access the Subscription Admin page." .
         " User id: {$_USER['uid']}, Username: {$_USER['username']}, " .
         " IP: $REMOTE_ADDR", 1);
     $display = COM_siteHeader();
@@ -394,7 +386,7 @@ if (!SEC_inGroup($_CONF_SUBSCR['pi_name'] . ' Admin')) {
 $action = '';
 $actionval = '';
 $expected = array(
-    'edit', 'cancel', 
+    'edit', 'cancel',
     'saveproduct', 'deleteproduct',
     'savesubscription', 'deletesubscription',
     'renewbutton_x', 'cancelbutton_x',
@@ -421,7 +413,7 @@ if ($action == 'mode') {
 
 
 // Get the mode and page name, if any
-//$view = isset($_REQUEST['view']) ? 
+//$view = isset($_REQUEST['view']) ?
 //                COM_applyFilter($_REQUEST['view']) : $action;
 
 // Get the product and subscription IDs, if any
@@ -440,7 +432,7 @@ $content = '';      // initialize variable for page content
 
 switch ($action) {
 case 'saveproduct':
-    $S = new Subscription\Product($item_id);
+    $S = new Subscription\Plan($item_id);
     $status = $S->Save($_POST);
     if ($status) {
         $view = 'products';
@@ -453,7 +445,7 @@ case 'saveproduct':
     break;
 
 case 'deleteproduct':
-    $S = new Subscription\Product($item_id);
+    $S = new Subscription\Plan($item_id);
     $S->Delete();
     $view = 'products';
     break;
@@ -485,11 +477,11 @@ case 'cancelbutton_x':
             Subscription\Subscription::CancelByID($item);
         }
     }
-    echo COM_refresh(SUBSCR_ADMIN_URL.'/index.php?subscriptions=x');
+    echo COM_refresh(SUBSCR_ADMIN_URL.'/index.php?subscriptions=0');
     break;
 
 case 'renewbutton_x':
-    if (isset($_POST['delitem']) && is_array($_POST['delitem']) && 
+    if (isset($_POST['delitem']) && is_array($_POST['delitem']) &&
             !empty($_POST['delitem'])) {
         $S = new Subscription\Subscription();
         foreach ($_POST['delitem'] as $item) {
@@ -509,12 +501,12 @@ default:
 // Display the correct page content
 switch ($view) {
 case 'editproduct':
-    $P = Subscription\Product::getInstance($item_id);
+    $P = Subscription\Plan::getInstance($item_id);
     if (isset($_POST['short_description'])) {
         // Pick a field.  If it exists, then this is probably a rejected save
         $P->SetVars($_POST);
     }
-    $content .= SUBSCR_adminMenu($view);
+    $content .= Subscription\Menu::Admin($view);
     $content .= $P->Edit();
     break;
 
@@ -525,14 +517,14 @@ case 'subscriptions':
 case 'editsubscrip':
     $sub_id = isset($_GET['sub_id']) ? $_GET['sub_id'] : '';
     $S = new Subscription\Subscription($sub_id);
-    $content .= SUBSCR_adminMenu($view);
+    $content .= Subscription\Menu::Admin($view);
     if ($actionval == 0 && isset($_POST['uid'])) {
         // Pick a field.  If it exists, then this is probably a rejected save
         $S->SetVars($_POST);
     }
     $content .= $S->Edit();
     break;
-    
+
 case 'products':
 default:
     $content .= SUBSCR_productAdminList();

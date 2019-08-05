@@ -62,7 +62,7 @@ class Subscription
         if (is_array($id)) {
             // Load variables from supplied array
             $this->setVars($id);
-            $this->Plan = Product::getInstance($this->item_id);
+            $this->Plan = Plan::getInstance($this->item_id);
             $this->isNew = false;
         } elseif ($id < 1) {
             $this->id = 0;
@@ -194,7 +194,7 @@ class Subscription
         if (!empty($row)) {
             $this->setVars($row, true);
             $this->isNew = false;
-            $this->Plan = Product::getInstance($row['item_id']);
+            $this->Plan = Plan::getInstance($row['item_id']);
             Cache::set($cache_key, $row, 'subscriptions');
             return true;
         } else {
@@ -207,7 +207,7 @@ class Subscription
      * Get a subscription object by user and item ID.
      *
      * @param   integer $uid        User ID
-     * @param   string  $item_id    Product ID
+     * @param   string  $item_id    Plan ID
      * @return  object      Subscription object
      */
     public static function getInstance($uid, $item_id)
@@ -293,7 +293,7 @@ class Subscription
         }
         /*$logmsg .= ' ' . $this->id . ' for ' .
                 COM_getDisplayName($A['uid']) . ' (' . $A['uid'] . ') ' .
-                $this->ProductName() . ", exp {$this->expiration}";*/
+                $this->PlanName() . ", exp {$this->expiration}";*/
         SUBSCR_debug('Status of last update: ' . print_r($status,true));
         return $status;
     }
@@ -325,7 +325,7 @@ class Subscription
      * @uses    AddtoGroup()
      * @uses    AddHistory()
      * @param   integer $uid        User ID
-     * @param   string  $item_id    Product item ID
+     * @param   string  $item_id    Plan item ID
      * @param   integer $duration   Optionsl Duration (# of duration_type's)
      * @param   integer $duration_type  Optional Duration interval (week, month, etc.)
      * @param   string  $expiration Optional fixed expiration
@@ -346,7 +346,7 @@ class Subscription
         $this->notified = 0;
 
         // Get the product information for this subscription
-        $P = Product::getInstance($item_id);
+        $P = Plan::getInstance($item_id);
         if ($price == -1) {
             $price = $upgrade ? $P->upg_price : $P->price;
         }
@@ -461,7 +461,7 @@ class Subscription
      */
     private function AddtoGroup()
     {
-        if (!$this->Plan) $this->Plan = Product::getInstance($this->item_id);
+        if (!$this->Plan) $this->Plan = Plan::getInstance($this->item_id);
         if (!$this->Plan->isNew) {
             SUBSCR_debug("Adding user {$this->uid} to group {$this->Plan->addgroup}");
             Cache::clearGroup($this->Plan->addgroup, $this->uid);
@@ -524,17 +524,9 @@ class Subscription
         }
 
         $T = new \Template(SUBSCR_PI_PATH . '/templates');
-        switch ($_SYSTEM['framework']) {
-        case 'uikit':
-            $T->set_file(array('product' => 'subscription_form.uikit.thtml'));
-            break;
-        default:
-            $T->set_file(array('product' => 'subscription_form.thtml'));
-            break;
-        }
+        $T->set_file('subscription', 'subscription_form.thtml');
         if ($id > 0) {
-            $retval = COM_startBlock($LANG_SUBSCR['edit'] . ': ' .
-                    $this->name);
+            $retval = COM_startBlock($LANG_SUBSCR['edit'] . ': ' . $this->name);
         } else {
             $retval = COM_startBlock($LANG_SUBSCR['new_subscription']);
         }
@@ -555,10 +547,9 @@ class Subscription
             'product_select' => $sel_opts .
                         COM_optionList($_TABLES['subscr_products'],
                         'item_id,item_id', $this->item_id, 1),
-            'iconset'       => $_CONF_SUBSCR['_iconset'],
         ) );
 
-        $retval .= $T->parse('output', 'product');
+        $retval .= $T->parse('output', 'subscription');
         $retval .= COM_endBlock();
         return $retval;
     }   // function Edit()
@@ -685,9 +676,9 @@ class Subscription
      * Get the product name associated with this subscription.
      *
      * @deprecated
-     * @return string      Product name
+     * @return string      Plan name
      */
-    public function X_ProductName()
+    public function X_PlanName()
     {
         global $_TABLES;
         return DB_getItem($_TABLES['subscr_products'], 'item_id',

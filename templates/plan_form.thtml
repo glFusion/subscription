@@ -34,7 +34,7 @@ function update_duration_type(opt)
   <div class="uk-form-controls">
     <input required size="20"
       type="text" name="item_id" value="{item_id}" id="f_item_id">
-    <i class="{iconset}-exclamation-triangle sub-icon-danger tooltip"
+    <i class="uk-icon uk-icon-exclamation-triangle uk-icon-danger tooltip"
         title="{$LANG_SUBSCR['required']}"></i>
   </div>
 </div>
@@ -61,7 +61,7 @@ function update_duration_type(opt)
   </label>
   <div class="uk-form-controls">
     <input type=text name="expiration" value="{expiration}" id="f_expiration">
-    <i class="{iconset}-calendar" id="fixedexp_trigger"
+    <i class="uk-icon uk--calendar" id="fixedexp_trigger"
       title="{$LANG_SUBSCR['date_selector']}"
       data-uk-tooltip></i>
   </div>
