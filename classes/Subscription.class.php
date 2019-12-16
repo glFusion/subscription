@@ -659,6 +659,7 @@ class Subscription
         if ($this->isNew) return false;
 
         // Remove the subscriber from the subscription group
+        USES_lib_user();
         SUBSCR_debug("Removing user {$this->uid} from {$this->Plan->addgroup}");
         Cache::clearGroup($this->Plan->addgroup, $this->uid);
         USER_delGroup($this->Plan->addgroup, $this->uid);
