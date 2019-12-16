@@ -1141,13 +1141,9 @@ class Plan
         switch($fieldname) {
         case 'edit':
             $retval .= COM_createLink(
-                '<i class="uk-icon-edit uk-icon-hover"></i>',
+                '<i class="uk-icon uk-icon-edit"></i>',
                 SUBSCR_ADMIN_URL .
-                    '/index.php?editproduct=x&amp;item_id=' . $A['item_id'],
-                array(
-                    'class' => 'tooltip',
-                    'title' => $LANG_SUBSCR['new_product'],
-                )
+                    '/index.php?editproduct=x&amp;item_id=' . $A['item_id']
             );
             break;
 
