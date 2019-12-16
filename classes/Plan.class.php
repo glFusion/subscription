@@ -301,7 +301,7 @@ class Plan
             $Obj = Cache::get($cache_key);
             if ($Obj === NULL) {
                 $Obj = new self($item_id);
-                Cache::set($cache_key, $Obj, 'plan');
+                Cache::set($cache_key, $Obj, 'plans');
             }
             $items[$item_id] = $Obj;
         }
@@ -431,9 +431,9 @@ class Plan
             $status = true;
         }
         // Clear all products since updates may affect listings
-        Cache::clear('products');
-        $cache_key = 'product_' . $this->item_id;
-        Cache::set($cache_key, $this, 'products');
+        Cache::clear('plans');
+        $cache_key = 'plan_' . $this->item_id;
+        Cache::set($cache_key, $this, 'plans');
         PLG_itemSaved($this->item_id, $_CONF_SUBSCR['pi_name'], $orig_item_id);
 
         SUBSCR_debug('Status of last update: ' . print_r($status,true));
@@ -463,7 +463,7 @@ class Plan
 
         DB_delete($_TABLES['subscr_products'], 'item_id', $this->item_id);
         // Clear all products since updates may affect listings
-        Cache::clear('products');
+        Cache::clear('plans');
         PLG_itemDeleted($this->item_id, $_CONF_SUBSCR['pi_name']);
         $this->item_id = '';
         return true;
@@ -629,7 +629,7 @@ class Plan
         //echo $sql;die;
         DB_query($sql);
         if (!DB_error()) {
-            Cache::clearAnyTags(array('products_ena_1', 'products_ena_0', 'product_' . $id));
+            Cache::clearAnyTags(array('plans_ena_1', 'plans_ena_0', 'plan_' . $id));
             return $newvalue;
         } else {
             return $oldvalue;
@@ -654,9 +654,8 @@ class Plan
         // Create product template
         $T = new \Template(SUBSCR_PI_PATH . '/templates');
         $T->set_file(array(
-            'detail'  => 'product_detail.thtml',
+            'detail'  => 'plan_detail.thtml',
         ));
-
         // Check the expiration for the current user
         if (!COM_isAnonUser()) {
             $sql = "SELECT expiration,
@@ -980,7 +979,7 @@ class Plan
         if (!SUBSCR_isAdmin()) {
             $sql .= SEC_buildAccessSql();
         }
-        $cache_key = 'products_' . md5($sql);
+        $cache_key = 'plans_' . md5($sql);
         $retval = Cache::get($cache_key);
         if ($retval === NULL) {
             $result = DB_query($sql);
@@ -988,7 +987,7 @@ class Plan
             while ($A = DB_fetchArray($result, false)) {
                 $retval[$A['item_id']] = new self($A);
             }
-            Cache::set($cache_key, $retval, 'products');
+            Cache::set($cache_key, $retval, 'plans');
         }
         return $retval;
     }
@@ -1016,7 +1015,7 @@ class Plan
                 SET rating = $rating, votes = $votes
                 WHERE id = $id";
         DB_query($sql);
-        Cache::clear('products');
+        Cache::clear('plans');
         return DB_error() ? false : true;
     }
 
