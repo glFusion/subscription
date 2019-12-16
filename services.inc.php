@@ -344,4 +344,32 @@ function service_getDetailPage_subscription($args, &$output, &$svc_msg)
     return PLG_RET_OK;
 }
 
+
+/**
+ * Set text information to be included with the purchase notification.
+ * Expected args: ```array(
+ *      'item_id' => array(
+ *          0 => item_id,
+ *          1 => new vs renewal,
+ *      ),
+ *      'mods' => array(
+ *          'uid' => user_id
+ *      )
+ *  )```
+ *
+ * @param   array   $args       Array of item information
+ * @param   array   $output     Return array
+ * @param   string  $svc_msg    Unused
+ * @return  integer     Return value
+ */
+function service_emailReceiptInfo_subscription($args, &$output, &$svc_msg)
+{
+    global $LANG_SUBSCR;
+
+    if (isset($args['item_id'][0])) {
+        $output = $LANG_SUBSCR['msg_purch_email'];
+    }
+    return PLG_RET_OK;      // don't error
+}
+
 ?>

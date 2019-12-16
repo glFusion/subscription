@@ -128,6 +128,7 @@ $LANG_SUBSCR = array(
 'date_selector' => 'Date Selector',
 'required'      => 'Required',
 'hlp_admin_del' => 'Only plans which have no associated subscriptions may be deleted.',
+'msg_purch_email' => 'If you are logged into the site, you may need to log out and back in again for your subscription to take effect.',
 );
 
 // Messages for the plugin upgrade
