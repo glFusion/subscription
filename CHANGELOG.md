@@ -1,12 +1,13 @@
 # Changelog for the Subscription plugin for glFusion
 
 ## 1.0.0
-Release TBD
+Release 2020-02-18
 - Fix link to subscriptions admin list.
 - Change from `Product` to `Plan`.
 - Implement Menu class to show menus and messages.
 - Deprecate non-uikit templates and styles.
 - Fix getting user ID from order object during handlePurchase().
+- Forward plan taxable status to Shop plugin when purchasing.
 
 ## 0.2.3
 Release 2019-08-04

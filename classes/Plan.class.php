@@ -310,6 +310,61 @@ class Plan
 
 
     /**
+     * Get the plan name (short description field).
+     *
+     * @return  string      Plan name
+     */
+    public function getName()
+    {
+        return $this->short_description;
+    }
+
+
+    /**
+     * Get the verbose description of the plan.
+     *
+     * @return  string      Plan description
+     */
+    public function getDscp()
+    {
+        return $this->description;
+    }
+
+
+    /**
+     * Get the taxable status of the plan.
+     *
+     * @return  integer     1 if taxable, 0 if non-taxable
+     */
+    public function isTaxable()
+    {
+        return $this->taxable ? 1 : 0;
+    }
+
+
+    /**
+     * Get the base price for the plan.
+     *
+     * @return  float   Base plan price
+     */
+    public function getBasePrice()
+    {
+        return (float)$this->price;
+    }
+
+
+    /**
+     * Get the upgrade price.
+     *
+     * @return  float   Upgrade price
+     */
+    public function getUpgradePrice()
+    {
+        return (float)$this->upg_price;
+    }
+
+
+    /**
      * Save the current values to the database.
      * Appends error messages to the $Errors property.
      *

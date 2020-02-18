@@ -115,14 +115,15 @@ function service_productinfo_subscription($A, &$output, &$svc_msg)
         COM_errorLog(__FUNCTION__ . " Item {$item_id} not found.");
         return PLG_RET_ERROR;
     }
-    $output['short_description'] = $P->short_description;
-    $output['name'] = $P->short_description;
-    $output['description'] = $P->description;
+    $output['short_description'] = $P->getName();
+    $output['name'] = $P->getName();;
+    $output['description'] = $P->getDscp();
+    $output['taxable'] = $P->isTaxable();
     if ($item_mod == 'upgrade' && $P->upg_from != '' && $P->upg_price > 0) {
-        $output['price'] = $P->upg_price;
+        $output['price'] = $P->getUpgradePrice();
         $output['name'] .= ', ' . $LANG_SUBSCR['upgrade'];
     } else {
-        $output['price'] = $P->price;
+        $output['price'] = $P->getBasePrice();
     }
     $output['url'] = COM_buildUrl(SUBSCR_URL .
                     '/index.php?view=detail&item_id=' . $P->item_id);
