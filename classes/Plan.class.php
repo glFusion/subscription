@@ -3,14 +3,15 @@
  * Class to manage subscription plans.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2010-2018 Lee Garner
+ * @copyright   Copyright (c) 2010-2020 Lee Garner
  * @package     subscription
- * @version     v0.2.2
+ * @version     v1.0.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
  */
 namespace Subscription;
+
 
 /**
  * Class for subscription product items.
@@ -18,13 +19,97 @@ namespace Subscription;
  */
 class Plan
 {
-    /** Property fields accessed via __set() and __get().
-     * @var array */
-    private $properties = array();
+    /** Subscription plan ID.
+     * @var string */
+    private $item_id;
 
-    /** Indicate whether the current user is an administrator.
+    /** Subscription plan from which this is an upgrade.
+     * @var string */
+    private $upg_from;
+
+    /** Subscription duration, works with duration_type.
+     * @var integer */
+    private $duration;
+
+    /** Duration type (day, month, year).
+     * @var string */
+    private $duration_type;
+
+    /** Group to which subscribers are automatically added.
+     * @var integer */
+    private $addgroup;
+
+    /** Number of days' grace period when the subscription expires.
+     * @var intger */
+    private $grace_days;
+
+    /** Number of days before expiration when the subscription may be renewed.
+     * @var integer */
+    private $early_renewal;
+
+    /** Automatically create a trial subscription at registration?
      * @var boolean */
-    private $isAdmin = false;
+    private $at_registration;
+
+    /** Number of days for the trial subscription.
+     * @var integer */
+    private $trial_days;
+
+    /** Group ID which is allowed to purchase this subscription.
+     * @var integer */
+    private $grp_access;
+
+    /** Subscription price.
+     * @var float */
+    private $price;
+
+    /** Upgrade price, if this is an upgrade from another plan.
+     * @var float */
+    private $upg_price;
+
+    /** Plan name (short description).
+     * @var string */
+    private $short_description;
+
+    /** Full text description.
+     * @var string */
+    private $description;
+
+    /** Profile type. TODO what is this?
+     * @var string */
+    private $prf_type;
+
+    /** Indicator that the plan is available for purchase.
+     * @var boolean */
+    private $enabled;
+
+    /** Show this plan in the purchase block?
+     * @var boolean */
+    private $show_in_block;
+
+    /** Plan is taxable?
+     * @var boolean */
+    private $taxable;
+
+    /** Upgrading to this plan extends the subscription period?
+     * @var boolean */
+    private $upg_extend_exp;
+
+    /** Fixed expiration date, NULL to calculate from the plan duration.
+     * @var string */
+    private $expiration = NULL;
+
+    /**Indicator that the current user is subscribed to this plan.
+     * @var boolean */
+    private $is_subscribed = 0;
+
+    /** Number of votes cast for this plan.
+     * @var integer */
+    private $votes = 0;
+
+    /** Rating score.
+     * @var float */
+    private $rating = 0;
 
     /**
      * Should permissions be checked?
@@ -58,7 +143,6 @@ class Plan
         global $_CONF_SUBSCR, $LANG_SUBSCR;
 
         $this->isNew = true;
-        $this->isAdmin = SEC_hasRights('subscription.admin') ? 1 : 0;
 
         if (is_array($id)) {
             $this->setVars($id, true);
@@ -77,14 +161,13 @@ class Plan
             $this->duration = 0;
             $this->duration_type = 'month';
             $this->expiration =  NULL;
-            $this->enabled = $_CONF_SUBSCR['enabled'];
-            $this->show_in_block = $_CONF_SUBSCR['show_in_block'];
-            $this->taxable = $_CONF_SUBSCR['taxable'];
+            $this->enabled = (int)$_CONF_SUBSCR['enabled'];
+            $this->show_in_block = (int)$_CONF_SUBSCR['show_in_block'];
+            $this->taxable = (int)$_CONF_SUBSCR['taxable'];
             $this->at_registration = SUBSCR_REGISTER_NONE;
-            $this->dt_add = time();
-            $this->views = 0;
-            $this->grace_days = $_CONF_SUBSCR['grace_days'];
-            $this->early_renewal = $_CONF_SUBSCR['early_renewal'];
+            //$this->views = 0;
+            $this->grace_days = (int)$_CONF_SUBSCR['grace_days'];
+            $this->early_renewal = (int)$_CONF_SUBSCR['early_renewal'];
             $this->grp_access = 13;       // logged-in users
             $this->pricing = array();
         }
@@ -99,74 +182,8 @@ class Plan
      */
     public function __set($var, $value='')
     {
-        switch ($var) {
-        case 'item_id':
-        case 'upg_from':
-            $this->properties[$var] = COM_sanitizeID($value, false);
-            break;
-
-        case 'views':
-        case 'dt_add':
-        case 'duration':
-        case 'addgroup':
-        case 'grace_days':
-        case 'early_renewal':
-        case 'at_registration':
-        case 'trial_days':
-        case 'grp_access':
-        case 'prf_update':
-            // Integer values
-            $this->properties[$var] = (int)$value;
-            break;
-
-        case 'price':
-        case 'upg_price':
-            // Float values
-            $this->properties[$var] = (float)$value;
-            break;
-
-        case 'buttons':
-        case 'short_description':
-        case 'description':
-        case 'duration_type':
-        case 'prf_type':
-            // String values
-            $this->properties[$var] = trim($value);
-            break;
-
-        case 'enabled':
-        case 'show_in_block':
-        case 'taxable':
-        case 'upg_extend_exp':
-            // Boolean values
-            $this->properties[$var] = $value == 1 ? 1 : 0;
-            break;
-
-        /*case 'buttons':
-            if (is_array($value)) {
-                $this->properties['buttons'] = $value;
-            } else {
-                $value = unserialize($value);
-                if (is_array($value)) {
-                    $this->properties['buttons'] = $value;
-                } else {
-                    $this->properties['buttons'] = $this->btn_types;
-                }
-            }
-            break;*/
-
-        case 'expiration':          // Fixed expiration date, or NULL
-            //if ($value != NULL) {
-            if (!empty($value)) {
-                $value = trim($value);
-            }
-            $this->properties['expiration'] = $value;
-            break;
-
-        default:
-            // Undefined values (do nothing)
-            break;
-        }
+        COM_errorLog("attempting __set $var to $value: " . print_r(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2),true));
+        return NULL;
     }
 
 
@@ -178,11 +195,8 @@ class Plan
      */
     public function __get($var)
     {
-        if (array_key_exists($var, $this->properties)) {
-            return $this->properties[$var];
-        } else {
-            return NULL;
-        }
+        COM_errorLog("attempting __get for $var: " . print_r(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2),true));
+        return NULL;
     }
 
 
@@ -196,20 +210,20 @@ class Plan
     {
         if (!is_array($row)) return;
 
-        $this->item_id = $row['item_id'];
+        $this->item_id = COM_sanitizeID($row['item_id'], false);
         $this->short_description = $row['short_description'];
         $this->description = $row['description'];
-        $this->enabled = $row['enabled'];
-        $this->at_registration = $row['at_registration'];
-        $this->trial_days = $row['trial_days'];
-        $this->price = $row['price'];
+        $this->enabled = LGLIB_getVar($row, 'enabled', 'integer', 0);
+        $this->at_registration = LGLIB_getVar($row, 'at_registration', 'integer', 0);
+        $this->trial_days = LGLIB_getVar($row, 'trial_days', 'integer', 0);
+        $this->price = LGLIB_getVar($row, 'price', 'float');
         $this->upg_price = 0;       // TODO: see if these will be used
         $this->upg_extend_exp = 0;
         $this->upg_from = '';
         //$this->upg_price = $row['upg_price'];
         //$this->upg_extend_exp = $row['upg_extend_exp'];
         //$this->upg_from = $row['upg_from'];
-        $this->duration = $row['duration'];
+        $this->duration = LGLIB_getVar($row, 'duration', 'integer', 0);
         $this->duration_type = $row['duration_type'];
         if ($this->duration_type == 'fixed') {
             $this->expiration = empty($row['expiration']) ?
@@ -217,25 +231,17 @@ class Plan
         } else {
             $this->expiration = NULL;
         }
-        //$this->prf_update = $row['prf_update'];
-        $this->prf_update = 0;
-        //$this->prf_type = $row['prf_type'];
-        $this->prf_type = '';
-        //$this->dt_add = $row['dt_add'];
-        $this->dt_add = '';
         //$this->views = $row['views'];
-        $this->views = 0;
-        $this->addgroup = $row['addgroup'];
-        $this->grace_days = $row['grace_days'];
-        $this->early_renewal = $row['early_renewal'];
-        $this->grp_access = $row['grp_access'];
+        //$this->views = 0;
+        $this->addgroup = (int)$row['addgroup'];
+        $this->grace_days = (int)$row['grace_days'];
+        $this->early_renewal = (int)$row['early_renewal'];
+        $this->grp_access = (int)$row['grp_access'];
         $this->show_in_block = isset($row['show_in_block']) ? $row['show_in_block'] : 0;
         $this->taxable = isset($row['taxable']) ? $row['taxable'] : 0;
         if ($fromDB) {
-            $this->buttons = $row['buttons'];
             $this->pricing = @unserialize($row['pricing']);
         } else {
-            $this->buttons = $this->btn_types;
             $this->pricing['base'] = (float)$row['price'];
             // TODO: This isn't doing anything here....
             if (isset($row['disc_price'])) {
@@ -310,6 +316,17 @@ class Plan
 
 
     /**
+     * Get the plan product ID.
+     *
+     * @return   string     Plan ID
+     */
+    public function getID()
+    {
+        return $this->item_id;
+    }
+
+
+    /**
      * Get the plan name (short description field).
      *
      * @return  string      Plan name
@@ -365,6 +382,118 @@ class Plan
 
 
     /**
+     * Get the plan from which this plan is an upgrade.
+     *
+     * @return  string      Plan ID of the base plan
+     */
+    public function getUpgradeFrom()
+    {
+        return $this->upg_from;
+    }
+
+
+    /**
+     * Get the expiration date.
+     *
+     * @return  string      Expiration date
+     */
+    public function getExpiration()
+    {
+        return $this->expirataion;
+    }
+
+
+    /**
+     * Get the duration number.
+     *
+     * @return  integer     Duration
+     */
+    public function getDuration()
+    {
+        return (int)$this->duration;
+    }
+
+
+    /**
+     * Get the duration type (day, week, month, etc.)
+     *
+     * @return  string      Duration type
+     */
+    public function getDurationType()
+    {
+        return $this->duration_type;
+    }
+
+
+    /**
+     * Check if this plan has a fixed duration.
+     *
+     * @return  boolean     1 if fixed, 0 if not
+     */
+    public function isFixed()
+    {
+        return $this->duration_type == 'fixed' ? 1 : 0;
+    }
+
+
+    /**
+     * Get the number of days allowed for early renewal.
+     *
+     * @return  integer     Early renewal days
+     */
+    public function getEarlyRenewal()
+    {
+        return (int)$this->early_renewal;
+    }
+
+
+    /**
+     * Get the number of days for trial subscription.
+     *
+     * @return  integer     Trial subscription days.
+     */
+    public function getTrialDays()
+    {
+        return (int)$this->trial_days;
+    }
+
+
+    /**
+     * Set the `checkPerms` property if access should not be checked.
+     *
+     * @param   boolean $chk    True to check permissions, False to ignore
+     * @return  object  $this
+     */
+    public function setCheckPerms($chk)
+    {
+        $this->checkPerms = $chk ? 1 : 0;
+    }
+
+
+    /**
+     * Check if this is a new plan record.
+     * Also indicates if there is an error reading a requested plan.
+     *
+     * @return  boolean     1 if new, 0 if not.
+     */
+    public function isNew()
+    {
+        return $this->isNew ? 1 : 0;
+    }
+
+
+    /**
+     * Check if an upgrade to this plan extends the existing duration.
+     *
+     * @return  boolean     1 if expiration is extended, 0 if not
+     */
+    public function upgradExtendsExp()
+    {
+        return $this->upg_extend_exp ? 1 : 0;
+    }
+
+
+    /**
      * Save the current values to the database.
      * Appends error messages to the $Errors property.
      *
@@ -390,8 +519,6 @@ class Plan
             // Make sure there's a valid item_id
             $this->item_id = COM_makeSid();
         }
-
-        $this->buttons = $this->btn_types;
 
         // Make sure the record has all necessary fields.
         if (!$this->isValidRecord()) {
@@ -465,17 +592,14 @@ class Plan
                 taxable = '{$this->taxable}',
                 at_registration = '{$this->at_registration}',
                 trial_days = '{$this->trial_days}',
-                views = '{$this->views}',
+                views = '0',
                 grace_days = '{$this->grace_days}',
                 early_renewal = '{$this->early_renewal}',
                 addgroup = '{$this->addgroup}',
                 upg_from = '{$this->upg_from}',
                 upg_price = '$upg_price',
                 upg_extend_exp = '{$this->upg_extend_exp}',
-                prf_update = '{$this->prf_update}',
-                prf_type = '" . DB_escapeString($this->prf_type) . "',
-                grp_access = '{$this->grp_access}',
-                buttons = '{$this->buttons}'";
+                grp_access = '{$this->grp_access}'";
         $sql = $sql1 . $sql2 . $sql3;
         //echo $sql;die;
         SUBSCR_debug($sql);
@@ -570,8 +694,8 @@ class Plan
         global $_TABLES, $_CONF, $_CONF_SUBSCR, $LANG_SUBSCR,
                 $LANG24, $LANG_postmodes, $_SYSTEM;
 
-        $id = COM_sanitizeID($id, false);
         if ($id != '') {
+            $id = COM_sanitizeID($id, false);
             // If an id is passed in, then read that record
             if (!$this->Read($id)) {
                 return Menu::errorMessage($LANG_SUBSCR['invalid_product_id'], 'info');
@@ -606,14 +730,8 @@ class Plan
             $retval = COM_startBlock($LANG_SUBSCR['new_product']);
         }
 
-        /*if (function_exists('USES_profile_functions')) {
-            $T->set_var('profile_enabled', 'true');
-        }*/
-        $this->prf_update = false;
-
         $T->set_var(array(
             'item_id'   => $id,
-            'mootools'  => $_SYSTEM['disable_mootools'] ? '' : 'true',
             'short_description'   =>
                             htmlspecialchars($this->short_description),
             'description'   => htmlspecialchars($this->description),
@@ -744,11 +862,12 @@ class Plan
         }
 
         if ($_CONF_SUBSCR['ena_ratings']) {
+            list($rating_id, $rating, $votes) = RATING_getRating($_CONF_SUBSCR['pi_name'], $this->item_id);
             $ratedIds = RATING_getRatedIds($_CONF_SUBSCR['pi_name']);
             if (in_array($this->item_id, $ratedIds)) {
                 $static = true;
                 $voted = 1;
-            } elseif (plugin_canuserrate_shop($this->item_id, $_USER['uid'])) {
+            } elseif (plugin_canuserrate_subscription($this->item_id, $_USER['uid'])) {
                 $static = 0;
                 $voted = 0;
             } else {
@@ -758,8 +877,8 @@ class Plan
             $rating_box = RATING_ratingBar(
                 $_CONF_SUBSCR['pi_name'],
                 $this->item_id,
-                $this->votes,
-                $this->rating,
+                $votes,
+                $rating,
                 $voted, 5, $static, 'sm'
             );
             $T->set_var('rating_bar', $rating_box);
@@ -861,7 +980,7 @@ class Plan
 
         if (SUBSCR_shop_enabled()) {
             $vars = array(
-                'item_number' => 'subscription:' . $this->item_id,
+                'item_number' => 'subscription:' . $this->item_id . ':new',
                 'item_name' => $this->short_description,
                 'short_description' => $this->short_description,
                 'amount' => sprintf("%5.2f", (float)$this->price),
@@ -886,7 +1005,6 @@ class Plan
             );
             if ($status == PLG_RET_OK && is_array($output)) {
                 foreach ($output as $button) {
-                    //$retval .= $button . '<br />';
                     $retval .= $button . LB;
                 }
             }
@@ -932,89 +1050,24 @@ class Plan
         global $_GROUPS, $_USER, $_CONF_SUBSCR;
 
         $retval = false;
+        $this->is_subscribed = 0;
         if ($this->item_id != '') {
             if (in_array($this->grp_access, $_GROUPS)) {
                 $retval = true;
             }
             $mySubs = Subscription::getSubscriptions($_USER['uid']);
             if (isset($mySubs[$this->item_id])) {
-                $d = new \Date($mySubs[$this->item_id]->expiration);
+                $this->is_subscribed = 1;
+                $d = new \Date($mySubs[$this->item_id]->getExpiration());
                 $exp_ts = $d->toUnix();
                  if ($this->early_renewal > 0) {
                     $renew_ts = $exp_ts - ($this->early_renewal * 86400);
-                    if ($renew_ts > $_CONF_SUBSCR['_dt']->toUnix())
+                    if ($renew_ts > $_CONF['_now']->toUnix())
                         $retval = false;
                 }
             }
         }
         return $retval;
-    }
-
-
-    /**
-     * Update the Profile plugin data with the membership type and expiration.
-     *
-     * @deprecated  0.2.0
-     * @param   string  $newdate    Subscription expiration date
-     * @param   integer $uid        User ID
-     * @return  integer             Result from LGLIB_invokeService()
-     */
-    public function DEPRECATED_updateProfile($newdate, $uid)
-    {
-        $args = array(
-            'sys_expires'       => $newdate,
-            'sys_membertype'    => $this->prf_type,
-            // not used, may be implemented later in the Profile plugin...
-            'children'          => $this->prf_update > 1 ? true : false,
-        );
-
-        // Based on the value of prf_update, update the profiles for related
-        // accounts.  Each case falls through to the next; e.g. a value of 3
-        // also implements 2 and 1.
-        switch ($this->prf_update) {
-        case 3:         // Find siblings (children of our parent)
-            $status = LGLIB_invokeService('profile', 'getParentAccount',
-                array('uid' => $uid), $output, $svc_msg);
-            if ($status == PLG_RET_OK && $output > 0) {
-                $args['uid'] = $output;
-                $status = LGLIB_invokeService('profile', 'setSysValues',
-                            $args, $output, $svc_msg);
-                $status = LGLIB_invokeService('profile', 'getChildAccounts',
-                    array('uid' => $output), $output, $svc_msg);
-                if ($status == PLG_RET_OK && is_array($output)) {
-                    foreach ($output as $user_id) {
-                        $args['uid'] = $user_id;
-                        $status = LGLIB_invokeService('profile', 'setSysValues',
-                            $args, $output, $svc_msg);
-                        if ($status != PLG_RET_OK) {
-                            COM_errorLog("Error updating profile for $user_id");
-                        }
-                    }
-                }
-            }
-
-        case 2:         // Update children of this account
-            // Update all the children
-            $status = LGLIB_invokeService('profile', 'getChildAccounts',
-                array('uid' => $uid), $output, $svc_msg);
-            if ($status == PLG_RET_OK) {
-                foreach ($output as $user_id) {
-                    $args['uid'] = $user_id;
-                    $status = LGLIB_invokeService('profile', 'setSysValues',
-                        $args, $output, $svc_msg);
-                    if ($status != PLG_RET_OK) {
-                        COM_errorLog("Error updating profile for user $user_id");
-                        break;
-                    }
-                }
-            }
-
-        case 1:
-            // Finally, update this account
-            $args['uid'] = $uid;
-            return LGLIB_invokeService('profile', 'setSysValues', $args,
-                        $output, $svc_msg);
-        }
     }
 
 
@@ -1045,33 +1098,6 @@ class Plan
             Cache::set($cache_key, $retval, 'plans');
         }
         return $retval;
-    }
-
-
-    /**
-     * Update a product rating and perform related housekeeping tasks.
-     *
-     * @see     plugin_itemrated_shop()
-     * @param   integer $id     Plan ID
-     * @param   integer $rating New rating value
-     * @param   integer $votes  New total number of votes
-     * @return  boolean     True on success, False on DB error
-     */
-    public static function updateRating($id, $rating, $votes)
-    {
-        global $_TABLES;
-
-        return true;
-
-        $id = (int)$id;
-        $rating = number_format($rating, 2, '.', '');
-        $votes = (int)$votes;
-        $sql = "UPDATE {$_TABLES['shop.products']}
-                SET rating = $rating, votes = $votes
-                WHERE id = $id";
-        DB_query($sql);
-        Cache::clear('plans');
-        return DB_error() ? false : true;
     }
 
 
@@ -1122,6 +1148,11 @@ class Plan
                 'sort' => true,
             ),
             array(
+                'field' => 'rating',
+                'text'  => $LANG_SUBSCR['rating'],
+                'sort'  => true,
+            ),
+            array(
                 'field' => 'subscriptions',
                 'text' => $LANG_SUBSCR['subscriptions'],
                 'sort' => true,
@@ -1155,13 +1186,29 @@ class Plan
             'has_extras' => true,
             'form_url' => SUBSCR_ADMIN_URL . '/index.php?type=products',
         );
-        $options = array();
+        // Update certain product properties in bulk
+        $bulk_update = '<button type="submit" name="resetratings" value="x" ' .
+            'class="uk-button uk-button-mini tooltip" ' .
+            'title="' . $LANG_SUBSCR['reset_ratings'] . '">' .
+            $LANG_SUBSCR['reset_ratings'] .
+            '</button>';
+        $options = array(
+            'chkdelete' => true,
+            'chkall' => true,
+            'chkfield' => 'item_id',
+            'chkname' => 'plan_bulk',
+            'chkactions' => $bulk_update,
+        );
+
         $form_arr = array();
-        $query_arr = array('table' => 'subscr_products',
-            'sql' => "SELECT p.*, g.grp_name
+        $query_arr = array(
+            'table' => 'subscr_products',
+            'sql' => "SELECT p.*, g.grp_name, r.rating, r.votes
                 FROM {$_TABLES['subscr_products']} p
                 LEFT JOIN {$_TABLES['groups']} g
-                    ON g.grp_id=p.addgroup",
+                    ON g.grp_id=p.addgroup
+                LEFT JOIN {$_TABLES['rating']} r
+                    ON r.type = 'subscription' AND r.item_id = p.item_id",
             'query_fields' => array('item_id', 'short_description', 'description'),
             'default_filter' => ' WHERE 1=1 ',
         );
@@ -1250,6 +1297,10 @@ class Plan
                 'item_id',
                 $A['item_id']
             );
+            break;
+
+        case 'rating':
+            $retval = sprintf('%.02f', $fieldvalue) . ' / ' . (int)$A['votes'];
             break;
 
         default:

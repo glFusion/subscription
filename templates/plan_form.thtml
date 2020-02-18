@@ -34,7 +34,7 @@ function update_duration_type(opt)
   <div class="uk-form-controls">
     <input required size="20"
       type="text" name="item_id" value="{item_id}" id="f_item_id">
-    <i class="uk-icon-exclamation-triangle uk-icon-danger tooltip"
+    <i class="uk-icon-exclamation-triangle uk-text-danger tooltip"
         title="{$LANG_SUBSCR['required']}"></i>
   </div>
 </div>
@@ -196,6 +196,7 @@ function update_duration_type(opt)
   type="submit"
   onclick="return confirm('{$LANG_SUBSCR['q_del_item']}');" />{$LANG_ADMIN['delete']}</button>
 {!endif}
+</div>
 </form>
 <script type="text/javascript">
     Calendar.setup({

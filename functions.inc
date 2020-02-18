@@ -3,9 +3,9 @@
  * Common functions for the Subscription plugin.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2010-2019 Lee Garner
+ * @copyright   Copyright (c) 2010-2020 Lee Garner
  * @package     subscription
- * @version     v0.2.3
+ * @version     v1.0.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -44,10 +44,6 @@ if (file_exists(SUBSCR_PI_PATH . '/config.php')) {
     /** Include local configuration overrides */
     include_once SUBSCR_PI_PATH . '/config.php';
 }
-
-// Save the current sql datetime for use throughout the plugin
-$_CONF_SUBSCR['_dt'] = new Date('now', $_CONF['timezone']);
-$_CONF_SUBSCR['now'] = $_CONF_SUBSCR['_dt']->toMySQL(true);
 
 /**
  * Language file Include
@@ -144,7 +140,7 @@ function plugin_showstats_subscription($showsitestats)
                 ON p.item_id=s.item_id
             WHERE p.enabled = 1
             AND ( s.status = '" . SUBSCR_STATUS_ENABLED . "' )
-            AND ( s.expiration > '{$_CONF_SUBSCR['now']}' )
+            AND ( s.expiration > '{$_CONF['_now']->toMySQL(true)}' )
             GROUP BY p.item_id";
     //echo $sql;die;
     $result = DB_query($sql);
@@ -474,7 +470,7 @@ function phpblock_subscription_subscribe()
             ON s.uid = '{$_USER['uid']}' AND p.item_id = s.item_id
             WHERE p.enabled = 1
             AND (s.item_id IS NULL OR
-                 s.expiration <= '{$_CONF_SUBSCR['now']}' + INTERVAL p.early_renewal DAY)
+                 s.expiration <= '{$_CONF['_now']}' + INTERVAL p.early_renewal DAY)
             AND p.show_in_block = 1";
     //echo $sql;die;
     $r = DB_query($sql);
@@ -491,7 +487,7 @@ function phpblock_subscription_subscribe()
     $i = 0;
     while ($row = DB_fetchArray($r, false)) {
         $P->Read($row['item_id']);
-        if ($P->item_id == '') continue;     // no access to this product
+        if ($P->getID() == '') continue;     // no access to this product
 
         $status = LGLIB_invokeService('shop', 'getCurrency', array(),
                     $currency, $svc_msg);
@@ -500,11 +496,11 @@ function phpblock_subscription_subscribe()
         $T->set_file('block', 'blk_subscribe.thtml');
 
         $T->set_var(array(
-            'title'     => $P->name,
-            'description' => $P->short_description,
-            'item_id'   => $P->item_id,
+            'title'     => $P->getID(),
+            'description' => $P->getDscp(),
+            'item_id'   => $P->getID(),
             'pi_url'    => SUBSCR_URL,
-            'price'     => COM_numberFormat($P->price, 2),
+            'price'     => COM_numberFormat($P->getBasePrice(), 2),
             'currency'  => $currency,
             'purchase_btn' => $P->MakeButton(),
         ) );
@@ -622,7 +618,7 @@ function plugin_runScheduledTask_subscription()
             FROM {$_TABLES['subscr_subscriptions']} s
             LEFT JOIN {$_TABLES['subscr_products']} p
                 ON p.item_id = s.item_id
-            WHERE '{$_CONF_SUBSCR['now']}' > (s.expiration + interval p.grace_days DAY)
+            WHERE '{$_CONF['_now']->toMySQL(true)}' > (s.expiration + interval p.grace_days DAY)
                 AND status = " . SUBSCR_STATUS_ENABLED;
     //COM_errorLog($sql);
     $r = DB_query($sql);
@@ -722,7 +718,7 @@ function SUBSCR_notifyExpiration()
             LEFT JOIN {$_TABLES['users']} u
                 ON u.uid = s.uid
             WHERE notified = 0
-            AND s.expiration < '{$_CONF_SUBSCR['now']}' + INTERVAL {$_CONF_SUBSCR['notifydays']} DAY";
+            AND s.expiration < '{$_CONF['_now']->toMySQL(true)}' + INTERVAL {$_CONF_SUBSCR['notifydays']} DAY";
     //COM_errorLog($sql);
     $r = DB_query($sql);
     if (!$r)
@@ -816,9 +812,9 @@ function plugin_user_create_subscription($uid = 0)
             // If auto-signup is enabled for this product, use the trial_days
             // if defined, or create a full subscription
             if ($P->trial_days > 0) {
-                $S->Add($uid, $P->item_id, $P->trial_days, 'day');
+                $S->Add($uid, $P->getID(), $P->getTrialDays(), 'day');
             } else {
-                $S->Add($uid, $P->item_id);
+                $S->Add($uid, $P->getID());
             }
         }
     }
@@ -1011,15 +1007,30 @@ function plugin_searchtypes_subscription()
 
 
 /**
+ * Determine if the current user is allowed to rate an item.
+ * Curretly, all logged-in users can rate (even admin).
+ * Requires glFusion 1.1.7 or higher.
+ *
+ * @param   mixed   $item_id    ID of product to be rate (not used)d
+ * @param   integer $uid        User ID of the one doing the rating
+ * @return  boolean             True if user is allowed, false if not
+ */
+function plugin_canuserrate_subscription($item_id, $uid)
+{
+    return !COM_isAnonUser();
+}
+
+
+/**
  * Updates the product table with the new rating and vote count.
  *
  * @param   mixed   $id     Plan ID
  * @param   float   $rating Rating Value
  * @param   integer $votes  Number of votes cast
  */
-function plugin_itemrated_subscription($id, $rating, $votes)
+function Xplugin_itemrated_subscription($id, $rating, $votes)
 {
-    return Subscription\Plan::updateRating($id, $rating, $votes);
+//    return Subscription\Plan::updateRating($id, $rating, $votes);
 }
 
 

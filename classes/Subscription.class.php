@@ -3,14 +3,15 @@
  * Class to manage actual subscriptions.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2010-2017 Lee Garner
+ * @copyright   Copyright (c) 2010-2020 Lee Garner
  * @package     subscription
- * @version     v0.2.2
+ * @version     v1.0.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
  */
 namespace Subscription;
+
 
 /**
  * Class for subscriptions.
@@ -18,9 +19,41 @@ namespace Subscription;
  */
 class Subscription
 {
-    /** Property fields accessed via __set() and __get().
-     * @var array */
-    private $properties;
+    const STATUS_ENABLED = 0;
+    const STATUS_CANCELE = 1;
+    const STATUS_EXPIRED = 2;
+
+    /** Subscription record ID.
+     * @var integer */
+    private $id;
+
+    /** Subscribing user ID.
+     * @var integer */
+    private $uid;
+
+    /** Subscription status.
+     * @var integer */
+    private $status;
+
+    /** Plan ID.
+     * @var string */
+    private $item_id;
+
+    /** Purchase transaction ID.
+     * @var string */
+    private $txn_id;
+
+    /** Purchase date.
+     * @var string */
+    private $purchase_date;
+
+    /** Expiration date.
+     * @var string */
+    private $expiration;
+
+    /** Flag to indicate the subscriber has been notified of impending expiration.
+     * @var boolean */
+    private $notified;
 
     /** Subscription plan object.
      * @var object */
@@ -54,7 +87,6 @@ class Subscription
     {
         global $_CONF_SUBSCR, $_CONF;
 
-        $this->properties = array();
         $this->isNew = true;
         $this->status = 0;
         $this->dt = new \Date('now', $_CONF['timezone']);
@@ -85,62 +117,39 @@ class Subscription
     /**
      * Set a property's value.
      *
+     * @deprecated
      * @param   string  $var    Name of property to set.
      * @param   mixed   $value  New value for property.
      */
     public function __set($var, $value='')
     {
-        switch ($var) {
-        case 'id':
-        case 'uid':
-        case 'status':
-            // Integer values
-            $this->properties[$var] = (int)$value;
-            break;
-
-        case 'item_id':
-            $this->properties[$var] = COM_sanitizeID($value, false);
-            break;
-
-        case 'txn_id':
-        case 'purchase_date':
-        case 'exp_day':
-        case 'exp_month':
-        case 'exp_year':
-            // String values
-            $this->properties[$var] = trim($value);
-            break;
-
-        case 'expiration':
-            $value = trim($value);
-            $this->properties[$var] = $value;
-            list($this->exp_year, $this->exp_month, $this->exp_day) = explode('-', $value);
-            break;
-
-        case 'notified':
-            $this->properties[$var] = $value == 1 ? 1 : 0;
-            break;
-
-        default:
-            // Undefined values (do nothing)
-            break;
-        }
+        COM_errorLog("attempting __set $var to $value: " . print_r(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2),true));
+        return NULL;
     }
 
 
     /**
      * Get the value of a property.
      *
+     * @deprecated
      * @param   string  $var    Name of property to retrieve.
      * @return  mixed           Value of property, NULL if undefined.
      */
     public function __get($var)
     {
-        if (array_key_exists($var, $this->properties)) {
-            return $this->properties[$var];
-        } else {
-            return NULL;
-        }
+        COM_errorLog("attempting __get for $var: " . print_r(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2),true));
+        return NULL;
+    }
+
+
+    /**
+     * Get the expiraation date.
+     *
+     * @return  string      Expiration date
+     */
+    public function getExpiration()
+    {
+        return $this->expiration;
     }
 
 
@@ -250,7 +259,7 @@ class Subscription
         }
 
         // If cancelling an existing subscription, just call self::_doCancel()
-        if ($this->status == SUBSCR_STATUS_CANCELED) {
+        if ($this->status == self::STATUS_CANCELED) {
             if (!$this->isNew) {
                 return self::_doCancel();
             } else {
@@ -334,30 +343,31 @@ class Subscription
      * @param   float   $price      Optional price, default to product price
      * @return  boolean     True on successful update, False on error
      */
-    public function Add($uid, $item_id, $duration=0, $duration_type='',
-                $expiration=NULL, $upgrade = false, $txn_id = '', $price = -1)
-    {
+    public function Add(
+        $uid, $item_id, $duration=0, $duration_type='',
+        $expiration=NULL, $upgrade = false, $txn_id = '', $price = -1
+    ) {
         global $_TABLES;
 
         $this->uid = $uid;
         $this->item_id = $item_id;
         $today = $this->dt->format('Y-m-d');
-        $this->status = SUBSCR_STATUS_ENABLED;
+        $this->status = self::STATUS_ENABLED;
         $this->notified = 0;
 
         // Get the product information for this subscription
         $P = Plan::getInstance($item_id);
         if ($price == -1) {
-            $price = $upgrade ? $P->upg_price : $P->price;
+            $price = $upgrade ? $P->getUpgradePrice(): $P->getBasePrice();
         }
-        if ($P->isNew) {
+        if ($P->isNew()) {
             return false;
         }
-        $P->checkPerms = false; // don't check permissions, may be IPN
+        $P->setCheckPerms(false); // don't check permissions, may be IPN
 
-        if (empty($duration_type)) $duration_type = $P->duration_type;
+        if (empty($duration_type)) $duration_type = $P->getDurationType();
         $duration_type = strtoupper($duration_type);
-        if ($duration == 0) $duration = $P->duration;
+        if ($duration == 0) $duration = $P->getDuration();
         $duration = (int)$duration;
 
         if ($this->isNew) {
@@ -372,8 +382,8 @@ class Subscription
             // active subscription for it.
             if ($upgrade) {
                 if ($this->status > 0 ||
-                    $P->upg_from == '' ||
-                    $P->upg_from != $this->item_id) {
+                    $P->getUpgradeFrom() == '' ||
+                    $P->getUpgradeFrom() != $this->item_id) {
                     return false;
                 }
             }
@@ -381,11 +391,11 @@ class Subscription
 
         // Set the new expiration to either the additional time, or the
         // fixed expiration date.
-        if (!$upgrade || $P->upg_extend_exp == 1) {
+        if (!$upgrade || $P->upgradeExtendsExp() == 1) {
             if ($duration_type != 'FIXED') {
                 $expiration = "'{$this->expiration}' + INTERVAL $duration $duration_type";
             } else {
-                $expiration = "'" . DB_escapeString($P->expiration) . "'";
+                $expiration = "'" . DB_escapeString($P->getExpiration()) . "'";
             }
         } else {
             $expiration = "'{$this->expiration}'";
@@ -398,7 +408,7 @@ class Subscription
             $sql3 = " ON DUPLICATE KEY UPDATE
                     expiration = $expiration,
                     notified = 0,
-                    status = " . SUBSCR_STATUS_ENABLED;
+                    status = " . self::STATUS_ENABLED;
         } else {
             // Update an existing subscription.  Also resets the notify flag
             $sql1 = "UPDATE {$_TABLES['subscr_subscriptions']} SET ";
@@ -408,7 +418,7 @@ class Subscription
         $sql2 = "item_id = '{$this->item_id}',
                 expiration = $expiration,
                 notified = 0,
-                status = '" . SUBSCR_STATUS_ENABLED . "'";
+                status = '" . self::STATUS_ENABLED . "'";
         $sql = $sql1 . $sql2 . $sql3;
         //COM_errorLog($sql);
         DB_query($sql, 1);     // Execute event record update
@@ -709,7 +719,7 @@ class Subscription
      * @param   integer $status Subscription status, Active by default
      * @return  array       Array of subscription objects
      */
-    public static function getSubscriptions($uid = 0, $status = SUBSCR_STATUS_ENABLED)
+    public static function getSubscriptions($uid = 0, $status = self::STATUS_ENABLED)
     {
         global $_USER, $_TABLES;
 
@@ -807,7 +817,7 @@ class Subscription
             'chkactions' => '<input name="cancelbutton" type="image" src="'
                 . $_CONF['layout_url'] . '/images/admin/delete.' . $_IMAGE_TYPE
                 . '" style="vertical-align:text-bottom;" title="' . $LANG01[124]
-                . '" class="gl_mootip"'
+                . '" class="tooltip"'
                 . ' data-uk-tooltip="{pos:\'top-left\'}"'
                 . ' onclick="return confirm(\'' . $LANG01[125] . '\');"'
                 . '/>&nbsp;' . $LANG_ADMIN['delete'] . '&nbsp;&nbsp;' .
@@ -815,7 +825,7 @@ class Subscription
                 '<input name="renewbutton" type="image" src="'
                 . SUBSCR_URL . '/images/renew.png'
                 . '" style="vertical-align:text-bottom;" title="' . $LANG_SUBSCR['renew_all']
-                . '" class="gl_mootip"'
+                . '" class="tooltip"'
                 . ' data-uk-tooltip="{pos:\'top-left\'}"'
                 . ' onclick="return confirm(\'' . $LANG_SUBSCR['confirm_renew']
                 . '\');"'
@@ -827,7 +837,7 @@ class Subscription
             $exp_query = '';
         } else {
             $frmchk = '';
-            $exp_query = ' AND s.status = ' . SUBSCR_STATUS_ENABLED;
+            $exp_query = ' AND s.status = ' . self::STATUS_ENABLED;
         }
 
         $query_arr = array('table' => 'subscr_subscriptions',
@@ -909,7 +919,7 @@ class Subscription
             break;
 
         case 'expiration':
-            if ($A['status'] > SUBSCR_STATUS_ENABLED) {
+            if ($A['status'] > self::STATUS_ENABLED) {
                 $retval = '<span class="expired">' . $fieldvalue . '</span>';
             } elseif ($fieldvalue < date('Y-m-d')) {
                 $retval .= '<span class="ingrace">' . $fieldvalue . '</span>';

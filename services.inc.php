@@ -5,9 +5,9 @@
  * as the Shop plugin.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2011-2019 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2011-2020 Lee Garner <lee@leegarner.com>
  * @package     subscription
- * @version     v0.2.3
+ * @version     v1.0.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -111,7 +111,7 @@ function service_productinfo_subscription($A, &$output, &$svc_msg)
     $item_id = $item[0];        // get base product ID
     $item_mod = SUBSCR_getVar($item, 1, 'string', 'new');
     $P = Subscription\Plan::getInstance($item_id);
-    if ($P->isNew) {
+    if ($P->isNew()) {
         COM_errorLog(__FUNCTION__ . " Item {$item_id} not found.");
         return PLG_RET_ERROR;
     }
@@ -126,7 +126,7 @@ function service_productinfo_subscription($A, &$output, &$svc_msg)
         $output['price'] = $P->getBasePrice();
     }
     $output['url'] = COM_buildUrl(SUBSCR_URL .
-                    '/index.php?view=detail&item_id=' . $P->item_id);
+                    '/index.php?view=detail&item_id=' . $P->getID());
     return PLG_RET_OK;
 }
 
@@ -167,7 +167,7 @@ function service_handlePurchase_subscription($args, &$output, &$svc_msg)
 
     $product_id = $id_parts[1];
     $P = Subscription\Plan::getInstance($product_id);
-    if ($P->isNew) {
+    if ($P->isNew()) {
         return PLG_RET_ERROR;
     }
     $upgrade = isset($id_parts[2]) && $id_parts[2] == 'upgrade' ? true : false;
@@ -176,9 +176,9 @@ function service_handlePurchase_subscription($args, &$output, &$svc_msg)
     // Initialize the return array
     $output = array(
             'product_id' => $item_id,
-            'name' => $P->name,
-            'short_description' => $P->name,
-            'description' => $P->description,
+            'name' => $P->getName(),
+            'short_description' => $P->getName(),
+            'description' => $P->getDscp(),
             'price' =>  $amount,
             'expiration' => NULL,
             'download' => 0,
@@ -273,44 +273,44 @@ function service_getproducts_subscription($args, &$output, &$svc_msg)
     if (!$Plans) return PLG_RET_ERROR;
 
     foreach ($Plans as $P) {
-        $description = $P->description;
-        $short_description = $P->short_description;
+        $description = $P->getDscp();
+        $short_description = $P->getName();
 
         // Check the expiration and early renewal period for any current
         // subscriptions to see if the current user can purchase this item.
         $ok_to_buy = true;
-        if (isset($Subs[$P->item_id]) && $Subs[$P->item_id]->expiration > '0000') {
-            $exp_ts = strtotime($Subs[$P->item_id]->expiration);
+        if (isset($Subs[$P->getID()]) && $Subs[$P->getID()]->getExpiration() > '0000') {
+            $exp_ts = strtotime($Subs[$P->getID()]->getExpiration());
             $exp_format = strftime($_CONF['shortdate'], $exp_ts);
             $description .= '<br /><i>' .
                 sprintf($LANG_SUBSCR['your_sub_expires'], $exp_format) .
                 '</i>';
-            if ($P->early_renewal > 0) {
-                $renew_ts = $exp_ts - ($P->early_renewal * 86400);
+            if ($P->getEarlyRenewal() > 0) {
+                $renew_ts = $exp_ts - ($P->getEarlyRenewal() * 86400);
                 if ($renew_ts > $_CONF['_now']->toUnix()) {
                     $ok_to_buy = false;
                 }
             }
         }
-        if (array_key_exists($P->upg_from, $Subs) && $P->upg_price != '') {
-            $price = (float)$P->upg_price;
+        if (array_key_exists($P->getUpgradeFrom(), $Subs) && $P->getUpgradePrice() != '') {
+            $price = (float)$P->getUpgradePrice();
             $item_option = ':upgrade';
         } else {
-            $price = (float)$P->price;
+            $price = (float)$P->getBasePrice();
             $item_option = ':new';
         }
 
         if ($ok_to_buy) {
             $output[] = array(
-                'id'    => 'subscription:' . $P->item_id . $item_option,
-                'item_id' => $P->item_id,
-                'name' => $P->name,
+                'id'    => 'subscription:' . $P->getID(). $item_option,
+                'item_id' => $P->getID(),
+                'name' => $P->getName(),
                 'short_description' => $short_description,
                 'description' => $description,
                 'price' => $price,
                 'buttons' => array('buy_now' => $P->MakeButton()),
                 'url' => COM_buildUrl(SUBSCR_URL .
-                    '/index.php?view=detail&item_id=' . $P->item_id),
+                    '/index.php?view=detail&item_id=' . $P->getID()),
                 'have_detail_svc' => true,  // Tell Shop to use it's detail page wrapper
             );
         }
@@ -340,7 +340,7 @@ function service_getDetailPage_subscription($args, &$output, &$svc_msg)
         return PLG_RET_ERROR;
     }
     $P = Subscription\Plan::getInstance($item_info[1]);
-    if ($P->isNew) return PLG_RET_ERROR;
+    if ($P->isNew()) return PLG_RET_ERROR;
     $output = $P->Detail();
     return PLG_RET_OK;
 }

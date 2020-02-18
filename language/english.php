@@ -1,20 +1,20 @@
 <?php
 /**
-*   Default English Language file for the Subscription plugin.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2010-2019 Lee Garner
-*   @package    subscription
-*   @version    0.2.3
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Default English Language file for the Subscription plugin.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2010-2020 Lee Garner
+ * @package     subscription
+ * @version     v1.0.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php 
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 /**
-* The plugin's lang array
-* @global array $LANG_SUBSCR
-*/
+ * The plugin's lang array
+ * @global array $LANG_SUBSCR
+ */
 $LANG_SUBSCR = array(
 'product_id'    => 'Plan ID',
 'name'          => 'Name',
@@ -129,6 +129,8 @@ $LANG_SUBSCR = array(
 'required'      => 'Required',
 'hlp_admin_del' => 'Only plans which have no associated subscriptions may be deleted.',
 'msg_purch_email' => 'If you are logged into the site, you may need to log out and back in again for your subscription to take effect.',
+'reset_ratings' => 'Reset Ratings',
+'rating'        => 'Rating',
 );
 
 // Messages for the plugin upgrade

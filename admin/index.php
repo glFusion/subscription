@@ -1,15 +1,15 @@
 <?php
 /**
-*   Administrative entry point for the Subscription plugin.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2010 Lee Garner
-*   @package    subscription
-*   @version    0.0.1
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Administrative entry point for the Subscription plugin.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2010-2020 Lee Garner
+ * @package     subscription
+ * @version     1.0.0
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 /** Import core glFusion functions */
 require_once('../../../lib-common.php');
@@ -18,9 +18,6 @@ if (!in_array('subscription', $_PLUGINS)) {
     COM_404();
 }
 
-/**
-*   MAIN
-*/
 // Only let admin users access this page
 if (!SEC_inGroup($_CONF_SUBSCR['pi_name'] . ' Admin')) {
     COM_errorLog("Attempted unauthorized access the Subscription Admin page." .
@@ -42,6 +39,7 @@ $expected = array(
     'saveproduct', 'deleteproduct',
     'savesubscription', 'deletesubscription',
     'renewbutton_x', 'cancelbutton_x',
+    'resetratings',
     // Views
     'editproduct', 'products', 'subscriptions',
     'editsubscrip',
@@ -83,6 +81,13 @@ $sub_id = isset($_REQUEST['sub_id']) ? (int)$_REQUEST['sub_id'] : 0;
 $content = '';      // initialize variable for page content
 
 switch ($action) {
+case 'resetratings':
+    foreach (LGLIB_getVar($_POST, 'plan_bulk', 'array', array()) as $plan_id) {
+        RATING_resetRating($_CONF_SUBSCR['pi_name'], $plan_id);
+    }
+    echo COM_refresh(SUBSCR_ADMIN_URL.'/index.php?products');
+    break;
+
 case 'saveproduct':
     $S = new Subscription\Plan($item_id);
     $status = $S->Save($_POST);
@@ -182,11 +187,9 @@ default:
     $content .= Subscription\Plan::adminList();
     break;
 }
-
 $display = COM_siteHeader();
 $display .= $content;
 $display .= COM_siteFooter();
-
 echo $display;
 
 ?>

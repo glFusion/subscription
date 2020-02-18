@@ -3,7 +3,7 @@
  * Plugin-specific functions for the Subscription plugin for glFusion.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2019 Lee Garner
+ * @copyright   Copyright (c) 2019-2020 Lee Garner
  * @package     subscription
  * @version     v1.0.0
  * @since       v1.0.0
@@ -61,24 +61,24 @@ class Catalog
         $T->set_block('prodlist', 'PlanBlock', 'PBlock');
         foreach ($Plans as $P) {
             // Skip the rare case of a fixed expiration that has passed.
-            if ($P->duration_type == 'fixed' &&
-                $P->expiration < $_CONF_SUBSCR['_dt']->format('Y-m-d', true)) {
+            if ($P->isFixed() &&
+                $P->getExpiration() < $_CONF['_now']->format('Y-m-d', true)) {
                 continue;
             }
-            $description = $P->description;
-            $price = (float)$P->price;
+            $description = $P->getName();   // just want the short 1-line description here
+            $price = (float)$P->getBasePrice();
             $lang_price = $LANG_SUBSCR['price'];
 
             $ok_to_buy = true;
             $exp_msg = '';
-            if (isset($mySubs[$P->item_id])) {
-                $d = new \Date($mySubs[$P->item_id]->expiration);
+            if (isset($mySubs[$P->getID()])) {
+                $d = new \Date($mySubs[$P->getID()]->getExpiration());
                 $exp_ts = $d->toUnix();
                 $exp_format = $d->format($_CONF['shortdate']);
                 $exp_msg = sprintf($LANG_SUBSCR['your_sub_expires'], $exp_format);
-                if ($P->early_renewal > 0) {
-                    $renew_ts = $exp_ts - ($P->early_renewal * 86400);
-                    if ($renew_ts > $_CONF_SUBSCR['_dt']->toUnix()) {
+                if ($P->getEarlyRenewal() > 0) {
+                    $renew_ts = $exp_ts - ($P->getEarlyRenewal() * 86400);
+                    if ($renew_ts > $_CONF['_now']->toUnix()) {
                         $ok_to_buy = false;
                     }
                 }
@@ -91,7 +91,7 @@ class Catalog
             }
 
             $T->set_var(array(
-                'item_id'   => $P->item_id,
+                'item_id'   => $P->getID(),
                 'description' => PLG_replacetags($description),
                 'price'     => COM_numberFormat($price, 2),
                 'encrypted' => '',

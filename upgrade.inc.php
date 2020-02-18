@@ -3,9 +3,9 @@
  * Upgrade routines for the Subscription plugin.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2009-2018 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2020 Lee Garner <lee@leegarner.com>
  * @package     subscription
- * @version     v0.2.2
+ * @version     v1.0.0
  * @license     http://opensource.org/licenses/gpl-2.0.php 
  *              GNU Public License v2 or later
  * @filesource
@@ -85,6 +85,12 @@ function SUBSCR_do_upgrade($dvlp=false)
 
     if (!COM_checkVersion($current_ver, '0.2.2')) {
         $current_ver = '0.2.2';
+        if (!SUBSCR_do_upgrade_sql($current_ver, $dvlp)) return false;
+        if (!SUBSCR_do_set_version($current_ver)) return false;
+    }
+
+    if (!COM_checkVersion($current_ver, '1.0.0')) {
+        $current_ver = '1.0.0';
         if (!SUBSCR_do_upgrade_sql($current_ver, $dvlp)) return false;
         if (!SUBSCR_do_set_version($current_ver)) return false;
     }

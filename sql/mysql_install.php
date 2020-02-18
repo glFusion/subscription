@@ -1,15 +1,15 @@
 <?php
 /**
-*   Database creation and update statements for the Subscription plugin.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2010-2018 Lee Garner
-*   @package    subscription
-*   @version    0.2.2
-*   @license    http://opensource.org/licenses/gpl-2.0.php 
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Database creation and update statements for the Subscription plugin.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2010-2020 Lee Garner
+ * @package     subscription
+ * @version     v1.0/0
+ * @license     http://opensource.org/licenses/gpl-2.0.php 
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 if (!defined ('GVERSION')) {
     die ('This file can not be used on its own.');
@@ -31,9 +31,6 @@ $_SQL['subscr_products'] =
   `enabled` tinyint(1) DEFAULT '1',
   `show_in_block` tinyint(1) unsigned DEFAULT '0',
   `taxable` tinyint(1) unsigned DEFAULT '0',
-  `dt_add` int(11) unsigned DEFAULT NULL,
-  `views` int(4) unsigned DEFAULT '0',
-  `buttons` text,
   `addgroup` int(5) DEFAULT NULL,
   `at_registration` tinyint(1) NOT NULL DEFAULT '0',
   `is_upgrade` tinyint(1) unsigned DEFAULT '0',
@@ -41,8 +38,6 @@ $_SQL['subscr_products'] =
   `upg_price` decimal(5,2) DEFAULT '0.00',
   `upg_extend_exp` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `trial_days` int(3) unsigned NOT NULL DEFAULT '0',
-  `prf_update` tinyint(1) unsigned NOT NULL DEFAULT '0',
-  `prf_type` varchar(40) DEFAULT NULL,
   `grp_access` mediumint(8) NOT NULL DEFAULT '13',
   PRIMARY KEY (`item_id`)
 ) ENGINE=MyISAM";
@@ -157,6 +152,13 @@ $SUBSCR_UPGRADE = array(
         // idempotent since 2 is no longer a valid option
     "UPDATE {$_TABLES['subscr_products']}
         SET at_registration = 1 WHERE at_registration = 2",
+    ),
+    '1.0.0' => array(
+        "ALTER TABLE {$_TABLES['subscr_products']} DROP views",
+        "ALTER TABLE {$_TABLES['subscr_products']} DROP buttons",
+        "ALTER TABLE {$_TABLES['subscr_products']} DROP prf_update",
+        "ALTER TABLE {$_TABLES['subscr_products']} DROP prf_type",
+        "ALTER TABLE {$_TABLES['subscr_products']} DROP dt_add",
     ),
 );
 
