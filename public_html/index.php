@@ -47,7 +47,9 @@ if (isset($_REQUEST['item_id'])) {
     $id = COM_applyFilter(COM_getArgument('item_id'));
 }
 
-if (empty($view)) $view = 'list';
+if (empty($view)) {
+    $view = ($_CONF_SUBSCR['show_in_pp_cat'] && function_exists('plugin_chkVersion_shop')) ? 'pp_cart' : 'list';
+}
 
 $pageTitle = $LANG_SUBSCR['subscriptions'];  // Set basic page title
 $display = Subscription\Menu::siteHeader($pageTitle);
@@ -68,6 +70,10 @@ case 'detail':
         $display .= Subscription\Catalog::Render();
     }
     break;
+
+case 'pp_cart':
+    echo COM_refresh($_CONF['site_url'] . '/shop/index.php?category=' . $_CONF_SUBSCR['pi_name']);
+    exit;
 
 case 'list':
 default:
