@@ -31,14 +31,6 @@ define('SUBSCR_ADMIN_URL',
 define('SUBSCR_URL',
     $_CONF['site_url'] . '/' . $_CONF_SUBSCR['pi_name']);
 
-define('SUBSCR_STATUS_ENABLED', 0);
-define('SUBSCR_STATUS_CANCELED', 1);
-define('SUBSCR_STATUS_EXPIRED', 2);
-define('SUBSCR_REGISTER_NONE', 0);
-define('SUBSCR_REGISTER_AUTO', 1);
-define('SUBSCR_REGISTER_OPTIONAL', 2);
-define('SUBSCR_REGISTER_TRIAL', 3);
-
 /** Additional config items and table definitions are added here */
 if (file_exists(SUBSCR_PI_PATH . '/config.php')) {
     /** Include local configuration overrides */
@@ -139,7 +131,7 @@ function plugin_showstats_subscription($showsitestats)
             LEFT JOIN {$_TABLES['subscr_subscriptions']} s
                 ON p.item_id=s.item_id
             WHERE p.enabled = 1
-            AND ( s.status = '" . SUBSCR_STATUS_ENABLED . "' )
+            AND ( s.status = '" . Subscription\Subscription::STATUS_ENABLED . "' )
             AND ( s.expiration > '{$_CONF['_now']->toMySQL(true)}' )
             GROUP BY p.item_id";
     //echo $sql;die;
@@ -184,7 +176,7 @@ function plugin_statssummary_subscription()
     global $LANG_SUBSCR, $_TABLES;
 
     $count = DB_count($_TABLES['subscr_subscriptions'],
-            'status', SUBSCR_STATUS_ENABLED);
+            'status', Subscription\Subscription::STATUS_ENABLED);
     $retval = array($LANG_SUBSCR['subscriptions'], $count);
     return $retval;
 }
@@ -619,7 +611,7 @@ function plugin_runScheduledTask_subscription()
             LEFT JOIN {$_TABLES['subscr_products']} p
                 ON p.item_id = s.item_id
             WHERE '{$_CONF['_now']->toMySQL(true)}' > (s.expiration + interval p.grace_days DAY)
-                AND status = " . SUBSCR_STATUS_ENABLED;
+                AND status = " . Subscription\Subscription::STATUS_ENABLED;
     //COM_errorLog($sql);
     $r = DB_query($sql);
     if ($r) {
@@ -808,10 +800,10 @@ function plugin_user_create_subscription($uid = 0)
     $S = new \Subscription\Subscription();
     $Plans = \Subscription\Plan::getPlans();
     foreach ($Plans as $P) {
-        if ($P->at_registration) {
+        if ($P->getAtRegistration()) {
             // If auto-signup is enabled for this product, use the trial_days
             // if defined, or create a full subscription
-            if ($P->trial_days > 0) {
+            if ($P->getTrialDays() > 0) {
                 $S->Add($uid, $P->getID(), $P->getTrialDays(), 'day');
             } else {
                 $S->Add($uid, $P->getID());

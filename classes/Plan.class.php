@@ -164,7 +164,7 @@ class Plan
             $this->enabled = (int)$_CONF_SUBSCR['enabled'];
             $this->show_in_block = (int)$_CONF_SUBSCR['show_in_block'];
             $this->taxable = (int)$_CONF_SUBSCR['taxable'];
-            $this->at_registration = SUBSCR_REGISTER_NONE;
+            $this->at_registration = 0;
             //$this->views = 0;
             $this->grace_days = (int)$_CONF_SUBSCR['grace_days'];
             $this->early_renewal = (int)$_CONF_SUBSCR['early_renewal'];
@@ -455,6 +455,17 @@ class Plan
     public function getTrialDays()
     {
         return (int)$this->trial_days;
+    }
+
+
+    /**
+     * Get the `At Registration` flag to determine if a new user should be added.
+     *
+     * @return  boolean     1 if automatically subscribing, zero if not
+     */
+    public function getAtRegistration()
+    {
+        return $this->at_registration ? 1 : 0;
     }
 
 
