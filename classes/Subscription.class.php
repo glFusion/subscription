@@ -895,7 +895,7 @@ class Subscription
         switch($fieldname) {
         case 'edit':
             $retval .= COM_createLink(
-                '<i class="uk-icon-edit uk-icon-hover"></i>',
+                '<i class="uk-icon uk-icon-edit"></i>',
                 SUBSCR_ADMIN_URL . '/index.php?editsubscrip=x&amp;sub_id=' . $A['id'],
                 array(
                     'class' => 'tooltip',

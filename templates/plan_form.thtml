@@ -183,7 +183,8 @@ function update_duration_type(opt)
 </div>
 </fieldset>
 
-<div class="uk-form-row">
+<div class="uk-form-row" style="margin-top:15px;">
+  <div class="uk-form-controls">
   <button class="uk-button uk-button-success" type="submit" name="saveproduct"
     value="{$LANG_SUBSCR['submit']}" />{$LANG_SUBSCR['submit']}</button>
   <button class="uk-button" type="reset" name="reset"
@@ -196,6 +197,7 @@ function update_duration_type(opt)
   type="submit"
   onclick="return confirm('{$LANG_SUBSCR['q_del_item']}');" />{$LANG_ADMIN['delete']}</button>
 {!endif}
+  </div>
 </div>
 </form>
 <script type="text/javascript">
