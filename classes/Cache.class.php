@@ -29,7 +29,6 @@ class Cache
      * @param   string  $key    Item key
      * @param   mixed   $data   Data, typically an array
      * @param   mixed   $tag    Tag, or array of tags.
-     * @param   integer $cach_mins  Minutes to cache, default 1 day
      * @param   integer $cache_mins Cache minutes
      * @return  boolean     True on success, False on error
      */

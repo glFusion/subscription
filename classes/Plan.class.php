@@ -1113,10 +1113,10 @@ class Plan
 
 
     /**
-    *   Create an admin list of plans.
-    *
-    *   @return string  HTML for list
-    */
+     * Create an admin list of plans.
+     *
+     * @return  string      HTML for list
+     */
     public static function adminList()
     {
         global $_CONF, $_TABLES, $LANG_ADMIN, $LANG_ACCESS;
@@ -1237,14 +1237,14 @@ class Plan
 
 
     /**
-    *   Get a single field for the Subscription Plan admin list.
-    *
-    *   @param  string  $fieldname  Name of field
-    *   @param  mixed   $fieldvalud Value of field
-    *   @param  array   $A          Array of all fields
-    *   @param  array   $icon_arr   Array of system icons
-    *   @return string              HTML content for field display
-    */
+     * Get a single field for the Subscription Plan admin list.
+     *
+     * @param   string  $fieldname  Name of field
+     * @param   mixed   $fieldvalu  Value of field
+     * @param   array   $A          Array of all fields
+     * @param   array   $icon_arr   Array of system icons
+     * @return  string              HTML content for field display
+     */
     public static function getAdminListField($fieldname, $fieldvalue, $A, $icon_arr)
     {
         global $_CONF, $LANG_ACCESS, $LANG_SUBSCR, $_CONF_SUBSCR, $_TABLES;

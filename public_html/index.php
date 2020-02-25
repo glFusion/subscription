@@ -1,15 +1,15 @@
 <?php
 /**
-*   Public entry point for the Subscription plugin.
-*
-*   @author     Lee Garner <lee@leegarner.com>
-*   @copyright  Copyright (c) 2010 Lee Garner
-*   @package    subscription
-*   @version    0.0.1
-*   @license    http://opensource.org/licenses/gpl-2.0.php
-*               GNU Public License v2 or later
-*   @filesource
-*/
+ * Public entry point for the Subscription plugin.
+ *
+ * @author      Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2010-2020 Lee Garner
+ * @package     subscription
+ * @version     1.0.1
+ * @license     http://opensource.org/licenses/gpl-2.0.php
+ *              GNU Public License v2 or later
+ * @filesource
+ */
 
 /** Import core glFusion libraries */
 require_once '../lib-common.php';
@@ -47,8 +47,12 @@ if (isset($_REQUEST['item_id'])) {
     $id = COM_applyFilter(COM_getArgument('item_id'));
 }
 
-if (empty($view)) {
-    $view = ($_CONF_SUBSCR['show_in_pp_cat'] && function_exists('plugin_chkVersion_shop')) ? 'pp_cart' : 'list';
+if (
+    empty($view) &&
+    $_CONF_SUBSCR['show_in_pp_cat'] &&
+    function_exists('plugin_chkVersion_shop')
+) {
+   $view = 'pp_cart';
 }
 
 $pageTitle = $LANG_SUBSCR['subscriptions'];  // Set basic page title

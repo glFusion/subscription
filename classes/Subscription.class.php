@@ -627,9 +627,11 @@ class Subscription
      * If $system is true, then a user's name won't be logged with the message
      * to avoid confusion.
      *
-     * @uses    selff:_doCancel()
-     * @param   integer $sub_id     Database ID of the subscription to cancel
+     * @uses    self:_doCancel()
+     * @param   integer $uid        User ID to cancel
+     * @param   string  $item_id    Plan ID to cancel for the user
      * @param   boolean $system     True if this is a system action.
+     * @return  boolean             True on success, False on failure
      */
     public static function Cancel($uid, $item_id, $system=false)
     {
@@ -646,6 +648,7 @@ class Subscription
      * @uses    selff:_doCancel()
      * @param   integer $sub_id     Database ID of the subscription to cancel
      * @param   boolean $system     True if this is a system action.
+     * @return  boolean             True on success, False on failure
      */
     public static function CancelByID($sub_id, $system=false)
     {
@@ -746,10 +749,11 @@ class Subscription
 
 
     /**
-    *   Create an admin list of subscriptions for a product
-    *
-    *   @return string  HTML for list
-    */
+     * Create an admin list of subscriptions for a product,
+     *
+     * @param   string  $item_id    Plan ID to limit list.
+     * @return  string      HTML for list
+     */
     public static function adminList($item_id)
     {
         global $_CONF, $_TABLES, $LANG_ADMIN, $LANG_ACCESS;
@@ -878,14 +882,14 @@ class Subscription
 
 
     /**
-    *   Get a single field for the Subscription admin list.
-    *
-    *   @param  string  $fieldname  Name of field
-    *   @param  mixed   $fieldvalud Value of field
-    *   @param  array   $A          Array of all fields
-    *   @param  array   $icon_arr   Array of system icons
-    *   @return string              HTML content for field display
-    */
+     * Get a single field for the Subscription admin list.
+     *
+     * @param   string  $fieldname  Name of field
+     * @param   mixed   $fieldvalue Value of field
+     * @param   array   $A          Array of all fields
+     * @param   array   $icon_arr   Array of system icons
+     * @return  string              HTML content for field display
+     */
     public static function getAdminListField($fieldname, $fieldvalue, $A, $icon_arr)
     {
         global $_CONF, $LANG_ACCESS, $LANG_SUBSCR, $_CONF_SUBSCR;

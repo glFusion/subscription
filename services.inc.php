@@ -7,7 +7,7 @@
  * @author      Lee Garner <lee@leegarner.com>
  * @copyright   Copyright (c) 2011-2020 Lee Garner <lee@leegarner.com>
  * @package     subscription
- * @version     v1.0.0
+ * @version     v1.0.1
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -251,9 +251,10 @@ function service_handleRefund_subscription($args, &$output, &$svc_msg)
 /**
  * Get the products under a given category (categroy not used)
  *
- * @deprecated - Shop no longer includes products, only categories
- * @param  string  $cat    Name of category (unused)
- * @return array           Array of product info, empty string if none
+ * @param   array   $args       Argument array (not used)
+ * @param   mixed   $output     Output holder variable
+ * @param   string  $svc_msg    Service message (not used)
+ * @return  integer         Status value
  */
 function service_getproducts_subscription($args, &$output, &$svc_msg)
 {
