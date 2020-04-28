@@ -52,7 +52,7 @@ if (
     $_CONF_SUBSCR['show_in_pp_cat'] &&
     function_exists('plugin_chkVersion_shop')
 ) {
-   $view = 'pp_cart';
+   $view = 'shop_catalog';
 }
 
 $pageTitle = $LANG_SUBSCR['subscriptions'];  // Set basic page title
@@ -75,7 +75,7 @@ case 'detail':
     }
     break;
 
-case 'pp_cart':
+case 'shop_catalog':
     echo COM_refresh($_CONF['site_url'] . '/shop/index.php?category=' . $_CONF_SUBSCR['pi_name']);
     exit;
 
