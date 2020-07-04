@@ -32,10 +32,6 @@ class Menu
         global $_CONF, $LANG_ADMIN, $LANG_SUBSCR;
         $menu_arr = array (
             array(
-                'url' => $_CONF['site_admin_url'],
-                'text' => $LANG_ADMIN['admin_home'],
-            ),
-            array(
                 'url' => SUBSCR_ADMIN_URL . '/index.php?products=x',
                 'text' => $LANG_SUBSCR['products'],
                 'active' => $view == 'products' ? true : false,
@@ -44,6 +40,10 @@ class Menu
                 'url' => SUBSCR_ADMIN_URL . '/index.php?subscriptions=0',
                 'text' => $LANG_SUBSCR['subscriptions'],
                 'active' => $view == 'subscriptions' ? true : false,
+            ),
+            array(
+                'url' => $_CONF['site_admin_url'],
+                'text' => $LANG_ADMIN['admin_home'],
             ),
         );
         if (isset($LANG_SUBSCR['admin_txt_' . $view])) {
