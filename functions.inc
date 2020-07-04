@@ -534,7 +534,6 @@ function plugin_profilevariablesdisplay_subscription($uid, &$T)
         $LT->set_file(array(
             'block' => 'profileblock.thtml',
         ));
-        $LT->set_var('is_uikit', $_CONF_SUBSCR['_is_uikit']);
         $LT->set_block('block', 'subscription_row', 'srow');
 
         while ($A = DB_fetchArray($res, false)) {
