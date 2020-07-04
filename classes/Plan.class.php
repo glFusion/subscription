@@ -1058,7 +1058,7 @@ class Plan
      */
     public function canBuy()
     {
-        global $_GROUPS, $_USER, $_CONF_SUBSCR;
+        global $_GROUPS, $_USER, $_CONF_SUBSCR, $_CONF;
 
         $retval = false;
         $this->is_subscribed = 0;
