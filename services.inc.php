@@ -94,8 +94,10 @@ function service_productinfo_subscription($A, &$output, &$svc_msg)
     if (!is_array($item)) return PLG_RET_ERROR;
 
     // Create a return array with values to be populated later
+    $product_id = implode(':', $item);
     $output = array(
-        'product_id' => implode(':', $item),
+        'product_id' => $product_id,
+        'id' => $product_id,
         'name' => 'Unknown',
         'short_description' => 'Unknown Subscription Item',
         'description'       => '',
@@ -313,6 +315,7 @@ function service_getproducts_subscription($args, &$output, &$svc_msg)
                 'url' => COM_buildUrl(SUBSCR_URL .
                     '/index.php?view=detail&item_id=' . $P->getID()),
                 'have_detail_svc' => true,  // Tell Shop to use it's detail page wrapper
+                'img_url' => '',
             );
         }
     }
