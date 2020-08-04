@@ -19,7 +19,7 @@ if (!in_array('subscription', $_PLUGINS)) {
 }
 
 // Only let admin users access this page
-if (!SEC_inGroup($_CONF_SUBSCR['pi_name'] . ' Admin')) {
+if (!SEC_hasRights('subscription.admin')) {
     COM_errorLog("Attempted unauthorized access the Subscription Admin page." .
         " User id: {$_USER['uid']}, Username: {$_USER['username']}, " .
         " IP: $REMOTE_ADDR", 1);

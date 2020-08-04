@@ -62,15 +62,6 @@ $INSTALL_plugin['subscription'] = array(
     ),
 
     array(
-        'type' => 'group',
-        'group' => $_CONF_SUBSCR['pi_name'] . ' Admin',
-        'desc' => 'Users in this group can administer the Subscriptions plugin',
-        'variable' => 'admin_group_id',
-        'admin' => true,
-        'addroot' => true,
-    ),
-
-    array(
         'type' => 'feature',
         'feature' => 'subscription.admin',
         'desc' => 'Ability to administer the Subscriptions plugin',
@@ -86,7 +77,7 @@ $INSTALL_plugin['subscription'] = array(
 
     array(
         'type' => 'mapping',
-        'group' => 'admin_group_id',
+        'group' => 1,
         'feature' => 'admin_feature_id',
         'log' => 'Adding Admin feature to the admin group',
     ),

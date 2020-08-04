@@ -5,6 +5,7 @@ Release TBD
 - Drop views column from plans table.
 - Fix plan ratings, enable rating resets from admin list.
 - Refactor class properties and use accessor functions.
+- Deprecate admin group, use subscription.admin permission.
 
 ## 1.0.0
 Release 2020-02-18

@@ -452,7 +452,11 @@ function phpblock_subscription_subscribe()
     $retval = '';
 
     // Shop is required to create the purchase link
-    if (!SUBSCR_shop_enabled() || COM_isAnonUser() || SEC_inGroup('Root')) {
+    if (
+        !SUBSCR_shop_enabled() ||
+        COM_isAnonUser() ||
+        SEC_hasRights('subscription.admin')
+    ) {
         return $retval;
     }
 
