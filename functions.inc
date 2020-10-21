@@ -43,7 +43,7 @@ if (file_exists(SUBSCR_PI_PATH . '/config.php')) {
 $langpath = SUBSCR_PI_PATH . '/language';
 $langfile = "{$_CONF['language']}.php";
 if (!file_exists("$langpath/$langfile")) {
-    $langfile = 'english.php';
+    $langfile = 'english_utf-8.php';
 }
 require_once "$langpath/$langfile";
 if (file_exists("$langpath/custom/$langfile")) {
