@@ -21,79 +21,79 @@ class Plan
 {
     /** Subscription plan ID.
      * @var string */
-    private $item_id;
+    private $item_id = '';
 
     /** Subscription plan from which this is an upgrade.
      * @var string */
-    private $upg_from;
+    private $upg_from = '';
 
     /** Subscription duration, works with duration_type.
      * @var integer */
-    private $duration;
+    private $duration = 0;
 
     /** Duration type (day, month, year).
      * @var string */
-    private $duration_type;
+    private $duration_type = '';
 
     /** Group to which subscribers are automatically added.
      * @var integer */
-    private $addgroup;
+    private $addgroup = 0;
 
     /** Number of days' grace period when the subscription expires.
      * @var intger */
-    private $grace_days;
+    private $grace_days = 0;
 
     /** Number of days before expiration when the subscription may be renewed.
      * @var integer */
-    private $early_renewal;
+    private $early_renewal = 0;
 
     /** Automatically create a trial subscription at registration?
      * @var boolean */
-    private $at_registration;
+    private $at_registration = 0;
 
     /** Number of days for the trial subscription.
      * @var integer */
-    private $trial_days;
+    private $trial_days = 0;
 
     /** Group ID which is allowed to purchase this subscription.
      * @var integer */
-    private $grp_access;
+    private $grp_access = 0;
 
     /** Subscription price.
      * @var float */
-    private $price;
+    private $price = 0;
 
     /** Upgrade price, if this is an upgrade from another plan.
      * @var float */
-    private $upg_price;
+    private $upg_price = 0;
 
     /** Plan name (short description).
      * @var string */
-    private $short_description;
+    private $short_description = '';
 
     /** Full text description.
      * @var string */
-    private $description;
+    private $description = '';
 
     /** Profile type. TODO what is this?
      * @var string */
-    private $prf_type;
+    private $prf_type = '';
 
     /** Indicator that the plan is available for purchase.
      * @var boolean */
-    private $enabled;
+    private $enabled = 1;
 
     /** Show this plan in the purchase block?
      * @var boolean */
-    private $show_in_block;
+    private $show_in_block = 0;
 
     /** Plan is taxable?
      * @var boolean */
-    private $taxable;
+    private $taxable = 0;
 
     /** Upgrading to this plan extends the subscription period?
      * @var boolean */
-    private $upg_extend_exp;
+    private $upg_extend_exp = 0;
 
     /** Fixed expiration date, NULL to calculate from the plan duration.
      * @var string */
@@ -121,7 +121,7 @@ class Plan
 
     /** Indicator that this is a new product vs. editing an existing one.
      * @var boolean */
-    public $isNew;
+    public $isNew = 1;
 
     /** Array of error messages.
      * @var array */
@@ -345,6 +345,17 @@ class Plan
     public function getDscp()
     {
         return $this->description;
+    }
+
+
+    /**
+     * Get the glFusion group to which subscribers are added.
+     *
+     * @return  integer     Group ID
+     */
+    public function getSubGroup()
+    {
+        return (int)$this->addgroup;
     }
 
 
