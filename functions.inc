@@ -516,16 +516,18 @@ function phpblock_subscription_subscribe()
  * Displays subscriptions in the user's profile.
  *
  * @param   integer  $uid   User ID whose profile is being displayed
- * @param   object   &$T    Pointer to template object
  * @return  string          HTML to include in profile page
  */
-function plugin_profilevariablesdisplay_subscription($uid, &$T)
+function plugin_profileblocksdisplay_subscription($uid)
 {
     global $_CONF_SUBSCR, $LANG_SUBSCR, $_TABLES, $_CONF, $_USER;
 
+    $retval = '';
+
     // non-admins can only see their own subscription.
-    if (!SEC_hasRights('subscription.admin') && $uid != $_USER['uid'])
-        return '';
+    if (!SEC_hasRights('subscription.admin') && $uid != $_USER['uid']) {
+        return $retval;
+    }
 
     $sql = "SELECT p.item_id, s.expiration
             FROM {$_TABLES['subscr_subscriptions']} s
@@ -549,12 +551,9 @@ function plugin_profilevariablesdisplay_subscription($uid, &$T)
         }
 
         $LT->parse('output', 'block');
-        $existingFields = $T->get_var('plugin_fields');
-        $T->set_var('plugin_fields',
-                $existingFields . $T->finish($LT->get_var('output')));
-    } else {
-        return '';
+        $retval = $LT->finish($LT->get_var('output'));
     }
+    return $retval;
 }
 
 
@@ -807,9 +806,15 @@ function plugin_user_create_subscription($uid = 0)
             // If auto-signup is enabled for this product, use the trial_days
             // if defined, or create a full subscription
             if ($P->getTrialDays() > 0) {
-                $S->Add($uid, $P->getID(), $P->getTrialDays(), 'day');
+                $S->withUid($uid)
+                    ->withItemId($P->getID())
+                    ->withDuration($P->getTrialDays())
+                    ->withDurationType('day')
+                    ->Add();
             } else {
-                $S->Add($uid, $P->getID());
+                $S->withUid($uid)
+                  ->withItemId($P->getID())
+                  ->Add();
             }
         }
     }

@@ -177,14 +177,14 @@ function service_handlePurchase_subscription($args, &$output, &$svc_msg)
 
     // Initialize the return array
     $output = array(
-            'product_id' => $item_id,
-            'name' => $P->getName(),
-            'short_description' => $P->getName(),
-            'description' => $P->getDscp(),
-            'price' =>  $amount,
-            'expiration' => NULL,
-            'download' => 0,
-            'file' => '',
+        'product_id' => $item_id,
+        'name' => $P->getName(),
+        'short_description' => $P->getName(),
+        'description' => $P->getDscp(),
+        'price' =>  $amount,
+        'expiration' => NULL,
+        'download' => 0,
+        'file' => '',
     );
 
     // User ID is returned in the 'custom' field, so make sure it's numeric.
@@ -200,16 +200,15 @@ function service_handlePurchase_subscription($args, &$output, &$svc_msg)
         );
     }
 
-    /*if (!empty($ipn_data['memo'])) {
-        $memo = DB_escapeString($ipn_data['memo']);
-    } else {
-        $memo = '';
-    }*/
-
     COM_errorLog("Processing subscription for user $uid to item {$product_id}");
     $txn_id = SUBSCR_getVar($ipn_data, 'txn_id', 'string', 'undefined');
     $S = Subscription\Subscription::getInstance($uid, $product_id);
-    $status = $S->Add($uid, $product_id, 0, '', NULL, $upgrade, $txn_id);
+    $status = $S->withUid($uid)
+                ->withItemId($product_id)
+                ->withUpgrade($upgrade)
+                ->withTxnID($txn_id)
+                ->withPrice($amount)
+                ->Add();
     return $status == true ? PLG_RET_OK : PLG_RET_ERROR;
 }
 

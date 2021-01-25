@@ -5,7 +5,7 @@
  * @author      Lee Garner <lee@leegarner.com>
  * @copyright   Copyright (c) 2010-2020 Lee Garner
  * @package     subscription
- * @version     v1.0.0
+ * @version     v1.0.1
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -25,56 +25,74 @@ class Subscription
 
     /** Subscription record ID.
      * @var integer */
-    private $id;
+    private $id = 0;
 
     /** Subscribing user ID.
      * @var integer */
-    private $uid;
+    private $uid = 0;
 
     /** Subscription status.
      * @var integer */
-    private $status;
+    private $status = 0;
 
     /** Plan ID.
      * @var string */
-    private $item_id;
+    private $item_id = '';
 
     /** Purchase transaction ID.
      * @var string */
-    private $txn_id;
+    private $txn_id = '';
 
     /** Purchase date.
      * @var string */
-    private $purchase_date;
+    private $purchase_date = '';
 
     /** Expiration date.
      * @var string */
-    private $expiration;
+    private $expiration = '';
 
     /** Flag to indicate the subscriber has been notified of impending expiration.
      * @var boolean */
-    private $notified;
+    private $notified = 0;
 
     /** Subscription plan object.
      * @var object */
-    public $Plan;
+    public $Plan = NULL;
 
     /** Indicate whether the current user is an administrator
      * @var boolean */
-    private $isAdmin;
+    private $isAdmin = false;
 
     /** Flag to indicate that this is a new record.
      * @var boolean */
-    private $isNew;
+    private $isNew = true;
 
     /** Holder for a general-purpose date object.
      * @var object */
-    private $dt;
+    private $dt = NULL;
 
     /** Array of error messages.
      * @var array */
     public $Errors = array();
 
+    /** Duration, in days, months or years.
+     * Used to calculate expiration.
+     * @var integer */
+    private $duration = 0;
+
+    /** Duration type.
+     * Day, Week, Month, Year or FIXED.
+     * @var string */
+    private $duration_type = 'MONTH';
+
+    /** Subscription price.
+     * Used for logging transaction history.
+     * @var float */
+    private $price = -1;
+
+    /** Flag to indicate this subscription is an upgrade.
+     * @var boolean */
+    private $is_upgrade = 0;
 
     /**
      * Constructor.
@@ -87,22 +105,14 @@ class Subscription
     {
         global $_CONF_SUBSCR, $_CONF;
 
-        $this->isNew = true;
-        $this->status = 0;
         $this->dt = new \Date('now', $_CONF['timezone']);
-        $this->Plan = NULL;
         if (is_array($id)) {
             // Load variables from supplied array
             $this->setVars($id);
             $this->Plan = Plan::getInstance($this->item_id);
             $this->isNew = false;
         } elseif ($id < 1) {
-            $this->id = 0;
-            $this->item_id = '';
-            $this->uid = 0;
-            $this->price = 0;
             $this->expiration = $this->dt->format('Y-m-d');
-            $this->txn_id = '';
             $this->purchase_date = $this->dt->format('Y-m-d');
         } else {
             $this->id = $id;
@@ -115,41 +125,117 @@ class Subscription
 
 
     /**
-     * Set a property's value.
-     *
-     * @deprecated
-     * @param   string  $var    Name of property to set.
-     * @param   mixed   $value  New value for property.
-     */
-    public function __set($var, $value='')
-    {
-        COM_errorLog("attempting __set $var to $value: " . print_r(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2),true));
-        return NULL;
-    }
-
-
-    /**
-     * Get the value of a property.
-     *
-     * @deprecated
-     * @param   string  $var    Name of property to retrieve.
-     * @return  mixed           Value of property, NULL if undefined.
-     */
-    public function __get($var)
-    {
-        COM_errorLog("attempting __get for $var: " . print_r(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2),true));
-        return NULL;
-    }
-
-
-    /**
-     * Get the expiraation date.
+     * Get the expiration date.
      *
      * @return  string      Expiration date
      */
     public function getExpiration()
     {
         return $this->expiration;
+    }
+
+
+    /**
+     * Set the subscriber's user ID.
+     *
+     * @param   integer $uid    User ID
+     * @return  object  $this
+     */
+    public function withUid($uid)
+    {
+        $this->uid = (int)$uid;
+        return $this;
+    }
+
+
+    /**
+     * Set the subscription plan ID.
+     *
+     * @param   string  $item_id    Plan ID
+     * @return  object  $this
+     */
+    public function withItemId($item_id)
+    {
+        $this->item_id = $item_id;
+        return $this;
+    }
+
+
+    /**
+     * Set the number of days/weeks/months for the duration.
+     *
+     * @see     self::withDurationType()
+     * @param   integer $duration   Duration number.
+     * @return  object  $this
+     */
+    public function withDuration($duration)
+    {
+        $this->duration = (int)$duration;
+        return $this;
+    }
+
+
+    /**
+     * Set the duration type, day, week, etc.
+     *
+     * @param   string  $type   Duration type
+     * @return  object  $this
+     */
+    public function withDurationType($type)
+    {
+        $type = strtoupper($type);
+        switch ($type) {
+        case 'DAY':
+        case 'WEEK':
+        case 'MONTH':
+        case 'YEAR':
+        case 'FIXED':
+            $this->duration_type = $type;
+            break;
+        default:
+            $this->duration_type = 'MONTH';
+            break;
+        }
+        return $this;
+    }
+
+
+    /**
+     * Set the upgrade flag if this is an upgrade from another plan.
+     *
+     * @param   boolean $flag   True if this is an upgrade, False if not
+     * @return  object  $this
+     */
+    public function withUpgrade($flag)
+    {
+        $this->is_upgrade = $flag ? true : false;
+        return $this;
+    }
+
+
+    /**
+     * Set the payment transaction ID for tracking.
+     *
+     * @param   string  $txn_id Transaction ID
+     * @return  object  $this
+     */
+    public function withTxnId($txn_id)
+    {
+        $this->txn_id = $txn_id;
+        return $this;
+    }
+
+
+    /**
+     * Set the price for this subscription.
+     *
+     * @param   float   $price  Subscription price
+     * @return  object  $this
+     */
+    public function withPrice($price)
+    {
+        $this->price = (float)$price;
+        return $this;
     }
 
 
@@ -162,12 +248,12 @@ class Subscription
     public function setVars($row, $fromDB=false)
     {
         if (!is_array($row)) return;
-        $this->id = $row['id'];
+        $this->id = (int)$row['id'];
         $this->item_id = $row['item_id'];
-        $this->uid = $row['uid'];
+        $this->uid = (int)$row['uid'];
         $this->expiration = $row['expiration'];
-        $this->notified = isset($row['notified']) ? $row['notified'] : 0;
-        $this->status = $row['status'];
+        $this->notified = isset($row['notified']) ? (int)$row['notified'] : 0;
+        $this->status = (int)$row['status'];
     }
 
 
@@ -188,23 +274,19 @@ class Subscription
             return false;
         }
 
-        $cache_key = 'subscr_' . $id;
-        $row = Cache::get($cache_key);
-        if ($row === NULL) {
-            $result = DB_query("SELECT *
-                    FROM {$_TABLES['subscr_subscriptions']}
-                    WHERE id='$id'");
-            if (!$result || DB_numRows($result) != 1) {
-                return false;
-            } else {
-                $row = DB_fetchArray($result, false);
-            }
+        $result = DB_query(
+            "SELECT * FROM {$_TABLES['subscr_subscriptions']}
+            WHERE id='$id'"
+        );
+        if (!$result || DB_numRows($result) != 1) {
+            return false;
+        } else {
+            $row = DB_fetchArray($result, false);
         }
         if (!empty($row)) {
             $this->setVars($row, true);
             $this->isNew = false;
             $this->Plan = Plan::getInstance($row['item_id']);
-            Cache::set($cache_key, $row, 'subscriptions');
             return true;
         } else {
             return false;
@@ -223,21 +305,16 @@ class Subscription
     {
         global $_TABLES;
 
-        $cache_key = "subscr_{$uid}_{$item_id}";
-        $Obj = Cache::get($cache_key);
-        if ($Obj === NULL) {
-            $uid = (int)$uid;
-            $item_id= DB_escapeString($item_id);
-            $sql = "SELECT * FROM {$_TABLES['subscr_subscriptions']}
-                    WHERE uid='{$uid}' AND item_id = '{$item_id}'";
-            $res = DB_query($sql);
-            if ($res && DB_numRows($res) == 1) {
-                $A = DB_fetchArray($res, false);
-                $Obj = new self($A);
-                Cache::set($cache_key, $Obj, 'subscriptions');
-            } else {
-                $Obj = new self();
-            }
+        $uid = (int)$uid;
+        $item_id= DB_escapeString($item_id);
+        $sql = "SELECT * FROM {$_TABLES['subscr_subscriptions']}
+            WHERE uid='{$uid}' AND item_id = '{$item_id}'";
+        $res = DB_query($sql);
+        if ($res && DB_numRows($res) == 1) {
+            $A = DB_fetchArray($res, false);
+            $Obj = new self($A);
+        } else {
+            $Obj = new self();
         }
         return $Obj;
     }
@@ -317,8 +394,9 @@ class Subscription
     {
         global $_TABLES, $_CONF_SUBSCR;
 
-        if ($this->id < 1)      // Invalid or new record
+        if ($this->id < 1) {    // Invalid or new record
             return false;
+        }
 
         DB_delete($_TABLES['subscr_subscriptions'], 'id', $this->id);
         Cache::clear('subscriptions');
@@ -333,42 +411,31 @@ class Subscription
      *
      * @uses    AddtoGroup()
      * @uses    AddHistory()
-     * @param   integer $uid        User ID
-     * @param   string  $item_id    Plan item ID
-     * @param   integer $duration   Optionsl Duration (# of duration_type's)
-     * @param   integer $duration_type  Optional Duration interval (week, month, etc.)
-     * @param   string  $expiration Optional fixed expiration
-     * @param   boolean $upgrade    True if this is an upgrade, default False
-     * @param   string  $txn_id     Optional Payment transaction ID
-     * @param   float   $price      Optional price, default to product price
      * @return  boolean     True on successful update, False on error
      */
-    public function Add(
-        $uid, $item_id, $duration=0, $duration_type='',
-        $expiration=NULL, $upgrade = false, $txn_id = '', $price = -1
-    ) {
+    public function Add()
+    {
         global $_TABLES;
 
-        $this->uid = $uid;
-        $this->item_id = $item_id;
         $today = $this->dt->format('Y-m-d');
         $this->status = self::STATUS_ENABLED;
-        $this->notified = 0;
 
         // Get the product information for this subscription
-        $P = Plan::getInstance($item_id);
-        if ($price == -1) {
-            $price = $upgrade ? $P->getUpgradePrice(): $P->getBasePrice();
+        $P = Plan::getInstance($this->item_id);
+        if ($this->price == -1) {
+            $this->price = $this->is_upgrade ? $P->getUpgradePrice(): $P->getBasePrice();
         }
         if ($P->isNew()) {
             return false;
         }
         $P->setCheckPerms(false); // don't check permissions, may be IPN
 
-        if (empty($duration_type)) $duration_type = $P->getDurationType();
-        $duration_type = strtoupper($duration_type);
-        if ($duration == 0) $duration = $P->getDuration();
-        $duration = (int)$duration;
+        if (empty($this->duration_type)) {
+            $this->duration_type = $P->getDurationType();
+        }
+        if ($this->duration == 0) {
+            $this->duration = $P->getDuration();
+        }
 
         if ($this->isNew) {
             $this->expiration = $today;
@@ -380,7 +447,7 @@ class Subscription
             // Check that the current product is an upgrade item, and that it
             // isn't being upgraded against itself, and that there's a current
             // active subscription for it.
-            if ($upgrade) {
+            if ($this->is_upgrade) {
                 if ($this->status > 0 ||
                     $P->getUpgradeFrom() == '' ||
                     $P->getUpgradeFrom() != $this->item_id) {
@@ -391,9 +458,9 @@ class Subscription
 
         // Set the new expiration to either the additional time, or the
         // fixed expiration date.
-        if (!$upgrade || $P->upgradeExtendsExp() == 1) {
-            if ($duration_type != 'FIXED') {
-                $expiration = "'{$this->expiration}' + INTERVAL $duration $duration_type";
+        if (!$this->is_upgrade || $P->upgradeExtendsExp() == 1) {
+            if ($this->duration_type != 'FIXED') {
+                $expiration = "'{$this->expiration}' + INTERVAL {$this->duration} {$this->duration_type}";
             } else {
                 $expiration = "'" . DB_escapeString($P->getExpiration()) . "'";
             }
@@ -432,7 +499,7 @@ class Subscription
             $status = true;
             $this->AddtoGroup();
             $this->Read();
-            $this->AddHistory($txn_id, $price);
+            $this->AddHistory($this->txn_id, $this->price);
             // Now have the product update the member profile
             //$P->updateProfile($this->expiration, $this->uid);
             Cache::clear('subscriptions');
@@ -471,12 +538,14 @@ class Subscription
      */
     private function AddtoGroup()
     {
-        if (!$this->Plan) $this->Plan = Plan::getInstance($this->item_id);
-        if (!$this->Plan->isNew) {
-            SUBSCR_debug("Adding user {$this->uid} to group {$this->Plan->addgroup}");
-            Cache::clearGroup($this->Plan->addgroup, $this->uid);
+        if (!$this->Plan) {
+            $this->Plan = Plan::getInstance($this->item_id);
+        }
+        if (!$this->Plan->isNew()) {
+            SUBSCR_debug("Adding user {$this->uid} to group {$this->Plan->getSubGroup()}");
+            Cache::clearGroup($this->Plan->getSubGroup(), $this->uid);
             USES_lib_user();
-            USER_addGroup($this->Plan->addgroup, $this->uid);
+            USER_addGroup($this->Plan->getSubGroup(), $this->uid);
         } else {
             COM_errorLog("Error finding group for plan {$this->item_id}");
         }
@@ -673,13 +742,13 @@ class Subscription
 
         // Remove the subscriber from the subscription group
         USES_lib_user();
-        SUBSCR_debug("Removing user {$this->uid} from {$this->Plan->addgroup}");
-        Cache::clearGroup($this->Plan->addgroup, $this->uid);
-        USER_delGroup($this->Plan->addgroup, $this->uid);
+        SUBSCR_debug("Removing user {$this->uid} from {$this->Plan->getSubGroup()}");
+        Cache::clearGroup($this->Plan->getSubGroup(), $this->uid);
+        USER_delGroup($this->Plan->getSubGroup(), $this->uid);
 
         // Delete the subscription and log the activity
         DB_delete($_TABLES['subscr_subscriptions'], 'id', $this->id);
-        SUBSCR_auditLog("Cancelled subscription $this->id ({$this->Plan->item_id}) " .
+        SUBSCR_auditLog("Cancelled subscription $this->id ({$this->Plan->getID()}) " .
                 "for user {$this->uid} (" .COM_getDisplayName($this->uid) . '), expiring ' .
                 $this->expiration, $system);
         return true;
@@ -940,6 +1009,53 @@ class Subscription
         return $retval;
     }
 
-}   // class Subscription
 
-?>
+    /**
+     * Loads the requested language array to send email in the recipient's language.
+     * If $requested is an array, the first valid language file is loaded.
+     * If not, the $requested language file is loaded.
+     * If $requested doesn't refer to a vailid language, then $_CONF['language']
+     * is assumed.
+     *
+     * After loading the base language file, the same filename is loaded from
+     * language/custom, if available. The admin can override language strings
+     * by creating a language file in that directory.
+     *
+     * @param   mixed   $requested  A single or array of language strings
+     * @return  array       $LANG_SUBSCR, the global language array for the plugin
+     */
+    public static function loadLanguage($requested)
+    {
+        global $_CONF;
+
+        // Add the requested language, which may be an array or
+        // a single item.
+        if (is_array($requested)) {
+            $languages = $requested;
+        } else {
+            // If no language requested, load the site/user default
+            $languages = array($requested);
+        }
+
+        // Add the site language as a failsafe
+        $languages[] = $_CONF['language'];
+
+        // Final failsafe, include "english.php" which is known to exist
+        $languages[] = 'english_utf-8';
+
+        // Search the array for desired language files, in order.
+        $langpath = __DIR__ . '/../language';
+        foreach ($languages as $language) {
+            if (file_exists("$langpath/$language.php")) {
+                include "$langpath/$language.php";
+                // Include admin-supplied overrides, if any.
+                if (file_exists("$langpath/custom/$language.php")) {
+                    include "$langpath/custom/$language.php";
+                }
+                break;
+            }
+        }
+        return $LANG_SUBSCR;
+    }
+
+}
