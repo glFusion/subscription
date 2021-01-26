@@ -1,11 +1,10 @@
 {# begin {templatelocation} #}
-{hr}
+{!!if {counter} > 0 !!}
+<hr />
+{!endif}
 <span style="font-weight:bold;">
-  <a href="{pi_url}/index.php?view=detail&item_id={item_id}">{title}</a>
+  <a href="{pi_url}/index.php?view=detail&item_id={item_id}">{short_dscp}</a>
 </span><br />
-<div style="clear:both;">
- {description}<br />
- {price} {currency}<p />
+ {price} {currency}
  {purchase_btn}
-</div>
 {# end {templatelocation} #}
