@@ -3,9 +3,9 @@
  * Common functions for the Subscription plugin.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2010-2020 Lee Garner
+ * @copyright   Copyright (c) 2010-2021 Lee Garner
  * @package     subscription
- * @version     v1.0.0
+ * @version     v1.0.1
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -86,9 +86,11 @@ function plugin_getmenuitems_subscription()
     global $_CONF, $_CONF_SUBSCR, $LANG_SUBSCR;
 
     $menuitems = array();
-    if ($_CONF_SUBSCR['onmenu'] == 1 &&
-           SEC_hasRights('subscription.view')) {
-          $menuitems[$LANG_SUBSCR['block_title']] = SUBSCR_URL . '/index.php';
+    if (
+        $_CONF_SUBSCR['onmenu'] == 1 &&
+        SEC_hasRights('subscription.view')
+    ) {
+      $menuitems[$LANG_SUBSCR['block_title']] = SUBSCR_URL . '/index.php';
     }
     return $menuitems;
 }
@@ -191,7 +193,7 @@ function plugin_cclabel_subscription()
 {
     global $_CONF, $_CONF_SUBSCR;
 
-    if (SEC_hasRights('subscription.admin')) {
+    if (SUBSCR_isAdmin()) {
         return array(
             $_CONF_SUBSCR['pi_display_name'],
             SUBSCR_ADMIN_URL . '/index.php',
@@ -212,7 +214,7 @@ function plugin_getadminoption_subscription()
 {
     global $_CONF, $_TABLES, $LANG_SUBSCR, $_CONF_SUBSCR;
 
-    if (SEC_hasRights('subscription.admin')) {
+    if (SUBSCR_isAdmin()) {
         return array(
             $_CONF_SUBSCR['pi_display_name'],
             SUBSCR_ADMIN_URL . '/index.php',
@@ -447,15 +449,14 @@ function plugin_upgrade_subscription()
  */
 function phpblock_subscription_subscribe()
 {
-    global $_TABLES, $_CONF_SUBSCR, $_USER;
+    global $_TABLES, $_CONF_SUBSCR, $_USER, $_CONF;
 
     $retval = '';
 
     // Shop is required to create the purchase link
     if (
         !SUBSCR_shop_enabled() ||
-        COM_isAnonUser() ||
-        SEC_hasRights('subscription.admin')
+        COM_isAnonUser()
     ) {
         return $retval;
     }
@@ -474,35 +475,42 @@ function phpblock_subscription_subscribe()
     // DB_numRows is checked just to save having to load the subscription
     // class if nothing needs to be shown.
     $n = DB_numRows($r);
-    if ($n < 1)
+    if ($n < 1) {
         return '';
+    }
 
-    $T = new Template(SUBSCR_PI_PATH . '/templates');
-    $P = new \Subscription\Plan();
-
+    $T = new Template(__DIR__ . '/templates');
     $i = 0;
     while ($row = DB_fetchArray($r, false)) {
-        $P->Read($row['item_id']);
+        $P = Subscription\Plan::getInstance($row['item_id']);
         if ($P->getID() == '') continue;     // no access to this product
 
-        $status = LGLIB_invokeService('shop', 'getCurrency', array(),
-                    $currency, $svc_msg);
-        if (empty($currency)) $currency = 'USD';
+        $status = LGLIB_invokeService(
+            'shop', 'getCurrency',
+            array(),
+            $currency,
+            $svc_msg
+        );
+        if (empty($currency)) {
+            $currency = 'USD';
+        }
 
         $T->set_file('block', 'blk_subscribe.thtml');
 
         $T->set_var(array(
             'title'     => $P->getID(),
-            'description' => $P->getDscp(),
+            'dscp'      => $P->getDscp(),
+            'short_dscp' => $P->getName(),
             'item_id'   => $P->getID(),
             'pi_url'    => SUBSCR_URL,
             'price'     => COM_numberFormat($P->getBasePrice(), 2),
             'currency'  => $currency,
             'purchase_btn' => $P->MakeButton(),
+            'counter'   => $i,
         ) );
 
-        if ($i > 0)
-            $T->set_var('hr', '<hr />');
+        /*if ($i > 0)
+            $T->set_var('hr', '<hr />');*/
         $i++;
 
         $T->parse('output','block');
@@ -525,7 +533,7 @@ function plugin_profileblocksdisplay_subscription($uid)
     $retval = '';
 
     // non-admins can only see their own subscription.
-    if (!SEC_hasRights('subscription.admin') && $uid != $_USER['uid']) {
+    if (!SUBSCR_isAdmin() && $uid != $_USER['uid']) {
         return $retval;
     }
 
@@ -1110,5 +1118,3 @@ function SUBSCR_getVar($A, $key, $type = 'string', $default = NULL)
     }
     return $val;
 }
-
-?>
