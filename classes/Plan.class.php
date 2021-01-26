@@ -3,9 +3,9 @@
  * Class to manage subscription plans.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2010-2020 Lee Garner
+ * @copyright   Copyright (c) 2010-2021 Lee Garner
  * @package     subscription
- * @version     v1.0.0
+ * @version     v1.0.1
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -33,7 +33,7 @@ class Plan
 
     /** Duration type (day, month, year).
      * @var string */
-    private $duration_type = '';
+    private $duration_type = 'month';
 
     /** Group to which subscribers are automatically added.
      * @var integer */
@@ -74,10 +74,6 @@ class Plan
     /** Full text description.
      * @var string */
     private $description = '';
-
-    /** Profile type. TODO what is this?
-     * @var string */
-    private $prf_type = '';
 
     /** Indicator that the plan is available for purchase.
      * @var boolean */
@@ -131,6 +127,7 @@ class Plan
      * @var array */
     public $pricing = array();
 
+
     /**
      * Constructor.
      * Reads in the specified class, if $id is set.  If $id is zero,
@@ -153,23 +150,11 @@ class Plan
                 $this->item_id = '';
             }
         } else {
-            $this->short_description = '';
-            $this->description = '';
-            $this->price = 0;
-            $this->upg_price = 0;
-            $this->upg_extend_exp = 0;
-            $this->duration = 0;
-            $this->duration_type = 'month';
-            $this->expiration =  NULL;
             $this->enabled = (int)$_CONF_SUBSCR['enabled'];
             $this->show_in_block = (int)$_CONF_SUBSCR['show_in_block'];
             $this->taxable = (int)$_CONF_SUBSCR['taxable'];
-            $this->at_registration = 0;
-            //$this->views = 0;
             $this->grace_days = (int)$_CONF_SUBSCR['grace_days'];
             $this->early_renewal = (int)$_CONF_SUBSCR['early_renewal'];
-            $this->grp_access = 13;       // logged-in users
-            $this->pricing = array();
         }
     }
 
@@ -524,7 +509,7 @@ class Plan
      */
     public function Save($A = '')
     {
-        global $_TABLES;
+        global $_TABLES, $_CONF_SUBSCR;
 
         if (!$this->isNew) {
             // Save the original item ID by which this record was loaded
@@ -713,8 +698,7 @@ class Plan
      */
     public function Edit($id = '')
     {
-        global $_TABLES, $_CONF, $_CONF_SUBSCR, $LANG_SUBSCR,
-                $LANG24, $LANG_postmodes, $_SYSTEM;
+        global $_TABLES, $_CONF, $_CONF_SUBSCR, $LANG_SUBSCR;
 
         if ($id != '') {
             $id = COM_sanitizeID($id, false);
@@ -754,8 +738,7 @@ class Plan
 
         $T->set_var(array(
             'item_id'   => $id,
-            'short_description'   =>
-                            htmlspecialchars($this->short_description),
+            'short_description' => htmlspecialchars($this->short_description),
             'description'   => htmlspecialchars($this->description),
             'price'         => sprintf('%.2f', $this->price),
             'duration'      => $this->duration,
@@ -763,8 +746,10 @@ class Plan
             'early_renewal' => $this->early_renewal,
             'pi_admin_url'  => SUBSCR_ADMIN_URL,
             'pi_url'        => SUBSCR_URL,
-            'doc_url'       => SUBSCR_getDocURL('plan_form.html',
-                                            $_CONF['language']),
+            'doc_url'       => SUBSCR_getDocURL(
+                'plan_form.html',
+                $_CONF['language']
+            ),
             'ena_chk'       => $this->enabled == 1 ?
                                     ' checked="checked"' : '',
             'block_chk'     => $this->show_in_block == 1 ?
@@ -773,22 +758,34 @@ class Plan
                                     ' checked="checked"' : '',
             'sel_' . $this->duration_type => ' selected="selected"',
             'expiration'    => $this->expiration,
-            'addgroup_sel'  => COM_optionList($_TABLES['groups'],
-                            'grp_id,grp_name', $this->addgroup, 1, 'grp_id <> 1'),
+            'addgroup_sel'  => COM_optionList(
+                $_TABLES['groups'],
+                'grp_id,grp_name',
+                $this->addgroup,
+                1,
+                'grp_id <> 1'
+            ),
             'dur_type'      => $this->duration_type,
             'upg_no_selection' => $this->upg_from == '' ?
                         'selected="selected"' : '',
-            'upg_from_sel'  => COM_optionList($_TABLES['subscr_products'],
-                        'item_id,item_id', $this->upg_from, 1,
-                        "item_id <> '{$this->item_id}'" ),
+            'upg_from_sel'  => COM_optionList(
+                $_TABLES['subscr_products'],
+                'item_id,item_id',
+                $this->upg_from,
+                1,
+                "item_id <> '{$this->item_id}'"
+            ),
             'upg_ext_chk' => $this->upg_extend_exp == 1 ?
                         'checked="checked"' : '',
             'upg_from' => $this->upg_from,
             'upg_price' => sprintf('%.2f', $this->upg_price),
-            'prf_upd_chk' . $this->prf_update  => 'checked="checked"',
-            'prf_type' => $this->prf_type,
-            'group_options' => COM_optionList($_TABLES['groups'],
-                                'grp_id,grp_name', $this->grp_access, 1, 'grp_id <> 1'),
+            'group_options' => COM_optionList(
+                $_TABLES['groups'],
+                'grp_id,grp_name',
+                $this->grp_access,
+                1,
+                'grp_id <> 1'
+            ),
             'register_chk' => $this->at_registration ? 'checked="checked"' : '',
         ) );
 
@@ -1333,6 +1330,4 @@ class Plan
         return $retval;
     }
 
-}   // class Plan
-
-?>
+}
