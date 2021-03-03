@@ -127,6 +127,11 @@ class Plan
      * @var array */
     public $pricing = array();
 
+    /** Separator when showing multiple buttons.
+     * Normally buttons show on separate lines.
+     * @var string */
+    private $_btn_separator = '<br />';
+
 
     /**
      * Constructor.
@@ -497,6 +502,19 @@ class Plan
     public function upgradExtendsExp()
     {
         return $this->upg_extend_exp ? 1 : 0;
+    }
+
+
+    /**
+     * Set the separator to be used between purchase buttons.
+     *
+     * @param   string  $str    Separator string, default = `<br />`
+     * @return  object  $this
+     */
+    public function withButtonSeparator($str)
+    {
+        $this->_btn_separator = $str;
+        return $this;
     }
 
 
@@ -1023,9 +1041,10 @@ class Plan
                 $svc_msg
             );
             if ($status == PLG_RET_OK && is_array($output)) {
-                foreach ($output as $button) {
+                /*foreach ($output as $button) {
                     $retval .= $button . LB;
-                }
+            }*/
+                $retval = implode($this->_btn_separator, $output);
             }
         }
         return $retval;

@@ -3,8 +3,8 @@
 <hr />
 {!endif}
 <span style="font-weight:bold;">
-  <a href="{pi_url}/index.php?view=detail&item_id={item_id}">{short_dscp}</a>
+    <a href="{pi_url}/index.php?view=detail&item_id={item_id}">{short_dscp}</a>
 </span><br />
- {price} {currency}
- {purchase_btn}
+    {price} {currency}
+    {purchase_btn}
 {# end {templatelocation} #}
