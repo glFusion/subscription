@@ -5,7 +5,7 @@
  * @author      Lee Garner <lee@leegarner.com>
  * @copyright   Copyright (c) 2010-2021 Lee Garner
  * @package     subscription
- * @version     v1.0.1
+ * @version     v1.1.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -57,7 +57,7 @@ class Plan
 
     /** Group ID which is allowed to purchase this subscription.
      * @var integer */
-    private $grp_access = 0;
+    private $grp_access = 13;
 
     /** Subscription price.
      * @var float */
@@ -106,6 +106,14 @@ class Plan
     /** Rating score.
      * @var float */
     private $rating = 0;
+ 
+    /** Affiliate bonus duration, works with bonus_duration_type.
+     * @var integer */
+    private $bonus_duration = 0;
+    
+    /** Affiliate bonus duration type (day, month, year).
+     * @var string */
+    private $bonus_duration_type = 'month';
 
     /**
      * Should permissions be checked?
@@ -221,6 +229,8 @@ class Plan
         } else {
             $this->expiration = NULL;
         }
+        $this->bonus_duration = LGLIB_getVar($row, 'bonus_duration', 'integer', 0);
+        $this->bonus_duration_type = $row['bonus_duration_type'];
         //$this->views = $row['views'];
         //$this->views = 0;
         $this->addgroup = (int)$row['addgroup'];
@@ -427,6 +437,27 @@ class Plan
 
 
     /**
+     * Get the Referral Bonus amount
+     *
+     * @return  boolean     1 if has bonus, 0 if not
+     */
+    public function getBonusDuration()
+    {
+        return $this->bonus_duration;
+    }
+    
+    /**
+     * Get the referral bonus duration type (day, week, month, etc.)
+     *
+     * @return  string      Duration type
+     */
+    public function getBonusDurationType()
+    {
+        return $this->bonus_duration_type;
+    }
+    
+    
+    /**
      * Check if this plan has a fixed duration.
      *
      * @return  boolean     1 if fixed, 0 if not
@@ -611,13 +642,14 @@ class Plan
                 price = '$price',
                 duration = '{$this->duration}',
                 duration_type = '" . DB_escapeString($this->duration_type). "',
+                bonus_duration = '{$this->bonus_duration}',
+                bonus_duration_type = '" . DB_escapeString($this->bonus_duration_type). "',
                 expiration = $expiration,
                 enabled = '{$this->enabled}',
                 show_in_block = '{$this->show_in_block}',
                 taxable = '{$this->taxable}',
                 at_registration = '{$this->at_registration}',
                 trial_days = '{$this->trial_days}',
-                views = '0',
                 grace_days = '{$this->grace_days}',
                 early_renewal = '{$this->early_renewal}',
                 addgroup = '{$this->addgroup}',
@@ -760,6 +792,7 @@ class Plan
             'description'   => htmlspecialchars($this->description),
             'price'         => sprintf('%.2f', $this->price),
             'duration'      => $this->duration,
+            'bonus_duration' => $this->bonus_duration,
             'grace_days'    => $this->grace_days,
             'early_renewal' => $this->early_renewal,
             'pi_admin_url'  => SUBSCR_ADMIN_URL,
@@ -775,6 +808,7 @@ class Plan
             'taxable_chk'   => $this->taxable == 1 ?
                                     ' checked="checked"' : '',
             'sel_' . $this->duration_type => ' selected="selected"',
+            'sel_bonus_' . $this->bonus_duration_type => ' selected="selected"',
             'expiration'    => $this->expiration,
             'addgroup_sel'  => COM_optionList(
                 $_TABLES['groups'],
@@ -784,6 +818,7 @@ class Plan
                 'grp_id <> 1'
             ),
             'dur_type'      => $this->duration_type,
+            'bonus_duration_type' => $this->bonus_duration_type,
             'upg_no_selection' => $this->upg_from == '' ?
                         'selected="selected"' : '',
             'upg_from_sel'  => COM_optionList(
@@ -933,6 +968,8 @@ class Plan
                 'purchase_btn'  => $buttons,
                 'duration'      => $this->duration,
                 'duration_type' => $LANG_SUBSCR[$this->duration_type],
+                'bonus_duration' => $this->bonus_duration,
+                'bonus_duration_type' => $LANG_SUBSCR[$this->bonus_duration_type],
                 'expiration'    => $this->expiration,
         ) );
 
@@ -1158,6 +1195,7 @@ class Plan
                 'field' => 'edit',
                 'text' => $LANG_ADMIN['edit'],
                 'sort' => false,
+                'align' => 'center',
             ),
             array(
                 'field' => 'enabled',
@@ -1174,6 +1212,13 @@ class Plan
                 'field' => 'duration',
                 'text' => $LANG_SUBSCR['duration'],
                 'sort' => false,
+                'align' => 'center',
+            ),
+            array(
+                'field' => 'bonus_duration',
+                'text' => $LANG_SUBSCR['bonus_duration'],
+                'sort' => false,
+                'align' => 'center',
             ),
             array(
                 'field' => 'grp_name',
@@ -1194,6 +1239,7 @@ class Plan
                 'field' => 'subscriptions',
                 'text' => $LANG_SUBSCR['subscriptions'],
                 'sort' => true,
+                'align' => 'center',
             ),
             array(
                 'field' => 'delete',
@@ -1208,7 +1254,7 @@ class Plan
         $defsort_arr = array('field' => 'item_id', 'direction' => 'asc');
 
         $retval .= COM_startBlock(
-            $LANG_SUBSCR['admin_hdr'] . ' v' . $_CONF_SUBSCR['pi_version'],
+            $LANG_SUBSCR['admin_hdr'] . ' v' . $_CONF_SUBSCR['pi_version'], '',
             COM_getBlockTemplate('_admin_block', 'header')
         );
         $retval .= Menu::Admin('products');
@@ -1329,6 +1375,10 @@ class Plan
             }
             break;
 
+        case 'bonus_duration':
+            $retval = $fieldvalue . ' ' . $LANG_SUBSCR[$A['bonus_duration_type']];
+           break;
+          
         case 'subscriptions':
             $retval = (int)DB_count(
                 $_TABLES['subscr_subscriptions'],

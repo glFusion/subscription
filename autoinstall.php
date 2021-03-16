@@ -5,7 +5,7 @@
  * @author      Lee Garner <lee@leegarner.com>
  * @copyright   Copyright (c) 2010 Lee Garner
  * @package     subscription
- * @version     v0.0.1
+ * @version     v1.1.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -60,6 +60,18 @@ $INSTALL_plugin['subscription'] = array(
         'table' => $_TABLES['subscr_subscriptions'],
         'sql' => $_SQL['subscr_subscriptions'],
     ),
+    
+    array(
+        'type' => 'table',
+        'table' => $_TABLES['subscr_history'],
+        'sql' => $_SQL['subscr_history'],
+    ),
+    
+    array(
+        'type' => 'table',
+        'table' => $_TABLES['subscr_referrals'],
+        'sql' => $_SQL['subscr_referrals'],
+    ),
 
     array(
         'type' => 'feature',
@@ -77,7 +89,7 @@ $INSTALL_plugin['subscription'] = array(
 
     array(
         'type' => 'mapping',
-        'group' => 1,
+        'findgroup' => 'Root',
         'feature' => 'admin_feature_id',
         'log' => 'Adding Admin feature to the admin group',
     ),

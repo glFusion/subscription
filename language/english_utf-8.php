@@ -5,7 +5,7 @@
  * @author      Lee Garner <lee@leegarner.com>
  * @copyright   Copyright (c) 2010-2020 Lee Garner
  * @package     subscription
- * @version     v1.0.0
+ * @version     v1.1.0
  * @license     http://opensource.org/licenses/gpl-2.0.php 
  *              GNU Public License v2 or later
  * @filesource
@@ -32,6 +32,8 @@ $LANG_SUBSCR = array(
 'description'   => 'Description',
 'duration'      => 'Duration',
 'duration_type' => 'Duration Period',
+'bonus_duration'      => 'Referral Bonus',
+'bonus_duration_type' => 'Referral Bonus Period',
 'price'         => 'Price',
 'disc_price'    => 'Discounted Price',
 'before_exp'    => 'before expiration',
@@ -55,6 +57,7 @@ $LANG_SUBSCR = array(
 'canceled'      => 'Canceled',
 'active'        => 'Active',
 'status'        => 'Status',
+'status_txt'    => array( 0 => 'Enabled', 1 => 'Canceled', 2 => 'Expired' ),
 'subscribe'     => 'Subscribe',
 'subscriber'    => 'Subscriber',
 'amount'        => 'Amount Paid',
@@ -122,6 +125,7 @@ $LANG_SUBSCR = array(
 'your_current_subs' => 'Your current subscriptions',
 'all_plans'     => 'All Plans',
 'show_exp'      => 'Show Expired',
+'show_can'      => 'Show Canceled',
 'msg_toggle'    => 'Item has been %s',
 'msg_unchanged' => 'Item was not changed',
 'tt_view_subscribers' => 'Click to view subscribers',

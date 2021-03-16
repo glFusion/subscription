@@ -5,7 +5,7 @@
  * @author      Lee Garner <lee@leegarner.com>
  * @copyright   Copyright (c) 2009-2020 Lee Garner <lee@leegarner.com>
  * @package     subscription
- * @version     v1.0.0
+ * @version     v1.1.0
  * @license     http://opensource.org/licenses/gpl-2.0.php 
  *              GNU Public License v2 or later
  * @filesource
@@ -94,6 +94,12 @@ function SUBSCR_do_upgrade($dvlp=false)
         if (!SUBSCR_do_upgrade_sql($current_ver, $dvlp)) return false;
         if (!SUBSCR_do_set_version($current_ver)) return false;
     }
+    
+    if (!COM_checkVersion($current_ver, '1.1.0')) {
+        $current_ver = '1.1.0';
+        if (!SUBSCR_do_upgrade_sql($current_ver, $dvlp)) return false;
+        if (!SUBSCR_do_set_version($current_ver)) return false;
+    }
 
     // Update the plugin configuration
     USES_lib_install();
@@ -127,9 +133,9 @@ function SUBSCR_do_upgrade_sql($version='', $ignore_errors=false)
     global $_TABLES, $_CONF_SUBSCR, $SUBSCR_UPGRADE;
 
     // If no sql statements passed in, return success
-    if (!isset($_SUBSCR_UPGRADE[$version]) ||
-            is_array($SUBSCR_UPGRADE[$version])) {
-        return true;
+    if (!isset($SUBSCR_UPGRADE[$version]) || 
+        !is_array($SUBSCR_UPGRADE[$version])) {   
+            return true;
     }
 
     // Execute SQL now to perform the upgrade
