@@ -323,7 +323,7 @@ class Subscription
      * @param   string  $item_id    Plan ID
      * @return  object      Subscription object
      */
-    public static function getInstance($uid, $item_id='' )
+    public static function getInstance($uid, $item_id='')
     {
         global $_TABLES;
 
@@ -336,7 +336,7 @@ class Subscription
         }
         // Get the most recent subscription. Note this will need to be tweaked 
         //  when/if the site allows multiple active subscriptions per user
-        $sql .= " ORDER BY expiration LIMIT 1";
+        $sql .= ' ORDER BY expiration DESC LIMIT 1';
         $res = DB_query($sql);
         if ($res && DB_numRows($res) == 1) {
             $A = DB_fetchArray($res, false);

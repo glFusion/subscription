@@ -74,6 +74,12 @@ $INSTALL_plugin['subscription'] = array(
     ),
 
     array(
+        'type' => 'table',
+        'table' => $_TABLES['subscr_history'],
+        'sql' => $_SQL['subscr_history'],
+    ),
+
+    array(
         'type' => 'feature',
         'feature' => 'subscription.admin',
         'desc' => 'Ability to administer the Subscriptions plugin',

@@ -172,6 +172,15 @@ function service_handlePurchase_subscription($args, &$output, &$svc_msg)
     if ($P->isNew()) {
         return PLG_RET_ERROR;
     }
+    $upgrade = false;
+    $ref_code = '';
+    if (isset($id_parts[2])) {
+        if ($id_parts[2] == 'upgrade') {
+            $upgrade = true;
+        } else {
+            $ref_code = $id_parts[2];
+        }
+    }
     $upgrade = isset($id_parts[2]) && $id_parts[2] == 'upgrade' ? true : false;
     $amount = (float)$ipn_data['pmt_gross'];
 
@@ -209,21 +218,20 @@ function service_handlePurchase_subscription($args, &$output, &$svc_msg)
                 ->withTxnID($txn_id)
                 ->withPrice($amount)
                 ->Add();
-    
     if ($status) {
-      // Handle referrals
-      if (isset($args['referrer']) && is_array($args['referrer'])) {
-        $ref_uid = LGLIB_getVar($args['referrer'], 'ref_uid', 'integer');
-        $ref_token = LGLIB_getVar($args['referrer'], 'ref_token');
-      }
-      if ($ref_uid > 0) {
-        // update the referrer's subscription or other action
-        $R = Subscription\Subscription::getInstance($ref_uid);
-        if( date('Y-m-d') <= $S->getExpiration()  ) { // is subscription still valid
-          COM_errorLog("Processing affiliate bonus for user {$ref_uid} for purchase by user {$uid} of item {$product_id}");
-          $status = $R->AddBonus($S);
+        // Handle referrals
+        if (isset($args['referrer']) && is_array($args['referrer'])) {
+            $ref_uid = LGLIB_getVar($args['referrer'], 'ref_uid', 'integer');
+            $ref_token = LGLIB_getVar($args['referrer'], 'ref_token');
         }
-      }
+        if ($ref_uid > 0) {
+            // update the referrer's subscription or other action
+            $R = Subscription\Subscription::getInstance($ref_uid);
+            if (date('Y-m-d') <= $S->getExpiration()) {    // is subscription still valid
+                COM_errorLog("Processing affiliate bonus for user {$ref_uid} for purchase by user {$uid} of item {$product_id}");
+                $status = $R->AddBonus($S);
+            }
+        }
     }      
     return $status == true ? PLG_RET_OK : PLG_RET_ERROR;
 }

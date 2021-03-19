@@ -1254,8 +1254,7 @@ class Plan
         $defsort_arr = array('field' => 'item_id', 'direction' => 'asc');
 
         $retval .= COM_startBlock(
-            $LANG_SUBSCR['admin_hdr'] . ' v' . $_CONF_SUBSCR['pi_version'], '',
-            COM_getBlockTemplate('_admin_block', 'header')
+            $LANG_SUBSCR['admin_hdr'] . ' v' . $_CONF_SUBSCR['pi_version']
         );
         $retval .= Menu::Admin('products');
         $retval .= COM_createLink(
