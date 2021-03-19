@@ -39,7 +39,7 @@ $expected = array(
     'saveproduct', 'deleteproduct',
     'savesubscription', 'deletesubscription',
     'renewbutton_x', 'cancelbutton_x',
-    'resetratings',
+    'resetratings', 'test',
     // Views
     'editproduct', 'products', 'subscriptions',
     'editsubscrip',
@@ -51,7 +51,7 @@ foreach($expected as $provided) {
         $actionval = $_POST[$provided];
         break;
     } elseif (isset($_GET[$provided])) {
-    	$action = $provided;
+    	  $action = $provided;
         $actionval = $_GET[$provided];
         break;
     }
@@ -182,6 +182,42 @@ case 'editsubscrip':
     $content .= $S->Edit();
     break;
 
+case 'test':
+    $ipn_data =  array(
+        'sql_date' => '2021-03-12',                 // SQL-formatted date string, site timezone
+        'uid' => 5,                                 // user ID to receive credit
+        'pmt_gross' => 99.99,                       // gross amount paid
+        'txn_id' => '',                             // transaction ID
+        'gw_name' => '',                            // payment gateway short name, e.g. "paypal"
+        'memo' => '',                               // misc. comment
+        'first_name' => 'Test',                     // payer's first name
+        'last_name' => 'User01',                    // payer's last name
+        'payer_name' => 'Test User01',              // payer's full name
+        'payer_email' => 'testuser01@example.com',  // payer's email address
+        'custom' => array(                          // backward compatibility for plugins
+        'uid' => 5,
+    ),
+    'data' => array(),    // actual complete notification payload
+    );
+    $args = array(
+        'item'  => array(
+            'item_id' => 'subscription:test',   // actual item ID (plugin:item_id)
+            'quantity' => 1,                    // quantity sold
+            'name' => 'test',                   // short description or SKU,
+            'price' => 99.99,                   // unit price
+            'paid' => 99.99,                    // amount paid
+            'order_id' => 1,                    // Shop order number,
+        ),
+        'ipn_data' => $ipn_data,
+        'referrer' => array(
+            'ref_uid' => 3,             // the referring user's glFusion ID
+            'ref_token' => 'tokenhere', // the referral token (affiliate ID),
+        )
+    );
+    service_handlePurchase_subscription( $args, $output, $svc_msg );
+    $content .= Subscription\Subscription::adminList( 0 );
+    break;
+    
 case 'products':
 default:
     $content .= Subscription\Plan::adminList();

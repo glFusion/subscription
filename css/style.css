@@ -7,11 +7,15 @@
 }
 
 .expired {
-    background-color: #FF9999;
+    background-color: #F5B7B1;
 }
 
 .ingrace {
-    background-color: #FFFF99;
+    background-color: #AED6F1;
+}
+
+.canceled {
+    background-color: #F9E79F;
 }
 
 .subscriptionForm label {

@@ -5,7 +5,7 @@
  * @author      Lee Garner <lee@leegarner.com>
  * @copyright   Copyright (c) 2010-2020 Lee Garner
  * @package     subscription
- * @version     v1.0/0
+ * @version     v1.1.0
  * @license     http://opensource.org/licenses/gpl-2.0.php 
  *              GNU Public License v2 or later
  * @filesource
@@ -25,6 +25,8 @@ $_SQL['subscr_products'] =
   `price` decimal(5,2) unsigned DEFAULT NULL,
   `duration` int(5) DEFAULT NULL,
   `duration_type` varchar(10) NOT NULL DEFAULT 'month',
+  `bonus_duration` INT(5) NOT NULL,
+  `bonus_duration_type` VARCHAR(10) NOT NULL,
   `expiration` date DEFAULT NULL,
   `grace_days` int(5) NOT NULL DEFAULT '0',
   `early_renewal` int(5) unsigned DEFAULT '0',
@@ -72,6 +74,17 @@ $_SQL['subscr_history'] =
   KEY `subscr_userid` (`uid`)
 ) ENGINE=MyISAM";
 
+$_SQL['subscr_referrals'] = 
+"CREATE TABLE `gl_subscr_referrals` (
+    `id` int(13) NOT NULL AUTO_INCREMENT,
+    `referrer` mediumint(8) unsigned NOT NULL,
+    `subscription_id` int(11) unsigned NOT NULL,
+    `purchase_date` datetime DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    KEY `affiliate` (`referrer`),
+    KEY `subscription_id` (`subscription_id`) USING BTREE
+    ) ENGINE=MyISAM";
+    
 
 $SUBSCR_UPGRADE = array(
 '0.1.1' => array(
@@ -134,7 +147,7 @@ $SUBSCR_UPGRADE = array(
         CHANGE group_id grp_access mediumint(8) unsigned NOT NULL DEFAULT 13,
         DROP owner_id, DROP perm_owner, DROP perm_group, DROP perm_members, DROP perm_anon",
     // add subscr_history table creation if it doesn't exist
-    "CREATE TABLE IF NOT EXIST {$_TABLES['subscr_history']} (
+    "CREATE TABLE IF NOT EXISTS {$_TABLES['subscr_history']} (
         `id` int(11) NOT NULL auto_increment,
         `item_id` varchar(128) NOT NULL,
         `uid` int(11) unsigned NOT NULL default '0',
@@ -148,17 +161,44 @@ $SUBSCR_UPGRADE = array(
         KEY `subscr_userid` (`uid`)
         ) ENGINE=MyISAM",
     ),
-    '0.2.2' => array(
-        // idempotent since 2 is no longer a valid option
+'0.2.2' => array(
+    // idempotent since 2 is no longer a valid option
     "UPDATE {$_TABLES['subscr_products']}
-        SET at_registration = 1 WHERE at_registration = 2",
+      SET at_registration = 1 WHERE at_registration = 2",
     ),
-    '1.0.0' => array(
-        "ALTER TABLE {$_TABLES['subscr_products']} DROP views",
-        "ALTER TABLE {$_TABLES['subscr_products']} DROP buttons",
-        "ALTER TABLE {$_TABLES['subscr_products']} DROP prf_update",
-        "ALTER TABLE {$_TABLES['subscr_products']} DROP prf_type",
-        "ALTER TABLE {$_TABLES['subscr_products']} DROP dt_add",
+'1.0.0' => array(
+    "ALTER TABLE {$_TABLES['subscr_products']} DROP views",
+    "ALTER TABLE {$_TABLES['subscr_products']} DROP buttons",
+    "ALTER TABLE {$_TABLES['subscr_products']} DROP prf_update",
+    "ALTER TABLE {$_TABLES['subscr_products']} DROP prf_type",
+    "ALTER TABLE {$_TABLES['subscr_products']} DROP dt_add",
+    ),
+'1.1.0' => array (
+    "ALTER TABLE {$_TABLES['subscr_products']} ADD `bonus_duration` INT(5) NOT NULL AFTER `duration_type`",
+    "ALTER TABLE {$_TABLES['subscr_products']} ADD `bonus_duration_type` VARCHAR(10) NOT NULL DEFAULT 'month' AFTER `bonus_duration`",
+    "CREATE TABLE IF NOT EXISTS {$_TABLES['subscr_referrals']} (
+        `id` int(13) NOT NULL AUTO_INCREMENT,
+        `referrer` mediumint(8) unsigned NOT NULL,
+        `subscription_id` int(11) unsigned NOT NULL,
+        `purchase_date` datetime DEFAULT NULL,
+        PRIMARY KEY (`id`),
+        KEY `affiliate` (`referrer`),
+        KEY `subscription_id` (`subscription_id`) USING BTREE
+        ) ENGINE=MyISAM",
+      // add subscr_history table creation if it doesn't exist
+    "CREATE TABLE IF NOT EXISTS {$_TABLES['subscr_history']} (
+        `id` int(11) NOT NULL auto_increment,
+        `item_id` varchar(128) NOT NULL,
+        `uid` int(11) unsigned NOT NULL default '0',
+        `txn_id` varchar(255) default '',
+        `purchase_date` datetime default NULL,
+        `expiration` datetime default NULL,
+        `price` float(10,2) NOT NULL default '0.00',
+        `notes` text,
+        PRIMARY KEY  (`id`),
+        KEY `subscr_itemid` (`item_id`),
+        KEY `subscr_userid` (`uid`)
+        ) ENGINE=MyISAM",
     ),
 );
 

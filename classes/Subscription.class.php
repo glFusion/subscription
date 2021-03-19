@@ -5,7 +5,7 @@
  * @author      Lee Garner <lee@leegarner.com>
  * @copyright   Copyright (c) 2010-2020 Lee Garner
  * @package     subscription
- * @version     v1.0.1
+ * @version     v1.1.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -20,7 +20,7 @@ namespace Subscription;
 class Subscription
 {
     const STATUS_ENABLED = 0;
-    const STATUS_CANCELE = 1;
+    const STATUS_CANCELED = 1;
     const STATUS_EXPIRED = 2;
 
     /** Subscription record ID.
@@ -124,6 +124,28 @@ class Subscription
     }
 
 
+    /**
+     * Get the subscription ID
+     *
+     * @return  int     The subscription ID
+     */
+    public function getID()
+    {
+      return $this->id;
+    }
+    
+    
+    /**
+     * Get the plan ID from the subsciption
+     *
+     * @return  string      the Plan ID
+     */
+    public function getitemID()
+    {
+      return $this->item_id;
+    }
+    
+    
     /**
      * Get the expiration date.
      *
@@ -301,14 +323,20 @@ class Subscription
      * @param   string  $item_id    Plan ID
      * @return  object      Subscription object
      */
-    public static function getInstance($uid, $item_id)
+    public static function getInstance($uid, $item_id='' )
     {
         global $_TABLES;
 
         $uid = (int)$uid;
-        $item_id= DB_escapeString($item_id);
         $sql = "SELECT * FROM {$_TABLES['subscr_subscriptions']}
-            WHERE uid='{$uid}' AND item_id = '{$item_id}'";
+            WHERE uid='{$uid}'";
+        if (!empty($item_id)) {
+            $item_id= DB_escapeString($item_id);
+            $sql .= " AND item_id = '{$item_id}'";
+        }
+        // Get the most recent subscription. Note this will need to be tweaked 
+        //  when/if the site allows multiple active subscriptions per user
+        $sql .= " ORDER BY expiration LIMIT 1";
         $res = DB_query($sql);
         if ($res && DB_numRows($res) == 1) {
             $A = DB_fetchArray($res, false);
@@ -526,6 +554,60 @@ class Subscription
             purchase_date = '" . $this->dt->toMySQL() . "',
             expiration = '{$this->expiration}',
             price = '$price'";
+        DB_query($sql, 1);
+    }
+    
+    
+    /**
+     * Add referrer bonus based on provided plan id
+     *
+     * @param   obj   $S      The subscription that was purchased
+     * @uses    AddReferral()
+     * @return  boolean     True on successful update, False on error
+     */
+    public function AddBonus($S)
+    {
+        global $_TABLES;
+      
+        // Get the product information for this subscription
+        $P = Plan::getInstance($S->getItemID());
+      
+        if ($P->getBonusDuration() == 0) {  // if no duration, no bonus
+            return true;
+        }
+      
+        $expiration = "'{$this->expiration}' + INTERVAL {$P->getBonusDuration()} {$P->getBonusDurationType()}";
+      
+        $sql = "UPDATE {$_TABLES['subscr_subscriptions']}
+                SET expiration = {$expiration}
+                WHERE id = '{$this->id}'";
+      
+        //COM_errorLog($sql);
+        DB_query($sql, 1);     // Execute event record update
+        if (DB_error()) {
+            COM_errorLog(__METHOD__ . "() SQL error: $sql");
+            $status = false;
+        } else {
+            $this->AddReferral($S->getID());
+            Cache::clear('subscriptions');
+            $status = true;
+        }
+        return $status;
+    }
+    
+    /**
+     * Add a referral record.
+     *
+     * @param   int     $sub_id        The id of the subscription generating referral
+     */
+    public function AddReferral($sub_id)
+    {
+        global $_TABLES;
+      
+        $sql = "INSERT INTO {$_TABLES['subscr_referrals']} SET
+                referrer = '{$this->uid}',
+                subscription_id = {$sub_id},
+                purchase_date = NOW()";
         DB_query($sql, 1);
     }
 
@@ -746,15 +828,82 @@ class Subscription
         Cache::clearGroup($this->Plan->getSubGroup(), $this->uid);
         USER_delGroup($this->Plan->getSubGroup(), $this->uid);
 
-        // Delete the subscription and log the activity
-        DB_delete($_TABLES['subscr_subscriptions'], 'id', $this->id);
-        SUBSCR_auditLog("Cancelled subscription $this->id ({$this->Plan->getID()}) " .
-                "for user {$this->uid} (" .COM_getDisplayName($this->uid) . '), expiring ' .
-                $this->expiration, $system);
+        // Mark the subscription as canceled and log the activity
+        $sql = "UPDATE {$_TABLES['subscr_subscriptions']} SET status='".self::STATUS_CANCELED."'
+                WHERE id='{$this->id}'";
+        DB_query($sql, 1);
+        SUBSCR_auditLog("Canceled subscription $this->id ({$this->Plan->getID()}) " .
+                        "for user {$this->uid} (" .COM_getDisplayName($this->uid) . ')', $system);
         return true;
     }
 
 
+    /**
+     * Mark a subscription as expired by user and plan ID.
+     * If $system is true, then a user's name won't be logged with the message
+     * to avoid confusion.
+     *
+     * @uses    self:_doExpire()
+     * @param   integer $uid        User ID to expire
+     * @param   string  $item_id    Plan ID to expire for the user
+     * @param   boolean $system     True if this is a system action.
+     * @return  boolean             True on success, False on failure
+     */
+    public static function Expire($uid, $item_id, $system=false)
+    {
+        $Sub = self::getInstance($uid, $item_id);
+        return $Sub->_doExpire($system);
+    }
+    
+    
+    /**
+     * Mark a subscription as expired by subscription ID.
+     * If $system is true, then a user's name won't be logged with the message
+     * to avoid confusion.
+     *
+     * @uses    selff:_doExpire()
+     * @param   integer $sub_id     Database ID of the subscription to mark as expired
+     * @param   boolean $system     True if this is a system action.
+     * @return  boolean             True on success, False on failure
+     */
+    public static function ExpireByID($sub_id, $system=false)
+    {
+        $Sub = new self($sub_id);
+        return $Sub->_doExpire($system);
+    }
+    
+    
+    /**
+     * Actually perform the functions to mark a subscription as expired.
+     *
+     * @see     self::Expire()
+     * @see     self::ExpireByID()
+     * @param   boolean $system     True if this is a system cancellation
+     * @return  boolean             True on success, False on failure
+     */
+    private function _doExpire($system = false)
+    {
+        global $_TABLES;
+      
+        if ($this->isNew) return false;
+      
+        // Remove the subscriber from the subscription group
+        USES_lib_user();
+        SUBSCR_debug("Removing user {$this->uid} from {$this->Plan->getSubGroup()}");
+        Cache::clearGroup($this->Plan->getSubGroup(), $this->uid);
+        USER_delGroup($this->Plan->getSubGroup(), $this->uid);
+      
+        // Mark the subscription as expired and log the activity
+        $sql = "UPDATE {$_TABLES['subscr_subscriptions']} SET status='".self::STATUS_EXPIRED."'
+                WHERE id='{$this->id}'";
+        DB_query($sql, 1);
+        SUBSCR_auditLog("Marked subscription $this->id ({$this->Plan->getID()}) as expired " .
+                        "for user {$this->uid} (" .COM_getDisplayName($this->uid) . '), expiring ' .
+                        $this->expiration, $system);
+        return true;
+    }
+    
+    
     /**
      * Get the product name associated with this subscription.
      *
@@ -853,6 +1002,13 @@ class Subscription
                 'field' => 'expiration',
                 'text' => $LANG_SUBSCR['expires'],
                 'sort' => true,
+                'align' => 'center',
+            ),
+            array(
+                'field' => 'status',
+                'text' => $LANG_SUBSCR['status'],
+                'sort' => true,
+                'align' => 'center',
             ),
         );
 
@@ -905,14 +1061,18 @@ class Subscription
                 . '/>&nbsp;' . $LANG_SUBSCR['renew'],
         );
 
+        $exp_query = ' AND s.status IN (' . self::STATUS_ENABLED;
         if (isset($_POST['showexp'])) {
-            $frmchk = 'checked="checked"';
-            $exp_query = '';
-        } else {
-            $frmchk = '';
-            $exp_query = ' AND s.status = ' . self::STATUS_ENABLED;
+          $frmchk = 'checked="checked"';
+          $exp_query .= ','.  self::STATUS_EXPIRED;;
         }
-
+        
+        if (isset($_POST['showcan'])) {
+          $canfrmchk = 'checked="checked"';
+          $exp_query .= ',' . self::STATUS_CANCELED;;
+        }
+        $exp_query .= ')';
+        
         $query_arr = array('table' => 'subscr_subscriptions',
             'sql' => "SELECT s.*, p.item_id as plan, u.username, u.fullname
                 FROM {$_TABLES['subscr_subscriptions']} s
@@ -933,8 +1093,11 @@ class Subscription
             '</option>' .
             COM_optionList($_TABLES['subscr_products'], "item_id,item_id", $item_id) .
             '</select>';
-        $filter = $plans . '&nbsp;<input type="checkbox" name="showexp" ' . $frmchk .
-            ' onclick="javascript:submit();"> ' . $LANG_SUBSCR['show_exp'] . '?<br />';
+        $filter = $plans . 
+            '&nbsp;&nbsp;<input type="checkbox" name="showexp" ' . $frmchk .
+            ' onclick="javascript:submit();"> ' . $LANG_SUBSCR['show_exp'] . '?'.
+            '&nbsp;&nbsp;<input type="checkbox" name="showcan" ' . $canfrmchk .
+            ' onclick="javascript:submit();"> ' . $LANG_SUBSCR['show_can'] . '? <br />';
         $form_arr = array(
         //    'top' => '<input type="checkbox" name="showexp"> Show expired?'
         );
@@ -992,13 +1155,19 @@ class Subscription
             break;
 
         case 'expiration':
-            if ($A['status'] > self::STATUS_ENABLED) {
+            if ($A['status'] == self::STATUS_EXPIRED) {
                 $retval = '<span class="expired">' . $fieldvalue . '</span>';
+            } elseif ($A['status'] == self::STATUS_CANCELED) {
+                $retval = '<span class="canceled">' . $fieldvalue . '</span>';
             } elseif ($fieldvalue < date('Y-m-d')) {
                 $retval .= '<span class="ingrace">' . $fieldvalue . '</span>';
             } else {
                 $retval = $fieldvalue;
             }
+            break;
+            
+        case 'status':
+            $retval = $LANG_SUBSCR['status_txt'][$A['status']];
             break;
 
         default:

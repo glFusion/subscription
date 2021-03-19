@@ -5,7 +5,7 @@
  * @author      Lee Garner <lee@leegarner.com>
  * @copyright   Copyright (c) 2010-2021 Lee Garner
  * @package     subscription
- * @version     v1.0.1
+ * @version     v1.1.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -251,6 +251,8 @@ function plugin_autouninstall_subscription()
         'tables' => array(
             'subscr_products',
             'subscr_subscriptions',
+            'subscr_history',
+            'subscr_referrals',
         ),
         'groups' => array(
             $_CONF_SUBSCR['pi_name'] . ' Admin',
@@ -608,7 +610,7 @@ function plugin_getheadercss_subscription()
 /**
  * Perform scheduled functions, such as notifications and cancellations.
  *
- * @uses    Subscription::Cancel()
+ * @uses    Subscription::Expire()
  * @uses    SUBSCR_notifyExpiration()
  */
 function plugin_runScheduledTask_subscription()
@@ -626,7 +628,7 @@ function plugin_runScheduledTask_subscription()
     $r = DB_query($sql);
     if ($r) {
         while ($row = DB_fetchArray($r, false)) {
-            \Subscription\Subscription::Cancel($row['uid'], $row['item_id'], true);
+            \Subscription\Subscription::Expire($row['uid'], $row['item_id'], true);
         }
     }
 
