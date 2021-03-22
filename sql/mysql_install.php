@@ -41,6 +41,7 @@ $_SQL['subscr_products'] =
   `upg_extend_exp` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `trial_days` int(3) unsigned NOT NULL DEFAULT '0',
   `grp_access` mediumint(8) NOT NULL DEFAULT '13',
+  `dt_add` int(11) unsigned NOT NULL DEFAULT UNIX_TIMESTAMP(),
   PRIMARY KEY (`item_id`)
 ) ENGINE=MyISAM";
 
@@ -174,6 +175,7 @@ $SUBSCR_UPGRADE = array(
     "ALTER TABLE {$_TABLES['subscr_products']} DROP dt_add",
     ),
 '1.1.0' => array (
+    "ALTER TABLE {$_TABLES['subscr_products']} ADD `dt_add` int(11) unsigned NOT NULL DEFAULT UNIX_TIMESTAMP() AFTER `grp_access`",
     "ALTER TABLE {$_TABLES['subscr_products']} ADD `bonus_duration` INT(5) NOT NULL AFTER `duration_type`",
     "ALTER TABLE {$_TABLES['subscr_products']} ADD `bonus_duration_type` VARCHAR(10) NOT NULL DEFAULT 'month' AFTER `bonus_duration`",
     "CREATE TABLE IF NOT EXISTS {$_TABLES['subscr_referrals']} (
