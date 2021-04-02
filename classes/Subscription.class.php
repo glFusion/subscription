@@ -133,8 +133,8 @@ class Subscription
     {
       return $this->id;
     }
-    
-    
+
+
     /**
      * Get the plan ID from the subsciption
      *
@@ -144,8 +144,8 @@ class Subscription
     {
       return $this->item_id;
     }
-    
-    
+
+
     /**
      * Get the expiration date.
      *
@@ -329,12 +329,13 @@ class Subscription
 
         $uid = (int)$uid;
         $sql = "SELECT * FROM {$_TABLES['subscr_subscriptions']}
-            WHERE uid='{$uid}'";
+            WHERE uid = {$uid}";
+
         if (!empty($item_id)) {
             $item_id= DB_escapeString($item_id);
             $sql .= " AND item_id = '{$item_id}'";
         }
-        // Get the most recent subscription. Note this will need to be tweaked 
+        // Get the most recent subscription. Note this will need to be tweaked
         //  when/if the site allows multiple active subscriptions per user
         $sql .= ' ORDER BY expiration DESC LIMIT 1';
         $res = DB_query($sql);
@@ -556,8 +557,8 @@ class Subscription
             price = '$price'";
         DB_query($sql, 1);
     }
-    
-    
+
+
     /**
      * Add referrer bonus based on provided plan id
      *
@@ -568,20 +569,18 @@ class Subscription
     public function AddBonus($S)
     {
         global $_TABLES;
-      
+
         // Get the product information for this subscription
         $P = Plan::getInstance($S->getItemID());
-      
+
         if ($P->getBonusDuration() == 0) {  // if no duration, no bonus
             return true;
         }
-      
+
         $expiration = "'{$this->expiration}' + INTERVAL {$P->getBonusDuration()} {$P->getBonusDurationType()}";
-      
         $sql = "UPDATE {$_TABLES['subscr_subscriptions']}
                 SET expiration = {$expiration}
                 WHERE id = '{$this->id}'";
-      
         //COM_errorLog($sql);
         DB_query($sql, 1);     // Execute event record update
         if (DB_error()) {
@@ -594,7 +593,7 @@ class Subscription
         }
         return $status;
     }
-    
+
     /**
      * Add a referral record.
      *
@@ -603,7 +602,7 @@ class Subscription
     public function AddReferral($sub_id)
     {
         global $_TABLES;
-      
+
         $sql = "INSERT INTO {$_TABLES['subscr_referrals']} SET
                 referrer = '{$this->uid}',
                 subscription_id = {$sub_id},
@@ -854,8 +853,8 @@ class Subscription
         $Sub = self::getInstance($uid, $item_id);
         return $Sub->_doExpire($system);
     }
-    
-    
+
+
     /**
      * Mark a subscription as expired by subscription ID.
      * If $system is true, then a user's name won't be logged with the message
@@ -871,8 +870,8 @@ class Subscription
         $Sub = new self($sub_id);
         return $Sub->_doExpire($system);
     }
-    
-    
+
+
     /**
      * Actually perform the functions to mark a subscription as expired.
      *
@@ -884,15 +883,15 @@ class Subscription
     private function _doExpire($system = false)
     {
         global $_TABLES;
-      
+
         if ($this->isNew) return false;
-      
+
         // Remove the subscriber from the subscription group
         USES_lib_user();
         SUBSCR_debug("Removing user {$this->uid} from {$this->Plan->getSubGroup()}");
         Cache::clearGroup($this->Plan->getSubGroup(), $this->uid);
         USER_delGroup($this->Plan->getSubGroup(), $this->uid);
-      
+
         // Mark the subscription as expired and log the activity
         $sql = "UPDATE {$_TABLES['subscr_subscriptions']} SET status='".self::STATUS_EXPIRED."'
                 WHERE id='{$this->id}'";
@@ -902,8 +901,8 @@ class Subscription
                         $this->expiration, $system);
         return true;
     }
-    
-    
+
+
     /**
      * Get the product name associated with this subscription.
      *
@@ -1065,14 +1064,18 @@ class Subscription
         if (isset($_POST['showexp'])) {
           $frmchk = 'checked="checked"';
           $exp_query .= ','.  self::STATUS_EXPIRED;;
+        } else {
+            $frmchk = '';
         }
-        
+
         if (isset($_POST['showcan'])) {
-          $canfrmchk = 'checked="checked"';
-          $exp_query .= ',' . self::STATUS_CANCELED;;
+            $canfrmchk = 'checked="checked"';
+            $exp_query .= ',' . self::STATUS_CANCELED;;
+        } else {
+            $canfrmchk = '';
         }
         $exp_query .= ')';
-        
+
         $query_arr = array('table' => 'subscr_subscriptions',
             'sql' => "SELECT s.*, p.item_id as plan, u.username, u.fullname
                 FROM {$_TABLES['subscr_subscriptions']} s
@@ -1093,7 +1096,7 @@ class Subscription
             '</option>' .
             COM_optionList($_TABLES['subscr_products'], "item_id,item_id", $item_id) .
             '</select>';
-        $filter = $plans . 
+        $filter = $plans .
             '&nbsp;&nbsp;<input type="checkbox" name="showexp" ' . $frmchk .
             ' onclick="javascript:submit();"> ' . $LANG_SUBSCR['show_exp'] . '?'.
             '&nbsp;&nbsp;<input type="checkbox" name="showcan" ' . $canfrmchk .
@@ -1165,7 +1168,7 @@ class Subscription
                 $retval = $fieldvalue;
             }
             break;
-            
+
         case 'status':
             $retval = $LANG_SUBSCR['status_txt'][$A['status']];
             break;

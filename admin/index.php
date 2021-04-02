@@ -51,7 +51,7 @@ foreach($expected as $provided) {
         $actionval = $_POST[$provided];
         break;
     } elseif (isset($_GET[$provided])) {
-    	  $action = $provided;
+        $action = $provided;
         $actionval = $_GET[$provided];
         break;
     }
