@@ -684,7 +684,10 @@ class Subscription
         }
 
         $T = new \Template(SUBSCR_PI_PATH . '/templates');
-        $T->set_file('subscription', 'subscription_form.thtml');
+        $T->set_file(array(
+            'subscription' => 'subscription_form.thtml',
+            'tooltipster' => 'tooltipster.thtml',
+        ) );
         if ($id > 0) {
             $retval = COM_startBlock($LANG_SUBSCR['edit'] . ': ' . $this->name);
         } else {
@@ -709,6 +712,7 @@ class Subscription
                         'item_id,item_id', $this->item_id, 1),
         ) );
 
+        $T->parse('tooltipster_js', 'tooltipster');
         $retval .= $T->parse('output', 'subscription');
         $retval .= COM_endBlock();
         return $retval;

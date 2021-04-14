@@ -760,7 +760,10 @@ class Plan
         $id = $this->item_id;
         $action_url = SUBSCR_ADMIN_URL . '/index.php';
         $T = new \Template(SUBSCR_PI_PATH . '/templates');
-        $T->set_file('plan', 'plan_form.thtml');
+        $T->set_file(array(
+            'plan' => 'plan_form.thtml',
+            'tooltipster' => 'tooltipster.thtml',
+        ) );
 
         // Set up the wysiwyg editor, if available
         switch (PLG_getEditorType()) {
@@ -846,6 +849,7 @@ class Plan
             $T->set_var('candelete', 'true');
         }
 
+        $T->parse('tooltipster_js', 'tooltipster');
         $retval .= $T->parse('output', 'plan');
         $retval .= COM_endBlock();
         return $retval;
