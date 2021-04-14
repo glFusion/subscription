@@ -23,7 +23,7 @@ global $_CONF_SUBSCR;
 
 $_CONF_SUBSCR['pi_name']            = 'subscription';
 $_CONF_SUBSCR['pi_display_name']    = 'Subscriptions';
-$_CONF_SUBSCR['pi_version']         = '1.1.0';
+$_CONF_SUBSCR['pi_version']         = '1.0.5';
 $_CONF_SUBSCR['gl_version']         = '1.7.8';
 $_CONF_SUBSCR['pi_url']             = 'http://www.leegarner.com';
 
