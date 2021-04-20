@@ -560,13 +560,14 @@ class Subscription
 
 
     /**
-     * Add referrer bonus based on provided plan id
+     * Add referrer bonus based on provided plan id.
      *
-     * @param   obj   $S      The subscription that was purchased
      * @uses    AddReferral()
+     * @param   object  $S          The subscription that was purchased
+     * @param   boolean $notify     True to notify the referrer
      * @return  boolean     True on successful update, False on error
      */
-    public function AddBonus($S)
+    public function AddBonus($S, $notify=true)
     {
         global $_TABLES;
 
@@ -588,11 +589,27 @@ class Subscription
             $status = false;
         } else {
             $this->AddReferral($S->getID());
+            if ($notify) {
+                $msg = sprintf(
+                    $LANG_SUBSCR['msg_referral'],
+                    $P->getName(),
+                    $P->getBonusDuration(),
+                    ucfirst($P->getBonusDurationType())
+                );
+                LGLIB_storeMessage(array(
+                    'message' => $msg,
+                    'title' => '',
+                    'persist' => true,
+                    'pi_code' => 'subscription',
+                    'uid' => $this->uid,
+                ) );
+            }
             Cache::clear('subscriptions');
             $status = true;
         }
         return $status;
     }
+
 
     /**
      * Add a referral record.

@@ -135,6 +135,7 @@ $LANG_SUBSCR = array(
 'msg_purch_email' => 'If you are logged into the site, you may need to log out and back in again for your subscription to take effect.',
 'reset_ratings' => 'Reset Ratings',
 'rating'        => 'Rating',
+'msg_referral' => 'For referring a new subscriber, your subscription to %1$s has been extended by %2$d %3$s.',
 );
 
 // Messages for the plugin upgrade

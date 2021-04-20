@@ -1,5 +1,9 @@
 # Changelog for the Subscription plugin for glFusion
 
+## 1.1.1
+Release TBD
+- Enable notifications to referring subscriber when a referral is processed.
+
 ## 1.1.0
 Release 2021-04-20
 - Drop views column from plans table.
