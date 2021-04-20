@@ -6,7 +6,7 @@ Release TBD
 - Fix plan ratings, enable rating resets from admin list.
 - Refactor class properties and use accessor functions.
 - Deprecate admin group, use subscription.admin permission.
-- Add referrer bonus functionality.
+- Add referrer bonus functionality. Requires Shop plugin v1.3.0+. (David Tong)
 
 ## 1.0.0
 Release 2020-02-18
