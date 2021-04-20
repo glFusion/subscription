@@ -1,7 +1,7 @@
 # Changelog for the Subscription plugin for glFusion
 
 ## 1.1.0
-Release TBD
+Release 2021-04-20
 - Drop views column from plans table.
 - Fix plan ratings, enable rating resets from admin list.
 - Refactor class properties and use accessor functions.
