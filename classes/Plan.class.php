@@ -1128,13 +1128,18 @@ class Plan
     {
         global $_GROUPS, $_USER, $_CONF_SUBSCR, $_CONF;
 
+        // Cache so this can be called from service_getproducts.
+        static $mySubs = NULL;
+
         $retval = false;
         $this->is_subscribed = 0;
         if ($this->item_id != '') {
             if (in_array($this->grp_access, $_GROUPS)) {
                 $retval = true;
             }
-            $mySubs = Subscription::getSubscriptions($_USER['uid']);
+            if ($mySubs === NULL) {
+                $mySubs = Subscription::getSubscriptions($_USER['uid']);
+            }
             if (isset($mySubs[$this->item_id])) {
                 $this->is_subscribed = 1;
                 $d = new \Date($mySubs[$this->item_id]->getExpiration());

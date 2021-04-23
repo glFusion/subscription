@@ -121,6 +121,7 @@ function service_productinfo_subscription($A, &$output, &$svc_msg)
     $output['name'] = $P->getName();;
     $output['description'] = $P->getDscp();
     $output['taxable'] = $P->isTaxable();
+    $output['canPurchase'] = $P->canBuy();
     if ($item_mod == 'upgrade' && $P->upg_from != '' && $P->upg_price > 0) {
         $output['price'] = $P->getUpgradePrice();
         $output['name'] .= ', ' . $LANG_SUBSCR['upgrade'];
@@ -128,7 +129,7 @@ function service_productinfo_subscription($A, &$output, &$svc_msg)
         $output['price'] = $P->getBasePrice();
     }
     $output['url'] = COM_buildUrl(SUBSCR_URL .
-                    '/index.php?view=detail&item_id=' . $P->getID());
+        '/index.php?view=detail&item_id=' . $P->getID());
     return PLG_RET_OK;
 }
 
@@ -294,7 +295,7 @@ function service_getproducts_subscription($args, &$output, &$svc_msg)
         return PLG_RET_ERROR;
     }
 
-    $Subs = Subscription\Subscription::getSubscriptions();
+    //$Subs = Subscription\Subscription::getSubscriptions();
     $Plans = Subscription\Plan::getPlans();
     if (!$Plans) return PLG_RET_ERROR;
 
@@ -304,43 +305,46 @@ function service_getproducts_subscription($args, &$output, &$svc_msg)
 
         // Check the expiration and early renewal period for any current
         // subscriptions to see if the current user can purchase this item.
-        $ok_to_buy = true;
-        if (isset($Subs[$P->getID()]) && $Subs[$P->getID()]->getExpiration() > '0000') {
+        $ok_to_buy = $P->canBuy();
+        /*if (isset($Subs[$P->getID()]) && $Subs[$P->getID()]->getExpiration() > '0000') {
+            $expDt = new Date($Subs[$P->getID()]->getExpiration(), $_CONF['timezone']);
             $exp_ts = strtotime($Subs[$P->getID()]->getExpiration());
-            $exp_format = strftime($_CONF['shortdate'], $exp_ts);
-            $description .= '<br /><i>' .
+            $exp_format = $expDt->format($_CONF['shortdate'], true);
+         */
+            /*$description .= '<br /><i>' .
                 sprintf($LANG_SUBSCR['your_sub_expires'], $exp_format) .
-                '</i>';
-            if ($P->getEarlyRenewal() > 0) {
-                $renew_ts = $exp_ts - ($P->getEarlyRenewal() * 86400);
+                '</i>';*/
+            /*if ($P->getEarlyRenewal() > 0) {
+                $renew_ts = $expDt->toUnix() - ($P->getEarlyRenewal() * 86400);
                 if ($renew_ts > $_CONF['_now']->toUnix()) {
                     $ok_to_buy = false;
                 }
             }
-        }
-        if (array_key_exists($P->getUpgradeFrom(), $Subs) && $P->getUpgradePrice() != '') {
+        }*/
+
+        /*if (array_key_exists($P->getUpgradeFrom(), $Subs) && $P->getUpgradePrice() != '') {
             $price = (float)$P->getUpgradePrice();
             $item_option = ':upgrade';
-        } else {
+        } else {*/
             $price = (float)$P->getBasePrice();
             $item_option = ':new';
-        }
+        //}
 
-        if ($ok_to_buy) {
-            $output[] = array(
-                'id'    => 'subscription:' . $P->getID(). $item_option,
-                'item_id' => $P->getID(),
-                'name' => $P->getName(),
-                'short_description' => $short_description,
-                'description' => $description,
-                'price' => $price,
-                'buttons' => array('buy_now' => $P->MakeButton()),
-                'url' => COM_buildUrl(SUBSCR_URL .
+        $output[] = array(
+            'id'    => 'subscription:' . $P->getID(). $item_option,
+            'item_id' => $P->getID(),
+            'name' => $P->getName(),
+            'short_description' => $short_description,
+            'description' => $description,
+            'price' => $price,
+            'buttons' => array('buy_now' => $P->MakeButton()),
+            'url' => COM_buildUrl(SUBSCR_URL .
                     '/index.php?view=detail&item_id=' . $P->getID()),
-                'have_detail_svc' => true,  // Tell Shop to use it's detail page wrapper
-                'img_url' => '',
-            );
-        }
+            'have_detail_svc' => true,  // Tell Shop to use it's detail page wrapper
+            'img_url' => '',
+            'canPurchase' => $ok_to_buy,
+            'canDisplay' => true,
+        );
     }
     return PLG_RET_OK;
 }
