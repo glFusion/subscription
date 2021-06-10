@@ -49,14 +49,9 @@ function service_profilefields_subscription($args, &$output, &$svc_msg)
                 'field' => $sub . '.expiration',
                 'title' => $LANG_SUBSCR['expires'],
             ),
-            $pi . '_membertype' => array(
-                'field' => $prod . '.prf_type',
-                'title' => $LANG_SUBSCR['member_type'],
-            ),
         ),
 
         'query' => "{$sub}.expiration as {$pi}_expires,
-                    {$prod}.prf_type as {$pi}_membertype,
                     {$prod}.short_description AS {$pi}_description",
 
         'join' => "LEFT JOIN {$sub} ON u.uid = {$sub}.uid
@@ -306,29 +301,8 @@ function service_getproducts_subscription($args, &$output, &$svc_msg)
         // Check the expiration and early renewal period for any current
         // subscriptions to see if the current user can purchase this item.
         $ok_to_buy = $P->canBuy();
-        /*if (isset($Subs[$P->getID()]) && $Subs[$P->getID()]->getExpiration() > '0000') {
-            $expDt = new Date($Subs[$P->getID()]->getExpiration(), $_CONF['timezone']);
-            $exp_ts = strtotime($Subs[$P->getID()]->getExpiration());
-            $exp_format = $expDt->format($_CONF['shortdate'], true);
-         */
-            /*$description .= '<br /><i>' .
-                sprintf($LANG_SUBSCR['your_sub_expires'], $exp_format) .
-                '</i>';*/
-            /*if ($P->getEarlyRenewal() > 0) {
-                $renew_ts = $expDt->toUnix() - ($P->getEarlyRenewal() * 86400);
-                if ($renew_ts > $_CONF['_now']->toUnix()) {
-                    $ok_to_buy = false;
-                }
-            }
-        }*/
-
-        /*if (array_key_exists($P->getUpgradeFrom(), $Subs) && $P->getUpgradePrice() != '') {
-            $price = (float)$P->getUpgradePrice();
-            $item_option = ':upgrade';
-        } else {*/
-            $price = (float)$P->getBasePrice();
-            $item_option = ':new';
-        //}
+        $price = (float)$P->getBasePrice();
+        $item_option = ':new';
 
         $output[] = array(
             'id'    => 'subscription:' . $P->getID(). $item_option,
