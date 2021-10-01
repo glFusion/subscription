@@ -80,13 +80,20 @@ function service_productinfo_subscription($A, &$output, &$svc_msg)
     global $_TABLES, $LANG_SUBSCR;
 
     // Does not support remote web services, must be local only.
-    if ($A['gl_svc'] !== false) return PLG_RET_PERMISSION_DENIED;
+    if ($A['gl_svc'] !== false) {
+        return PLG_RET_PERMISSION_DENIED;
+    }
+
     // remove to prevent extra ':' in product_id.
-    if (isset($A['gl_svc'])) unset($A['gl_svc']);
+    if (isset($A['gl_svc'])) {
+        unset($A['gl_svc']);
+    }
 
     // Verify that item id is passed in
     $item = SUBSCR_getVar($A, 'item_id', 'array');
-    if (!is_array($item)) return PLG_RET_ERROR;
+    if (!is_array($item)) {
+        return PLG_RET_ERROR;
+    }
 
     // Create a return array with values to be populated later
     $product_id = implode(':', $item);
@@ -101,7 +108,7 @@ function service_productinfo_subscription($A, &$output, &$svc_msg)
         'have_detail_svc' => true,  // Tell Shop to use it's detail page wrapper
         'fixed_q' => 1,         // Purchase qty fixed at 1
         'isUnique' => true,     // Only on purchase of this item allowed
-        'supportsRatings' => true,
+        'supportsRatings' => false,
         'cancel_url' => SUBSCR_URL . '/index.php',
     );
 
@@ -377,5 +384,3 @@ function service_emailReceiptInfo_subscription($args, &$output, &$svc_msg)
     }
     return PLG_RET_OK;      // don't error
 }
-
-?>
