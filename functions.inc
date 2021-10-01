@@ -725,8 +725,9 @@ function SUBSCR_notifyExpiration()
             AND s.expiration < '{$_CONF['_now']->toMySQL(true)}' + INTERVAL {$_CONF_SUBSCR['notifydays']} DAY";
     //COM_errorLog($sql);
     $r = DB_query($sql);
-    if (!$r)
+    if (!$r) {
         return;
+    }
 
     $template_base = SUBSCR_PI_PATH . '/templates/notify';
 
@@ -896,61 +897,51 @@ function plugin_getiteminfo_subscription($id, $what, $uid=0, $options=array())
     global $_TABLES, $_CONF, $LANG_SUBSCR;
 
     $properties = explode(',', $what);
-    $fields = array();
     $retval = array();
     $buildingSearchIndex = false;
+
     foreach ($properties as $p) {
         switch ($p) {
         case 'search_index':
             $buildingSearchIndex = true;
             break;
-        case 'id':
-            $fields[] = 'item_id';
-            break;
-        case 'title':
-            $fields[] = 'short_description';
-            break;
-        case 'content':
-        case 'description':
-            $fields[] = 'description';
-            break;
-        case 'searchidx':
-            $fields[] = 'short_description';
-            $fields[] = 'description';
-            break;
-        case 'price':
-            $fields[] = 'price';
-            break;
-        case 'date':
-            $fields[] = 'dt_add';
-            break;
         }
     }
-    if (count($fields) == 0) {
-        return $retval;
-    }
-    $fields = array_unique($fields);
-    $fields = implode(',', $fields);
+
     $retval = array();
-    $sql = "SELECT $fields FROM {$_TABLES['subscr_products']} ";
+    $sql = "SELECT * FROM {$_TABLES['subscr_products']} ";
     if ($id != '*') {
         $sql .= " WHERE (item_id = '" . DB_escapeString($id) . "')";
     }
-    //echo $sql;die;
+
     $res = DB_query($sql);
+    $props = array();
+    $item_mod = SUBSCR_getVar($options['item_id'], 1, 'string', 'new');
     while ($A = DB_fetchArray($res, false)) {
+        $P = new Subscription\Plan($A);
+        if ($item_mod == 'upgrade') {
+            // check if upgrade is possible.
+            if ($P->getUpgradeFrom() == '' || $P->getUpgradePrice == 0) {
+                $item_mod = '';
+            }
+        }
         foreach ($properties as $p) {
             switch ($p) {
             case 'id':
-                $props[$p] = $A['item_id'];
+                $props[$p] = $P->getID();
                 break;
             case 'excerpt':
             case 'description':
             case 'content':
-                $props[$p] = $A['description'];
+                $props[$p] = $P->getDscp();
                 break;
             case 'title':
-                $props[$p] = $A['short_description'];
+            case 'short_description':
+            case 'name':
+                $props[$p] = $P->getName();
+                if ($item_mod == 'upgrade') {
+                    $props['name'] .= ', ' . $LANG_SUBSCR['upgrade'];
+                }
                 break;
             case 'author':
                 $props[$p] = 2;     // no author, just return Admin
@@ -959,16 +950,37 @@ function plugin_getiteminfo_subscription($id, $what, $uid=0, $options=array())
                 $props[$p] = $A['dt_add'];
                 break;
             case 'searchidx':
-                $props[$p] = $A['short_description'] . ' ' . $A['description'];
+                $props[$p] = $P->getName() . ' ' . $P->getDscp();
                 break;
             case 'url':
+            case 'cancel_url':
                 $props[$p] = COM_buildUrl(SUBSCR_URL);  // no detail page yet
+                break;
+            case 'isUnique':
+            case 'have_detail_svc':
+            case 'override_price':
+            case 'fixed_q':
+                $props[$p] = true;
+                break;
+            case 'supportsRatings':
+                $props[$p] = false;
+                break;
+            case 'price':
+                if ($item_mod == 'upgrade') {
+                    $props[$p] = $P->getUpgradePrice();
+                } else {
+                    $props[$p] = $P->getBasePrice();
+                }
+                break;
+            case 'supportsRatings':
+                $props[$p] = false;
                 break;
             default:
                 $props[$p] = isset($A[$p]) ? $A[$p] : NULL;
                 break;
             }
         }
+
         $mapped = array();
         foreach ($props as $key => $value) {
             if ($id == '*') {
@@ -993,7 +1005,7 @@ function plugin_getiteminfo_subscription($id, $what, $uid=0, $options=array())
         $retval = $tRet[0];
     }
     if ($retval === '' || (is_array($retval) && count($retval) == 0)) {
-        return NULL;
+        return false;
     } else {
         return $retval;
     }
