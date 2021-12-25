@@ -17,6 +17,7 @@ if (!defined ('GVERSION')) {
 
 global $_TABLES;
 
+$_SQL = array();
 $_SQL['subscr_products'] = 
 "CREATE TABLE {$_TABLES['subscr_products']} (
   `item_id` varchar(128) NOT NULL,
