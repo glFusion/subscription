@@ -3,9 +3,9 @@
  * Upgrade routines for the Subscription plugin.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2009-2020 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2009-2022 Lee Garner <lee@leegarner.com>
  * @package     subscription
- * @version     v1.1.0
+ * @version     v1.1.1
  * @license     http://opensource.org/licenses/gpl-2.0.php 
  *              GNU Public License v2 or later
  * @filesource
@@ -139,12 +139,12 @@ function SUBSCR_do_upgrade_sql($version='', $ignore_errors=false)
     }
 
     // Execute SQL now to perform the upgrade
-    COM_errorLog("--Updating Subscription to version $version");
+    COM_errorLog("-- Updating Subscription to version $version");
     foreach($SUBSCR_UPGRADE[$version] as $sql) {
-        COM_errorLog("Subscription Plugin $version update: Executing SQL => $sql");
+        COM_errorLog("--- Subscription Plugin $version update: Executing SQL => $sql");
         DB_query($sql, 1);
         if (DB_error()) {
-            COM_errorLog("SQL Error during Subscription Plugin update", 1);
+            COM_errorLog("*** SQL Error during Subscription Plugin update", 1);
             if ($ignore_errors) return false;
         }
     }
@@ -174,11 +174,11 @@ function SUBSCR_do_set_version($ver)
 
     $res = DB_query($sql, 1);
     if (DB_error()) {
-        COM_errorLog("Error updating the {$_CONF_SUBSCR['pi_display_name']} Plugin version",1);
+        COM_errorLog("*** Error updating the {$_CONF_SUBSCR['pi_display_name']} plugin version",1);
         return false;
     } else {
+        COM_errorLog("--- Updated the {$_CONF_SUBSCR['pi_display_name']} plugin version to $ver");
         return true;
     }
 }
 
-?>
