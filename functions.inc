@@ -916,7 +916,8 @@ function plugin_getiteminfo_subscription($id, $what, $uid=0, $options=array())
 
     $res = DB_query($sql);
     $props = array();
-    $item_mod = SUBSCR_getVar($options['item_id'], 1, 'string', 'new');
+    //$item_mod = SUBSCR_getVar($options['item_id'], 1, 'string', 'new');
+    $item_mod = 'new';
     while ($A = DB_fetchArray($res, false)) {
         $P = new Subscription\Plan($A);
         if ($item_mod == 'upgrade') {
