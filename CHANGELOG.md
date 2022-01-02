@@ -1,8 +1,9 @@
 # Changelog for the Subscription plugin for glFusion
 
 ## 1.1.1
-Release TBD
+Release 2022-01-02
 - Enable notifications to referring subscriber when a referral is processed.
+- Implement `plugin_iteminfo_subscription()` for Shop plugin 1.3.0+
 
 ## 1.1.0
 Release 2021-04-20
