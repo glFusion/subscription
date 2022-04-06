@@ -1,5 +1,8 @@
 # Changelog for the Subscription plugin for glFusion
 
+## 1.1.2
+Release TBD
+
 ## 1.1.1
 Release 2022-01-02
 - Enable notifications to referring subscriber when a referral is processed.
