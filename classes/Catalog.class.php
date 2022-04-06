@@ -53,16 +53,16 @@ class Catalog
             return $retval;
         }
 
-        /*$status = LGLIB_invokeService('shop', 'getCurrency', array(),
-            $currency, $svc_msg);*/
         $currency = PLG_callFunctionForOnePlugin('plugin_getCurrency_shop');
         if (empty($currency)) $currency = 'USD';
 
         $T->set_block('prodlist', 'PlanBlock', 'PBlock');
         foreach ($Plans as $P) {
             // Skip the rare case of a fixed expiration that has passed.
-            if ($P->isFixed() &&
-                $P->getExpiration() < $_CONF['_now']->format('Y-m-d', true)) {
+            if (
+                $P->isFixed() &&
+                $P->getExpiration() < $_CONF['_now']->format('Y-m-d', true)
+            ) {
                 continue;
             }
             $description = $P->getName();   // just want the short 1-line description here
