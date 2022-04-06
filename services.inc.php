@@ -37,7 +37,9 @@ function service_profilefields_subscription($args, &$output, &$svc_msg)
     $sub = $_TABLES['subscr_subscriptions'];
 
     // Does not support remote web services, must be local only.
-    if ($args['gl_svc'] !== false) return PLG_RET_PERMISSION_DENIED;
+    if (isset($args['gl_svc']) && $args['gl_svc'] !== false) {
+        return PLG_RET_PERMISSION_DENIED;
+    }
 
     $output = array(
         'names' => array(
@@ -80,7 +82,7 @@ function service_productinfo_subscription($A, &$output, &$svc_msg)
     global $_TABLES, $LANG_SUBSCR;
 
     // Does not support remote web services, must be local only.
-    if ($A['gl_svc'] !== false) {
+    if (isset($args['gl_svc']) && $args['gl_svc'] !== false) {
         return PLG_RET_PERMISSION_DENIED;
     }
 
@@ -150,8 +152,9 @@ function service_handlePurchase_subscription($args, &$output, &$svc_msg)
 
     $item_id = NULL;
     if (isset($args['item']) && is_array($args['item'])) {
-        if (isset($args['item']['item_id']))
+        if (isset($args['item']['item_id'])) {
             $item_id = $args['item']['item_id'];
+        }
     }
     // Must have an item ID and IPN data
     if (

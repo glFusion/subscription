@@ -173,32 +173,6 @@ class Plan
 
 
     /**
-     * Set a property's value.
-     *
-     * @param   string  $var    Name of property to set.
-     * @param   mixed   $value  New value for property.
-     */
-    public function __set($var, $value='')
-    {
-        COM_errorLog("attempting __set $var to $value: " . print_r(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2),true));
-        return NULL;
-    }
-
-
-    /**
-     * Get the value of a property.
-     *
-     * @param   string  $var    Name of property to retrieve.
-     * @return  mixed           Value of property, NULL if undefined.
-     */
-    public function __get($var)
-    {
-        COM_errorLog("attempting __get for $var: " . print_r(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2),true));
-        return NULL;
-    }
-
-
-    /**
      * Sets all variables to the matching values from $rows.
      *
      * @param   array   $row        Array of values, from DB or $_POST
@@ -410,7 +384,7 @@ class Plan
      */
     public function getExpiration()
     {
-        return $this->expirataion;
+        return $this->expiration;
     }
 
 
