@@ -16,6 +16,7 @@
 if (!defined ('GVERSION')) {
     die ('This file can not be used on its own!');
 }
+use glFusion\Log\Log;
 
 
 /**
@@ -118,7 +119,7 @@ function service_productinfo_subscription($A, &$output, &$svc_msg)
     $item_mod = SUBSCR_getVar($item, 1, 'string', 'new');
     $P = Subscription\Plan::getInstance($item_id);
     if ($P->isNew()) {
-        COM_errorLog(__FUNCTION__ . " Item {$item_id} not found.");
+        Log::write('system', Log::ERROR, __FUNCTION__ . " Item {$item_id} not found.");
         return PLG_RET_ERROR;
     }
     $output['short_description'] = $P->getName();
@@ -215,7 +216,7 @@ function service_handlePurchase_subscription($args, &$output, &$svc_msg)
         );
     }
 
-    COM_errorLog("Processing subscription for user $uid to item {$product_id}");
+    Log::write('system', Log::INFO, "Processing subscription for user $uid to item {$product_id}");
     $txn_id = SUBSCR_getVar($ipn_data, 'txn_id', 'string', 'undefined');
     $S = Subscription\Subscription::getInstance($uid, $product_id);
     $status = $S->withUid($uid)
@@ -234,7 +235,7 @@ function service_handlePurchase_subscription($args, &$output, &$svc_msg)
             // update the referrer's subscription or other action
             $R = Subscription\Subscription::getInstance($ref_uid);
             if (date('Y-m-d') <= $S->getExpiration()) {    // is subscription still valid
-                COM_errorLog("Processing affiliate bonus for user {$ref_uid} for purchase by user {$uid} of item {$product_id}");
+                Log::write('system', Log::INFO, "Processing affiliate bonus for user {$ref_uid} for purchase by user {$uid} of item {$product_id}");
                 $status = $R->AddBonus($S);
             }
         }

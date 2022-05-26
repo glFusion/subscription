@@ -3,7 +3,7 @@
  * Class to manage actual subscriptions.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2010-2020 Lee Garner
+ * @copyright   Copyright (c) 2010-2022 Lee Garner
  * @package     subscription
  * @version     v1.1.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
@@ -11,6 +11,8 @@
  * @filesource
  */
 namespace Subscription;
+use glFusion\Database\Database;
+use glFusion\Log\Log;
 
 
 /**
@@ -404,12 +406,12 @@ class Subscription
         } else {
             $status = false;
             $this->Errors[] = 'Database error, possible duplicate key.';
-            COM_errorLog(__METHOD__ . '() SQL error: ' . $sql);
+            Log::write('system', Log::ERROR, __METHOD__ . ': SQL error: ' . $sql);
         }
         /*$logmsg .= ' ' . $this->id . ' for ' .
                 COM_getDisplayName($A['uid']) . ' (' . $A['uid'] . ') ' .
                 $this->PlanName() . ", exp {$this->expiration}";*/
-        SUBSCR_debug('Status of last update: ' . print_r($status,true));
+        Log::write('subscr_debug', Log::DEBUG, 'Status of last update: ' . print_r($status,true));
         return $status;
     }
 
@@ -516,10 +518,9 @@ class Subscription
                 notified = 0,
                 status = '" . self::STATUS_ENABLED . "'";
         $sql = $sql1 . $sql2 . $sql3;
-        //COM_errorLog($sql);
         DB_query($sql, 1);     // Execute event record update
         if (DB_error()) {
-            COM_errorLog(__METHOD__ . "() SQL error: $sql");
+            Log::write('system', Log::ERROR, __METHOD__ . "() SQL error: $sql");
             $status = false;
         } else {
             if ($this->id == 0) {
@@ -582,10 +583,9 @@ class Subscription
         $sql = "UPDATE {$_TABLES['subscr_subscriptions']}
                 SET expiration = {$expiration}
                 WHERE id = '{$this->id}'";
-        //COM_errorLog($sql);
         DB_query($sql, 1);     // Execute event record update
         if (DB_error()) {
-            COM_errorLog(__METHOD__ . "() SQL error: $sql");
+            Log::write('system', Log::ERROR, __METHOD__ . "() SQL error: $sql");
             $status = false;
         } else {
             $this->AddReferral($S->getID());
@@ -640,12 +640,12 @@ class Subscription
             $this->Plan = Plan::getInstance($this->item_id);
         }
         if (!$this->Plan->isNew()) {
-            SUBSCR_debug("Adding user {$this->uid} to group {$this->Plan->getSubGroup()}");
+            Log::write('subscr_debug', Log::DEBUG, "Adding user {$this->uid} to group {$this->Plan->getSubGroup()}");
             Cache::clearGroup($this->Plan->getSubGroup(), $this->uid);
             USES_lib_user();
             USER_addGroup($this->Plan->getSubGroup(), $this->uid);
         } else {
-            COM_errorLog("Error finding group for plan {$this->item_id}");
+            Log::write('system', Log::ERROR, "Error finding group for plan {$this->item_id}");
         }
     }
 
@@ -668,10 +668,10 @@ class Subscription
         }
 
         if (!empty($this->Errors)) {
-            SUBSCR_debug('Errors encountered: ' . print_r($this->Errors,true));
+            Log::write('subscr_debug', Log::DEBUG, __METHOD__ . ': Errors encountered: ' . print_r($this->Errors,true));
             return false;
         } else {
-            SUBSCR_debug('isValidRecord(): No errors');
+            Log::write('subscr_debug', Log::DEBUG, __METHOD__ . ':  No errors');
             return true;
         }
     }
@@ -844,7 +844,7 @@ class Subscription
 
         // Remove the subscriber from the subscription group
         USES_lib_user();
-        SUBSCR_debug("Removing user {$this->uid} from {$this->Plan->getSubGroup()}");
+        Log::write('subscr_debug', Log::DEBUG, "Removing user {$this->uid} from {$this->Plan->getSubGroup()}");
         Cache::clearGroup($this->Plan->getSubGroup(), $this->uid);
         USER_delGroup($this->Plan->getSubGroup(), $this->uid);
 
@@ -852,8 +852,12 @@ class Subscription
         $sql = "UPDATE {$_TABLES['subscr_subscriptions']} SET status='".self::STATUS_CANCELED."'
                 WHERE id='{$this->id}'";
         DB_query($sql, 1);
-        SUBSCR_auditLog("Canceled subscription $this->id ({$this->Plan->getID()}) " .
-                        "for user {$this->uid} (" .COM_getDisplayName($this->uid) . ')', $system);
+        Log::write(
+            'subscr_audit',
+            Log::INFO,
+            "Canceled subscription $this->id ({$this->Plan->getID()}) " .
+            "for user {$this->uid} (" .COM_getDisplayName($this->uid) . ')'
+        );
         return true;
     }
 
@@ -909,7 +913,7 @@ class Subscription
 
         // Remove the subscriber from the subscription group
         USES_lib_user();
-        SUBSCR_debug("Removing user {$this->uid} from {$this->Plan->getSubGroup()}");
+        Log::write('subscr_debug', Log::DEBUG, "Removing user {$this->uid} from {$this->Plan->getSubGroup()}");
         Cache::clearGroup($this->Plan->getSubGroup(), $this->uid);
         USER_delGroup($this->Plan->getSubGroup(), $this->uid);
 
@@ -917,9 +921,13 @@ class Subscription
         $sql = "UPDATE {$_TABLES['subscr_subscriptions']} SET status='".self::STATUS_EXPIRED."'
                 WHERE id='{$this->id}'";
         DB_query($sql, 1);
-        SUBSCR_auditLog("Marked subscription $this->id ({$this->Plan->getID()}) as expired " .
-                        "for user {$this->uid} (" .COM_getDisplayName($this->uid) . '), expiring ' .
-                        $this->expiration, $system);
+        Log::write(
+            'subscr_audit',
+            Log::INFO,
+            "Marked subscription $this->id ({$this->Plan->getID()}) as expired " .
+            "for user {$this->uid} (" .COM_getDisplayName($this->uid) . '), expiring ' .
+            $this->expiration
+        );
         return true;
     }
 

@@ -13,11 +13,14 @@
 
 /** Import core glFusion functions */
 require_once '../../../lib-common.php';
+use glFusion\Log\Log;
 
 // Only let Root users access this page
 if (!SEC_inGroup('Root')) {
     // Someone is trying to illegally access this page
-    COM_errorLog("Someone has tried to illegally access the subscription installation page.  User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: $REMOTE_ADDR",1);
+    Log::write('system', Log::ERROR,
+        "Someone has tried to illegally access the subscription installation page.  User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: $REMOTE_ADDR"
+    );
     $display = COM_siteHeader();
     $display .= COM_startBlock($LANG_DQ['access_denied']);
     $display .= $LANG_DQ['access_denied_msg'];

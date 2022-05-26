@@ -16,6 +16,7 @@ global $_CONF, $_CONF_SUBSCR, $SUBSCR_UPGRADE;
 
 /** Include the table creation strings */
 require_once __DIR__ . "/sql/mysql_install.php";
+use glFusion\Log\Log;
 
 
 /**
@@ -139,16 +140,16 @@ function SUBSCR_do_upgrade_sql($version='', $ignore_errors=false)
     }
 
     // Execute SQL now to perform the upgrade
-    COM_errorLog("-- Updating Subscription to version $version");
+    Log::write('system', Log::INFO, "-- Updating Subscription to version $version");
     foreach($SUBSCR_UPGRADE[$version] as $sql) {
-        COM_errorLog("--- Subscription Plugin $version update: Executing SQL => $sql");
+        Log::write('system', Log::INFO, "--- Subscription Plugin $version update: Executing SQL");
         DB_query($sql, 1);
         if (DB_error()) {
-            COM_errorLog("*** SQL Error during Subscription Plugin update", 1);
+            Log::write('system', Log::ERROR, "*** SQL Error during Subscription Plugin update => $sql");
             if ($ignore_errors) return false;
         }
     }
-    COM_errorLog("--- Subscription plugin SQL update to version $version done", 1);
+    Log::write('system', Log::INFO, "--- Subscription plugin SQL update to version $version done");
     return true;
 }
 
@@ -174,10 +175,10 @@ function SUBSCR_do_set_version($ver)
 
     $res = DB_query($sql, 1);
     if (DB_error()) {
-        COM_errorLog("*** Error updating the {$_CONF_SUBSCR['pi_display_name']} plugin version",1);
+        Log::write('system', Log::ERROR, "*** Error updating the {$_CONF_SUBSCR['pi_display_name']} plugin version");
         return false;
     } else {
-        COM_errorLog("--- Updated the {$_CONF_SUBSCR['pi_display_name']} plugin version to $ver");
+        Log::write('system', Log::INFO, "--- Updated the {$_CONF_SUBSCR['pi_display_name']} plugin version to $ver");
         return true;
     }
 }

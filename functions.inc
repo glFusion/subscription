@@ -3,7 +3,7 @@
  * Common functions for the Subscription plugin.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2010-2021 Lee Garner
+ * @copyright   Copyright (c) 2010-2022 Lee Garner
  * @package     subscription
  * @version     v1.1.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
@@ -63,6 +63,26 @@ spl_autoload_register(function ($class)
         }
     }
 });
+use glFusion\Database\Database;
+use glFusion\Log\Log;
+
+Log::config('subscr_audit',
+    array(
+      'type'  => 'file',
+      'path'  => $_CONF['path_log'],
+      'file'  => 'subscription.log',
+      'level' => $_CONF['log_level'],
+    )
+);
+
+Log::config('subscr_debug',
+    array(
+      'type'  => 'file',
+      'path'  => $_CONF['path_log'],
+      'file'  => 'system.log',
+      'level' => $_CONF_SUBSCR['debug'] ? Log::DEBUG : 999,
+    )
+);
 
 
 /**
@@ -617,17 +637,26 @@ function plugin_runScheduledTask_subscription()
 {
     global $_TABLES, $_CONF_SUBSCR, $_CONF;
 
+    $db = Database::getInstance();
+    $qb = $db->conn->createQueryBuilder();
+
     // Cancel subscriptions not renewed within the grace period
-    $sql = "SELECT s.uid, s.item_id
-            FROM {$_TABLES['subscr_subscriptions']} s
-            LEFT JOIN {$_TABLES['subscr_products']} p
-                ON p.item_id = s.item_id
-            WHERE '{$_CONF['_now']->toMySQL(true)}' > (s.expiration + interval p.grace_days DAY)
-                AND status = " . Subscription\Subscription::STATUS_ENABLED;
-    //COM_errorLog($sql);
-    $r = DB_query($sql);
-    if ($r) {
-        while ($row = DB_fetchArray($r, false)) {
+    try {
+        $data = $qb->select('s.uid', 's.item_id')
+           ->from($_TABLES['subscr_subscriptions'], 's')
+           ->leftJoin('s', $_TABLES['subscr_products'], 'p', 's.item_id = p.item_id')
+           ->where(':cutoff > (s.experation + interval p.grace_days DAY)')
+           ->andWhere('status = :status')
+           ->setParameter('cutoff', $_CONF['_now']->toMySQL(true), Database::STRING)
+           ->setParameter('status', Subscription\Subscription::STATUS_ENABLED, Database::INTEGER)
+           ->execute()
+           ->fetchAllAssociative();
+    } catch (\Exception $e) {
+        Log::write('system', Log::ERROR, __FUNCTION__ . ': ' . $e->getMessage());
+        $data = false;
+    }
+    if (is_array($data)) {
+        foreach ($data as $row) {
             \Subscription\Subscription::Expire($row['uid'], $row['item_id'], true);
         }
     }
@@ -635,69 +664,6 @@ function plugin_runScheduledTask_subscription()
     // For the subscriptions that are left, notify the subscribers
     // if their expiration is impending
     SUBSCR_notifyExpiration();
-}
-
-
-/**
- * Log activity to a plugin-specific log file.
- * Message includes the user who initiated the action, unless it's a
- * system-generated event such as a scheduled task.
- *
- * @param   string  $logentry   Text to log
- * @param   boolean $system     True if this is a system-generated entry
- */
-function SUBSCR_auditLog($logentry = '', $system=false)
-{
-    global $_CONF, $_USER, $LANG01, $LANG_SUBSCR;
-
-    if ($logentry == '')
-        return '';
-
-    // A little sanitizing
-    $logentry = str_replace(
-            array('<?', '?>'),
-            array('(@', '@)'),
-            $logentry);
-
-    $timestamp = strftime('%c');
-    $logfile = $_CONF['path_log'] . 'subscription.log';
-
-    // Can't open the log file?  Return an error
-    if (!$file = fopen($logfile, 'a+')) {
-        return $LANG01[33] . $logfile . ' (' . $timestamp . ')<br />' . LB;
-    }
-
-    if ($system == false) {
-        // Get the user name if it's not anonymous
-        if (isset($_USER['uid'])) {
-            $byuser = $_USER['uid'] . '-'.
-                    COM_getDisplayName($_USER['uid'],
-                        $_USER['username'], $_USER['fullname']);
-        } else {
-            $byuser = 'anon';
-        }
-        $byuser .= '@' . $_SERVER['REMOTE_ADDR'];
-    } else {
-        $byuser = $LANG_SUBSCR['system_task'];
-    }
-
-    // Write the log entry to the file
-    fputs($file, "$timestamp ($byuser) - $logentry\n");
-
-}
-
-
-/**
- * Send debug info to the error log.
- *
- * @param   string  $msg    Text message to display, may be blank.
- */
-function SUBSCR_debug($msg)
-{
-    global $_CONF_SUBSCR;
-    if (isset($_CONF_SUBSCR['debug']) && $_CONF_SUBSCR['debug']) {
-        COM_errorLog('SUBSCR DEBUG: ' . $msg);
-    }
 }
 
 
@@ -723,7 +689,6 @@ function SUBSCR_notifyExpiration()
                 ON u.uid = s.uid
             WHERE notified = 0
             AND s.expiration < '{$_CONF['_now']->toMySQL(true)}' + INTERVAL {$_CONF_SUBSCR['notifydays']} DAY";
-    //COM_errorLog($sql);
     $r = DB_query($sql);
     if (!$r) {
         return;
@@ -763,8 +728,10 @@ function SUBSCR_notifyExpiration()
         $T->parse('output','message');
         $message = $T->finish($T->get_var('output'));
 
+
         COM_mail(
-            array($email, $username),
+            //array('email' => $email, 'name' => $username),
+            $email,
             $LANG_SUBSCR['exp_notice'],
             $message,
             "{$_CONF['site_name']} <{$_CONF['site_mail']}>",
@@ -854,7 +821,7 @@ function plugin_user_move_subscription($origUID, $destUID)
     foreach($sqls as $sql) {
         DB_query($sql, 1);
         if (DB_error()) {
-            COM_errorLog("plugin_user_move_subscription SQL error: $sql",1);
+            Log::write('system', Log::ERROR, __FUNCTION__ . ": SQL error: $sql");
         }
     }
 }

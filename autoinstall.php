@@ -21,6 +21,7 @@ $pi_path = $_CONF['path'] . 'plugins/subscription';
 require_once $pi_path . '/subscription.php';
 require_once $pi_path . '/sql/' . $_DB_dbms . '_install.php';
 require_once $pi_path . '/install_defaults.php';
+use glFusion\Log\Log;
 
 $language = $_CONF['language'];
 if (!is_file($pi_path . '/language/' . $language . '.php')) {
@@ -125,7 +126,7 @@ function plugin_install_subscription()
     $pi_name            = $_CONF_SUBSCR['pi_name'];
     $pi_display_name    = $_CONF_SUBSCR['pi_display_name'];
 
-    COM_errorLog("Attempting to install the $pi_display_name plugin", 1);
+    Log::write('system', Log::INFO, "Attempting to install the $pi_display_name plugin");
 
     $ret = INSTALLER_install($INSTALL_plugin[$pi_name]);
     if ($ret > 0) {
@@ -165,16 +166,15 @@ function plugin_postinstall_subscription()
     if (!file_exists($_CONF['path_log'] . $_CONF_SUBSCR['logfile'])) {
         $fp = fopen($_CONF['path_log'] . $_CONF_SUBSCR['logfile'], "w+");
         if (!$fp) {
-            COM_errorLog("Failed to create logfile {$_CONF_SUBSCR['logfile']}");
+            Log::write('system', Log::ERROR, "Failed to create logfile {$_CONF_SUBSCR['logfile']}");
         } else {
             fwrite($fp, "*** Logfile Created ***\n");
         }
     }
 
     if (!is_writable($_CONF['path_log'] . $_CONF_SUBSCR['logfile'])) {
-        COM_errorLog("Can't write to {$_CONF_SUBSCR['logfile']}");
+        Log::write('system', Log::ERROR, "Can't write to {$_CONF_SUBSCR['logfile']}");
     }
-
 }
 
 
@@ -188,7 +188,7 @@ function plugin_postinstall_subscription()
  */
 function mkdir_recursive($pathname, $mode=0777)
 {
-    COM_errorLog("mkdir: creating $pathname");
+    Log::write('system', Log::INFO, "mkdir: creating $pathname");
     is_dir(dirname($pathname)) || mkdir_recursive(dirname($pathname), $mode);
     return is_dir($pathname) || @mkdir($pathname, $mode);
 }

@@ -13,6 +13,7 @@
 
 /** Import core glFusion functions */
 require_once('../../../lib-common.php');
+use glFusion\Log\Log;
 
 if (!in_array('subscription', $_PLUGINS)) {
     COM_404();
@@ -20,9 +21,11 @@ if (!in_array('subscription', $_PLUGINS)) {
 
 // Only let admin users access this page
 if (!SEC_hasRights('subscription.admin')) {
-    COM_errorLog("Attempted unauthorized access the Subscription Admin page." .
+    Log::write('system', Log::ERROR,
+        "Attempted unauthorized access the Subscription Admin page." .
         " User id: {$_USER['uid']}, Username: {$_USER['username']}, " .
-        " IP: $REMOTE_ADDR", 1);
+        " IP: $REMOTE_ADDR"
+    );
     $display = COM_siteHeader();
     $display .= COM_startBlock($LANG_SUBSCR['access_denied']);
     $display .= $LANG_SUBSCR['access_denied_msg'];

@@ -17,9 +17,13 @@
  */
 
 require_once '../../../lib-common.php';
+use glFusion\Log\Log;
+
 if (!SEC_inGroup('Root')) {
     // Someone is trying to illegally access this page
-    COM_errorLog("Someone has tried to access the Subscription Development Code Upgrade Routine without proper permissions.  User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: " . $_SERVER['REMOTE_ADDR'],1);
+    Log::write('system', Log::ERROR,
+        "Someone has tried to access the Subscription Development Code Upgrade Routine without proper permissions.  User id: {$_USER['uid']}, Username: {$_USER['username']}, IP: " . $_SERVER['REMOTE_ADDR']
+    );
     COM_404();
     exit;
 }

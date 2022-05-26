@@ -3,7 +3,7 @@
  * Class to manage subscription plans.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2010-2021 Lee Garner
+ * @copyright   Copyright (c) 2010-2022 Lee Garner
  * @package     subscription
  * @version     v1.1.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
@@ -11,6 +11,8 @@
  * @filesource
  */
 namespace Subscription;
+use glFusion\Database\Database;
+use glFusion\Log\Log;
 
 
 /**
@@ -254,7 +256,6 @@ class Plan
         $sql = "SELECT * FROM {$_TABLES['subscr_products']}
                WHERE item_id='$id' ";
         //echo $sql;die;
-        //COM_errorLog($sql);
         $result = DB_query($sql);
         if (!$result || DB_numRows($result) != 1) {
             return false;
@@ -569,18 +570,18 @@ class Plan
 
         // Insert or update the record, as appropriate
         if ($this->isNew) {
-            SUBSCR_debug('Preparing to save a new product.');
+            Log::write('subscr_debug', Log::DEBUG, 'Preparing to save a new product.');
             $count_should_be = 0;   // item_id should not be in the DB
             $sql1 = "INSERT INTO {$_TABLES['subscr_products']} SET
                     item_id='{$this->item_id}', ";
             $sql3 = '';
             $orig_item_id = $this->item_id;
         } else {
-            SUBSCR_debug('Preparing to update product id ' . $this->item_id);
+            Log::write('subscr_debug', Log::DEBUG, 'Preparing to update product id ' . $this->item_id);
             $sql1 = "UPDATE {$_TABLES['subscr_products']} SET ";
             $count_should_be = 1;   // should be one existing record
             if ($this->item_id != $orig_item_id) {
-                SUBSCR_debug("Updating from {$orig_item_id} to {$this->item_id}");
+                Log::write('subscr_debug', Log::DEBUG, "Updating from {$orig_item_id} to {$this->item_id}");
                 $count_should_be = 0;   // When updating item_id should be absent
                 $sql1 .= "item_id = '{$this->item_id}',";
             }
@@ -591,7 +592,7 @@ class Plan
         // if updating the same ID
         $c = DB_count($_TABLES['subscr_products'], 'item_id', $this->item_id);
         if ($c > $count_should_be) {
-            SUBSCR_debug("Item {$this->item_id} already exists, cannot add");
+            Log::write('subscr_debug', Log::DEBUG, "Item {$this->item_id} already exists, cannot add");
             $this->Errors[] = "Item {$this->item_id} already exists, cannot create";
             return false;
         }
@@ -633,7 +634,7 @@ class Plan
                 grp_access = '{$this->grp_access}'";
         $sql = $sql1 . $sql2 . $sql3;
         //echo $sql;die;
-        SUBSCR_debug($sql);
+        Log::write('subscr_debug', Log::DEBUG, $sql);
         DB_query($sql);
         if (DB_error()) {
             $status = false;
@@ -646,14 +647,16 @@ class Plan
         Cache::set($cache_key, $this, 'plans');
         PLG_itemSaved($this->item_id, $_CONF_SUBSCR['pi_name'], $orig_item_id);
 
-        SUBSCR_debug('Status of last update: ' . print_r($status,true));
+        Log::write('subscr_debug', Log::DEBUG, 'Status of last update: ' . print_r($status,true));
         if (!$this->hasErrors()) {
-            SUBSCR_debug('Update of product ' . $this->item_id .
-                    ' succeeded.');
+            Log::write('subscr_debug', Log::DEBUG,
+                'Update of product ' . $this->item_id . ' succeeded.'
+            );
             return true;
         } else {
-            SUBSCR_debug('Update of product ' . $this->item_id .
-                    ' failed.');
+            Log::write('subscr_debug', Log::DEBUG,
+                'Update of product ' . $this->item_id . ' failed.'
+            );
             return false;
         }
     }
@@ -705,10 +708,10 @@ class Plan
         }
 
         if ($this->hasErrors()) {
-            SUBSCR_debug('Errors encountered: ' . print_r($this->Errors,true));
+            Log::write('subscr_debug', Log::DEBUG, 'Errors encountered: ' . print_r($this->Errors,true));
             return false;
         } else {
-            SUBSCR_debug('isValidRecord(): No errors');
+            Log::write('subscr_debug', Log::DEBUG, __METHOD__ . ': No errors');
             return true;
         }
     }
