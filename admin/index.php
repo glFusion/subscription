@@ -85,7 +85,7 @@ $content = '';      // initialize variable for page content
 
 switch ($action) {
 case 'resetratings':
-    foreach (LGLIB_getVar($_POST, 'plan_bulk', 'array', array()) as $plan_id) {
+    foreach (SHOP_getVar($_POST, 'plan_bulk', 'array', array()) as $plan_id) {
         RATING_resetRating($_CONF_SUBSCR['pi_name'], $plan_id);
     }
     echo COM_refresh(SUBSCR_ADMIN_URL.'/index.php?products');

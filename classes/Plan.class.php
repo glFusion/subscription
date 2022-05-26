@@ -187,17 +187,17 @@ class Plan
         $this->item_id = COM_sanitizeID($row['item_id'], false);
         $this->short_description = $row['short_description'];
         $this->description = $row['description'];
-        $this->enabled = LGLIB_getVar($row, 'enabled', 'integer', 0);
-        $this->at_registration = LGLIB_getVar($row, 'at_registration', 'integer', 0);
-        $this->trial_days = LGLIB_getVar($row, 'trial_days', 'integer', 0);
-        $this->price = LGLIB_getVar($row, 'price', 'float');
+        $this->enabled = SUBSCR_getVar($row, 'enabled', 'integer', 0);
+        $this->at_registration = SUBSCR_getVar($row, 'at_registration', 'integer', 0);
+        $this->trial_days = SUBSCR_getVar($row, 'trial_days', 'integer', 0);
+        $this->price = SUBSCR_getVar($row, 'price', 'float');
         $this->upg_price = 0;       // TODO: see if these will be used
         $this->upg_extend_exp = 0;
         $this->upg_from = '';
         //$this->upg_price = $row['upg_price'];
         //$this->upg_extend_exp = $row['upg_extend_exp'];
         //$this->upg_from = $row['upg_from'];
-        $this->duration = LGLIB_getVar($row, 'duration', 'integer', 0);
+        $this->duration = SUBSCR_getVar($row, 'duration', 'integer', 0);
         $this->duration_type = $row['duration_type'];
         if ($this->duration_type == 'fixed') {
             $this->expiration = empty($row['expiration']) ?
@@ -205,7 +205,7 @@ class Plan
         } else {
             $this->expiration = NULL;
         }
-        $this->bonus_duration = LGLIB_getVar($row, 'bonus_duration', 'integer', 0);
+        $this->bonus_duration = SUBSCR_getVar($row, 'bonus_duration', 'integer', 0);
         $this->bonus_duration_type = $row['bonus_duration_type'];
         //$this->views = $row['views'];
         //$this->views = 0;
@@ -1051,17 +1051,16 @@ class Plan
             if (!empty($_CONF_SUBSCR['return_url'])) {
                 $vars['return'] = $_CONF_SUBSCR['return_url'];
             }
-            $status = LGLIB_invokeService(
-                'shop',
-                'genButton',
-                $vars,
-                $output,
-                $svc_msg
+
+            $status = PLG_callFunctionForOnePlugin(
+                'service_genButton_shop',
+                array(
+                    1 => $vars,
+                    2 => &$output,
+                    3 => &$svc_msg,
+                )
             );
             if ($status == PLG_RET_OK && is_array($output)) {
-                /*foreach ($output as $button) {
-                    $retval .= $button . LB;
-            }*/
                 $retval = implode($this->_btn_separator, $output);
             }
         }

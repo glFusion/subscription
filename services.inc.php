@@ -228,8 +228,8 @@ function service_handlePurchase_subscription($args, &$output, &$svc_msg)
     if ($status) {
         // Handle referrals
         if (isset($args['referrer']) && is_array($args['referrer'])) {
-            $ref_uid = LGLIB_getVar($args['referrer'], 'ref_uid', 'integer');
-            $ref_token = LGLIB_getVar($args['referrer'], 'ref_token');
+            $ref_uid = SHOP_getVar($args['referrer'], 'ref_uid', 'integer');
+            $ref_token = SHOP_getVar($args['referrer'], 'ref_token');
         }
         if ($ref_uid > 0) {
             // update the referrer's subscription or other action

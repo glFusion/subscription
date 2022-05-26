@@ -507,18 +507,12 @@ function phpblock_subscription_subscribe()
         $P = Subscription\Plan::getInstance($row['item_id']);
         if ($P->getID() == '') continue;     // no access to this product
 
-        $status = LGLIB_invokeService(
-            'shop', 'getCurrency',
-            array(),
-            $currency,
-            $svc_msg
-        );
+        $currency = PLG_callFunctionForOnePlugin('plugin_getCurrency_shop');
         if (empty($currency)) {
             $currency = 'USD';
         }
 
         $T->set_file('block', 'blk_subscribe.thtml');
-
         $T->set_var(array(
             'title'     => $P->getID(),
             'dscp'      => $P->getDscp(),
@@ -883,7 +877,6 @@ function plugin_getiteminfo_subscription($id, $what, $uid=0, $options=array())
 
     $res = DB_query($sql);
     $props = array();
-    //$item_mod = SUBSCR_getVar($options['item_id'], 1, 'string', 'new');
     $item_mod = 'new';
     while ($A = DB_fetchArray($res, false)) {
         $P = new Subscription\Plan($A);
