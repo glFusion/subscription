@@ -639,7 +639,7 @@ function plugin_runScheduledTask_subscription()
         $data = $qb->select('s.uid', 's.item_id')
            ->from($_TABLES['subscr_subscriptions'], 's')
            ->leftJoin('s', $_TABLES['subscr_products'], 'p', 's.item_id = p.item_id')
-           ->where(':cutoff > (s.experation + interval p.grace_days DAY)')
+           ->where(':cutoff > (s.expiration + interval p.grace_days DAY)')
            ->andWhere('status = :status')
            ->setParameter('cutoff', $_CONF['_now']->toMySQL(true), Database::STRING)
            ->setParameter('status', Subscription\Subscription::STATUS_ENABLED, Database::INTEGER)
@@ -674,8 +674,9 @@ function SUBSCR_notifyExpiration()
         return;
     }
 
-    $sql = "SELECT s.id, s.uid, s.notified,
-                p.item_id, p.short_description
+    $sql = "SELECT s.*,
+                p.item_id, p.short_description, p.grace_days,
+                p.description, p.price
             FROM {$_TABLES['subscr_subscriptions']} s
             LEFT JOIN {$_TABLES['subscr_products']} p
                 ON p.item_id = s.item_id
@@ -714,14 +715,16 @@ function SUBSCR_notifyExpiration()
             'product'       => $row['item_id'],
             'item_id'       => $row['item_id'],
             'short_description' => $row['short_description'],
+            'description'   => $row['description'],
+            'expiration'    => $row['expiration'],
+            'price'         => number_format($row['price'], 2, '.', ''),
+            'uid'           => $row['uid'],
             'detail_url'    => COM_buildURL(SUBSCR_URL .
                     '/index.php?view=detail&item_id=' .
                     urlencode($row['item_id'])),
         ) );
-
         $T->parse('output','message');
         $message = $T->finish($T->get_var('output'));
-
 
         COM_mail(
             //array('email' => $email, 'name' => $username),
@@ -737,7 +740,6 @@ function SUBSCR_notifyExpiration()
                 SET notified=1
                 WHERE id='{$row['id']}'");
     }
-
 }
 
 
