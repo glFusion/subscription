@@ -105,9 +105,9 @@ case 'saveproduct':
     break;
 
 case 'deleteproduct':
-    $S = new Subscription\Plan($item_id);
-    $S->Delete();
-    $view = 'products';
+    $P = new Subscription\Plan($item_id);
+    $P->Delete();
+    echo COM_refresh(SUBSCR_ADMIN_URL . '/index.php?products');
     break;
 
 case 'savesubscription':
@@ -115,9 +115,8 @@ case 'savesubscription':
     $item_id = isset($_POST['item_id']) ? $_POST['item_id'] : '';
     $S = Subscription\Subscription::getInstance($uid, $item_id);
     if ($S->Save($_POST)) {
-        $actionval = $S->item_id;
+        $actionval = $S->getItemID();
         echo COM_refresh(SUBSCR_ADMIN_URL.'/index.php?subscriptions=' . $item_id);
-        $view = 'subscriptions';
     } else {
         $content .= Subscription\Menu::errorMessage($S->PrintErrors());
         $view = 'editsubscrip';
@@ -127,7 +126,7 @@ case 'savesubscription':
 case 'deletesubscription':
     $S = new Subscription\Subscription($_POST['id']);
     $S->Delete();
-    $view = 'subscriptions';
+    echo COM_refresh(SUBSCR_ADMIN_URL . '/index.php?subscriptions');
     break;
 
 case 'cancelbutton_x':
