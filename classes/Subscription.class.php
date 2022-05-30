@@ -570,7 +570,7 @@ class Subscription
      */
     public function AddBonus($S, $notify=true)
     {
-        global $_TABLES;
+        global $_TABLES, $LANG_SUBSCR;
 
         // Get the product information for this subscription
         $P = Plan::getInstance($S->getItemID());
