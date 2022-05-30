@@ -1,11 +1,7 @@
 {# begin {templatelocation} #}
-<script>
-$( function() {
-	$("#f_expire").datepicker({
-		dateFormat: "yy-mm-dd"
-	});
-} );
-</script>
+<script src="{site_url}/javascript/addons/datetime/jquery.datetimepicker.full.min.js" type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="{site_url}/javascript/addons/datetime/jquery.datetimepicker.min.css"/ >
+<script src="{site_url}/javascript/addons/datetime/datetimepicker.js" type="text/javascript"></script>
 <form action="{action_url}" method="post" class="uk-form uk-form-horizontal subscriptionform">
 	<input type=hidden name="id" value="{id}">
 
@@ -39,7 +35,7 @@ $( function() {
 			<span id="expiration" class="tooltip_cfg tooltipstered"></span>
 		</label>
 		<div class="uk-form-controls">
-			<input class="uk-input uk-form-width-small" type="text" name="expiration" value="{expiration}" size="12" id="f_expire" />
+			<input class="uk-input uk-form-width-small datepicker" type="text" name="expiration" value="{expiration}" size="12" id="f_expire" />
 		</div>
 	</div>
 
