@@ -5,7 +5,7 @@
  * @author      Lee Garner <lee@leegarner.com>
  * @copyright   Copyright (c) 2010-2022 Lee Garner
  * @package     subscription
- * @version     v1.1.0
+ * @version     v1.2.0
  * @license     http://opensource.org/licenses/gpl-2.0.php
  *              GNU Public License v2 or later
  * @filesource
@@ -242,28 +242,37 @@ class Plan
      * @param   integer $id Optional ID.  Current ID is used if zero.
      * @return  boolean     True if a record was read, False on failure
      */
-    public function Read($id = '')
+    public function Read(?string $id = NULL) : bool
     {
         global $_TABLES;
 
+        if (empty($id)) {
+            $id = $this->item_id;
+        }
         $id = COM_sanitizeID($id, false);
-        if ($id == '') $id = $this->item_id;
         if ($id == '') {
             $this->error = 'Invalid ID in Read()';
             return false;
         }
 
-        $sql = "SELECT * FROM {$_TABLES['subscr_products']}
-               WHERE item_id='$id' ";
-        //echo $sql;die;
-        $result = DB_query($sql);
-        if (!$result || DB_numRows($result) != 1) {
-            return false;
-        } else {
-            $row = DB_fetchArray($result, false);
-            $this->SetVars($row, true);
+        $db = Database::getInstance();
+        try {
+            $data = $db->conn->executeQuery(
+                "SELECT * FROM {$_TABLES['subscr_products']}
+                WHERE item_id = ?",
+                array($id),
+                array(Database::STRING)
+            )->fetchAssociative();
+        } catch (\Exception $e) {
+            Log::write('system', Log::ERROR, $e->getMessage());
+            $data = false;
+        }
+        if (is_array($data)) {
+            $this->SetVars($data, true);
             $this->isNew = false;
             return true;
+        } else {
+            return false;
         }
     }
 
@@ -531,7 +540,7 @@ class Plan
      * @param   array   $A      Optional array of values from $_POST
      * @return  boolean         True if no errors, False otherwise
      */
-    public function Save($A = '')
+    public function Save(?array $A = NULL) : bool
     {
         global $_TABLES, $_CONF_SUBSCR;
 
@@ -564,6 +573,9 @@ class Plan
             $expiration = 'NULL';
         }
 
+        $db = Database::getInstance();
+        $qb = $db->conn->createQueryBuilder();
+
         // Ensure prices are formatted for MySQL regardless of locale
         $price = number_format($this->price, 2, '.', '');
         $upg_price = number_format($this->upg_price, 2, '.', '');
@@ -572,20 +584,60 @@ class Plan
         if ($this->isNew) {
             Log::write('subscr_debug', Log::DEBUG, 'Preparing to save a new product.');
             $count_should_be = 0;   // item_id should not be in the DB
-            $sql1 = "INSERT INTO {$_TABLES['subscr_products']} SET
-                    item_id='{$this->item_id}', ";
-            $sql3 = '';
+            $qb->insert($_TABLES['subscr_products'])
+               ->setValue('item_id', ':item_id')
+               ->setValue('short_description', ':short_dscp')
+               ->setValue('description', ':dscp')
+               ->setValue('price', ':price')
+               ->setValue('duration', ':duration')
+               ->setValue('duration_type', ':duration_type')
+               ->setValue('bonus_duration', ':bonus_duration')
+               ->setValue('bonus_duration_type', ':bonus_duration_type')
+               ->setValue('expiration', ':expiration')
+               ->setValue('enabled', ':enabled')
+               ->setValue('show_in_block', ':show_in_block')
+               ->setValue('taxable', ':taxable')
+               ->setValue('at_registration', ':at_registration')
+               ->setValue('trial_days', ':trial_days')
+               ->setValue('grace_days', ':grace_days')
+               ->setValue('early_renewal', ':early_renewal')
+               ->setValue('addgroup', ':addgroup')
+               ->setValue('upg_from', ':upg_from')
+               ->setValue('upg_price', ':upg_price')
+               ->setValue('upg_extend_exp', ':upg_extend_exp')
+               ->setValue('grp_access', ':grp_access');
             $orig_item_id = $this->item_id;
         } else {
             Log::write('subscr_debug', Log::DEBUG, 'Preparing to update product id ' . $this->item_id);
-            $sql1 = "UPDATE {$_TABLES['subscr_products']} SET ";
+            $qb->update($_TABLES['subscr_products'])
+               ->set('item_id', ':item_id')
+               ->set('short_description', ':short_dscp')
+               ->set('description', ':dscp')
+               ->set('price', ':price')
+               ->set('duration', ':duration')
+               ->set('duration_type', ':duration_type')
+               ->set('bonus_duration', ':bonus_duration')
+               ->set('bonus_duration_type', ':bonus_duration_type')
+               ->set('expiration', ':expiration')
+               ->set('enabled', ':enabled')
+               ->set('show_in_block', ':show_in_block')
+               ->set('taxable', ':taxable')
+               ->set('at_registration', ':at_registration')
+               ->set('trial_days', ':trial_days')
+               ->set('grace_days', ':grace_days')
+               ->set('early_renewal', ':early_renewal')
+               ->set('addgroup', ':addgroup')
+               ->set('upg_from', ':upg_from')
+               ->set('upg_price', ':upg_price')
+               ->set('upg_extend_exp', ':upg_extend_exp')
+               ->set('grp_access', ':grp_access')
+               ->where('item_id = :orig_item_id');
             $count_should_be = 1;   // should be one existing record
             if ($this->item_id != $orig_item_id) {
                 Log::write('subscr_debug', Log::DEBUG, "Updating from {$orig_item_id} to {$this->item_id}");
                 $count_should_be = 0;   // When updating item_id should be absent
-                $sql1 .= "item_id = '{$this->item_id}',";
+                $qb->set('item_id', ':item_id');
             }
-            $sql3 = " WHERE item_id='{$orig_item_id}'";
         }
 
         // Check that the item_id does not already exist, or only exists once
@@ -601,85 +653,82 @@ class Plan
         // records with the new value. Do this first, before updating the
         // product, to avoid getting out of sync.
         if ($this->item_id != $orig_item_id) {
-            $sql = "UPDATE {$_TABLES['subscr_subscriptions']}
+            Subscription::changePlanId($orig_item_id, $this->item_id);
+            /*$sql = "UPDATE {$_TABLES['subscr_subscriptions']}
                     SET item_id = '{$this->item_id}'
                     WHERE item_id = '$orig_item_id'";
             DB_query($sql);
             if (DB_error()) {
                 $this->Errors[] = "Failed updating subscriptions to {$this->item_id}";
                 return false;
-            }
+            }*/
         }
 
-        $sql2 = "short_description = '" .
-                        DB_escapeString($this->short_description) . "',
-                description = '" . DB_escapeString($this->description) . "',
-                price = '$price',
-                duration = '{$this->duration}',
-                duration_type = '" . DB_escapeString($this->duration_type). "',
-                bonus_duration = '{$this->bonus_duration}',
-                bonus_duration_type = '" . DB_escapeString($this->bonus_duration_type). "',
-                expiration = $expiration,
-                enabled = '{$this->enabled}',
-                show_in_block = '{$this->show_in_block}',
-                taxable = '{$this->taxable}',
-                at_registration = '{$this->at_registration}',
-                trial_days = '{$this->trial_days}',
-                grace_days = '{$this->grace_days}',
-                early_renewal = '{$this->early_renewal}',
-                addgroup = '{$this->addgroup}',
-                upg_from = '{$this->upg_from}',
-                upg_price = '$upg_price',
-                upg_extend_exp = '{$this->upg_extend_exp}',
-                grp_access = '{$this->grp_access}'";
-        $sql = $sql1 . $sql2 . $sql3;
-        //echo $sql;die;
-        Log::write('subscr_debug', Log::DEBUG, $sql);
-        DB_query($sql);
-        if (DB_error()) {
-            $status = false;
-        } else {
+        $qb->setParameter('short_dscp', $this->short_description, Database::STRING)
+            ->setParameter('dscp', $this->description, Database::STRING)
+            ->setParameter('price', $price, Database::STRING)
+            ->setParameter('duration', $this->duration, Database::INTEGER)
+            ->setParameter('duration_type', $this->duration_type, Database::STRING)
+            ->setParamter('bonus_duration', $this->bonus_duration, Database::INTEGER)
+            ->setParameter('bonus_duration_type', $this->bonus_duration_type, Database::STRING)
+            ->setParameter('expiration', $expiration, Database::STRING)
+            ->setParameter('enabled', $this->enabled, Database::INTEGER)
+            ->setParameter('show_in_block', $this->show_in_block, Database::INTEGER)
+            ->setParameter('taxable', $this->taxable, Database::INTEGER)
+            ->setParameter('at_registration', $this->at_registration, Database::INTEGER)
+            ->setParameter('trial_days', $this->trial_days, Database::INTEGER)
+            ->setParameter('grace_days', $this->grace_days, Database::INTEGER)
+            ->setParameter('early_renewal', $this->early_renewal, Database::INTEGER)
+            ->setParameter('addgroup', $this->addgroup, Database::INTEGER)
+            ->setParameter('upg_from', $this->upg_from, Database::STRING)
+            ->setParameter('upg_price', $upg_price, Database::STRING)
+            ->setParameter('upg_extend_exp', $this->upg_extend_exp, Database::INTEGER)
+            ->setParameter('grp_access', $this->upg_extend_exp, Database::INTEGER)
+            ->setParameter('item_id', $this->item_id, Database::STRING)
+            ->setParameter('orig_item_id', $orig_item_id, Database::STRING);
+        try {
+            $qb->execute();
             $status = true;
+        } catch (\Exception $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+            $status = false;
         }
+
         // Clear all products since updates may affect listings
         Cache::clear('plans');
         $cache_key = 'plan_' . $this->item_id;
         Cache::set($cache_key, $this, 'plans');
         PLG_itemSaved($this->item_id, $_CONF_SUBSCR['pi_name'], $orig_item_id);
-
-        Log::write('subscr_debug', Log::DEBUG, 'Status of last update: ' . print_r($status,true));
-        if (!$this->hasErrors()) {
-            Log::write('subscr_debug', Log::DEBUG,
-                'Update of product ' . $this->item_id . ' succeeded.'
-            );
-            return true;
-        } else {
-            Log::write('subscr_debug', Log::DEBUG,
-                'Update of product ' . $this->item_id . ' failed.'
-            );
-            return false;
-        }
+        return $status;
     }
 
 
     /**
      * Delete the current product record from the database.
-     *
-     * @return  boolean     True on success, False if item not valid
      */
-    public function Delete()
+    public function Delete() : void
     {
         global $_TABLES, $_CONF_SUBSCR;
 
-        if ($this->item_id == '')
-            return false;
+        if ($this->item_id == '') {
+            return;
+        }
 
-        DB_delete($_TABLES['subscr_products'], 'item_id', $this->item_id);
-        // Clear all products since updates may affect listings
-        Cache::clear('plans');
-        PLG_itemDeleted($this->item_id, $_CONF_SUBSCR['pi_name']);
-        $this->item_id = '';
-        return true;
+        $db = Database::getInstance();
+        try {
+            $db->conn->delete(
+                $_TABLES['subscr_products'],
+                array('item_id'),
+                array($this->item_id),
+                array(Database::STRING)
+            );
+            // Clear all products since updates may affect listings
+            Cache::clear('plans');
+            PLG_itemDeleted($this->item_id, $_CONF_SUBSCR['pi_name']);
+            $this->item_id = '';
+        } catch (\Exception $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+        }
     }
 
 
@@ -838,10 +887,10 @@ class Plan
      *
      * @param   integer $oldvalue   Original value to change
      * @param   string  $varname    Field name to change
-     * @param   integer $id         ID number of plan to modify
+     * @param   string  $id         ID number of plan to modify
      * @return          New value, or old value upon failure
      */
-    private static function _toggle($oldvalue, $varname, $id)
+    private static function _toggle(int $oldvalue, string $varname, string $id) : int
     {
         global $_TABLES;
 
@@ -849,15 +898,19 @@ class Plan
         $newvalue = $oldvalue == 1 ? 0 : 1;
         $id = COM_sanitizeID($id);
 
-        $sql = "UPDATE {$_TABLES['subscr_products']}
-                SET $varname=$newvalue
-                WHERE item_id='" . DB_escapeString($id) . "'";
-        //echo $sql;die;
-        DB_query($sql);
-        if (!DB_error()) {
+        $db = Database::getInstance();
+        try {
+            $db->conn->executeStatement(
+                "UPDATE {$_TABLES['subscr_products']}
+                SET $varname = ?
+                WHERE item_id='" . DB_escapeString($id) . "'",
+                array($newvalue, $id),
+                array(Database::INTEGER, Database::STRING)
+            );
             Cache::clearAnyTags(array('plans_ena_1', 'plans_ena_0', 'plan_' . $id));
             return $newvalue;
-        } else {
+        } catch (\Exception $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
             return $oldvalue;
         }
     }
@@ -882,20 +935,40 @@ class Plan
         $T->set_file(array(
             'detail'  => 'plan_detail.thtml',
         ));
+
+        $db = Database::getInstance();
         // Check the expiration for the current user
         if (!COM_isAnonUser()) {
-            $sql = "SELECT expiration,
-                UNIX_TIMESTAMP(expiration) as exp_date,
-                UNIX_TIMESTAMP(expiration - INTERVAL
+            try {
+                $data = $db->conn->executeQuery(
+                    "SELECT expiration,
+                    UNIX_TIMESTAMP(expiration) as exp_date,
+                    UNIX_TIMESTAMP(expiration - INTERVAL
                         {$_CONF_SUBSCR['early_renewal']} DAY) AS early_renewal,
-                UNIX_TIMESTAMP(expiration + INTERVAL
+                    UNIX_TIMESTAMP(expiration + INTERVAL
                         {$_CONF_SUBSCR['grace_days']} DAY) AS late_renewal
-                FROM {$_TABLES['subscr_subscriptions']}
-                WHERE item_id='" . $this->item_id . "'
-                AND uid='{$_USER['uid']}'";
-            $A = DB_fetchArray(DB_query($sql), false);
-            if (!empty($A)) {
-                $dt = new \Date($A['exp_date'], $_CONF['timezone']);
+                    FROM {$_TABLES['subscr_subscriptions']}
+                    WHERE item_id='" . $this->item_id . "'
+                    AND uid='{$_USER['uid']}'",
+                    array(
+                        $_CONF_SUBSCR['early_renewal'],
+                        $_CONF_SUBSCR['grace_days'],
+                        $this->item_id,
+                        $_USER['uid'],
+                    ),
+                    array(
+                        Database::INTEGER,
+                        Database::INTEGER,
+                        Database::STRING,
+                        Database::INTEGER,
+                    )
+                )->fetchAssociative();
+            } catch (\Exception $e) {
+                Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+                $data = false;
+            }
+            if (!empty($data)) {
+                $dt = new \Date($data['exp_date'], $_CONF['timezone']);
                 $T->set_var(
                     'exp_msg',
                     sprintf(
@@ -904,8 +977,8 @@ class Plan
                     )
                 );
                 $tm = time();
-                if ($A['early_renewal'] < $tm ||
-                    ($A['late_renewal'] > $tm && $A['exp_date'] <= $tm)) {
+                if ($data['early_renewal'] < $tm ||
+                    ($data['late_renewal'] > $tm && $data['exp_date'] <= $tm)) {
                     $T->set_var('renew_now', 'true');
                 }
             }
@@ -967,7 +1040,7 @@ class Plan
      * @param   integer $id         ID number of element to modify
      * @return          New value, or old value upon failure
      */
-    public static function toggleEnabled($oldvalue, $id)
+    public static function toggleEnabled(int $oldvalue, string $id) : int
     {
         $oldvalue = $oldvalue == 1 ? 1 : 0;
         return self::_toggle($oldvalue, 'enabled', $id);
@@ -981,16 +1054,17 @@ class Plan
      * @param   string  $id     Plan ID to check
      * @return  boolean     True if used, False if not
      */
-    public static function isUsed($id)
+    public static function isUsed(string $id) : bool
     {
         global $_TABLES;
 
-        $id = COM_sanitizeID($id, false);
-        if (DB_count($_TABLES['subscr_subscriptions'], 'item_id', $id) > 0) {
-            return true;
-        } else {
-            return false;
+        $db = Database::getInstance();
+        try {
+            $count = $db->getCount($_TABLES['subscr_subscriptions'], 'item_id', $id, Database::STRING);
+        } catch (\Exception $e) {
+            $count = 0;
         }
+        return $count > 0;
     }
 
 
@@ -1137,25 +1211,37 @@ class Plan
      * @param   integer $enabled    1 or 0
      * @return  array       Array of product objects
      */
-    public static function getPlans($enabled = 1)
+    public static function getPlans($enabled = 1) : array
     {
         global $_TABLES;
 
         $enabled = $enabled == 1 ? 1 : 0;
-        $sql = "SELECT * FROM {$_TABLES['subscr_products']}
-            WHERE enabled = $enabled";
-        if (!SUBSCR_isAdmin()) {
-            $sql .= SEC_buildAccessSql();
-        }
-        $cache_key = 'plans_' . md5($sql);
+        $cache_key = 'plans_' . $enabled;
         $retval = Cache::get($cache_key);
         if ($retval === NULL) {
-            $result = DB_query($sql);
             $retval = array();
-            while ($A = DB_fetchArray($result, false)) {
-                $retval[$A['item_id']] = new self($A);
+            $db = Database::getInstance();
+            try {
+                $sql = "SELECT * FROM {$_TABLES['subscr_products']}
+                    WHERE enabled = ?";
+                if (!SUBSCR_isAdmin()) {
+                    $sql .= SEC_buildAccessSql();
+                }
+                $data = $db->conn->executeQuery(
+                    $sql,
+                    array($enabled),
+                    array(Database::INTEGER)
+                )->fetchAllAssociative();
+            } catch (\Exception $e) {
+                Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+                $data = false;
             }
-            Cache::set($cache_key, $retval, 'plans');
+            if (!empty($data)) {
+                foreach ($data as $A) {
+                    $retval[$A['item_id']] = new self($A);
+                }
+                Cache::set($cache_key, $retval, 'plans');
+            }
         }
         return $retval;
     }
