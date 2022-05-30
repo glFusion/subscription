@@ -99,7 +99,6 @@ class Cache
     public static function clearGroup($grp_id, $uid)
     {
         $tags = array('menu', 'groups', 'group_' . $grp_id, 'user_' . $uid);
-        SUBSCR_debug("Clearing cache for user $uid, group $grp_id");
         return self::clearAnyTags($tags);
     }
 
