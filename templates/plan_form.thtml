@@ -1,4 +1,7 @@
 {# begin {templatelocation} #}
+<script src="{site_url}/javascript/addons/datetime/jquery.datetimepicker.full.min.js" type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="{site_url}/javascript/addons/datetime/jquery.datetimepicker.min.css"/ >
+<script src="{site_url}/javascript/addons/datetime/datetimepicker.js" type="text/javascript"></script>
 <script>
 $(document).ready(function() {
 	update_duration_type("{dur_type}");
@@ -42,8 +45,8 @@ function update_duration_type(opt)
 				<span id="duration" class="tooltip_cfg tooltipstered"></span>
 			</label>
 			<div class="uk-form-controls">
-				<input type=text name="duration" value="{duration}" id="f_duration">
-				<select name="duration_type" onchange="javascript:update_duration_type(this.value);">
+				<input type="text" class="uk-input uk-form-width-small" name="duration" value="{duration}" id="f_duration">
+				<select class="uk-select uk-form-width-small" name="duration_type" onchange="javascript:update_duration_type(this.value);">
 					<option value="day" {sel_day}>{$LANG_SUBSCR['day']}</option>
 					<option value="week" {sel_week}>{$LANG_SUBSCR['week']}</option>
 					<option value="month" {sel_month}>{$LANG_SUBSCR['month']}</option>
@@ -58,7 +61,7 @@ function update_duration_type(opt)
 				<span id="expiration" class="tooltip_cfg tooltipstered"></span>
 			</label>
 			<div class="uk-form-controls">
-				<input type=text name="expiration" value="{expiration}" id="f_expiration">
+				<input type="text" name="expiration" value="{expiration}" id="f_expiration" autocomplete="off" class="uk-input uk-form-width-small datepicker">
 			</div>
 		</div>
 
@@ -67,7 +70,7 @@ function update_duration_type(opt)
 				<span id="price" class="tooltip_cfg tooltipstered"></span>
 			</label>
 			<div class="uk-form-controls">
-				<input type=text name="price" value="{price}" id="f_price">
+				<input type="text" class="uk-input uk-form-width-small" name="price" value="{price}" id="f_price">
 			</div>
 		</div>
 
@@ -76,7 +79,7 @@ function update_duration_type(opt)
 				<span id="addgroup" class="tooltip_cfg tooltipstered"></span>
 			</label>
 			<div class="uk-form-controls">
-				<select name="addgroup" value="{addgroup}" id="f_addgroup">
+				<select class="uk-select uk-form-width-small" name="addgroup" value="{addgroup}" id="f_addgroup">
 					{addgroup_sel}
 				</select>
 			</div>
@@ -87,7 +90,7 @@ function update_duration_type(opt)
 				<span id="short_dscp" class="tooltip_cfg tooltipstered"></span>
 			</label>
 			<div class="uk-form-controls">
-				<input type="text" id="f_short_desc" name="short_description" size="60" maxlength="255"
+				<input type="text" class="uk-input" id="f_short_desc" name="short_description" size="60" maxlength="255"
 					value="{short_description}">
 			</div>
 		</div>
@@ -106,7 +109,7 @@ function update_duration_type(opt)
 				<span id="enabled" class="tooltip_cfg tooltipstered"></span>
 			</label>
 			<div class="uk-form-controls">
-				<input type="checkbox" id="f_enabled" name="enabled" value="1" {ena_chk}>
+				<input type="checkbox" class="uk-checkbox" id="f_enabled" name="enabled" value="1" {ena_chk}>
 			</div>
 		</div>
 
@@ -197,9 +200,7 @@ function update_duration_type(opt)
 				value="{$LANG_SUBSCR['submit']}" />{$LANG_SUBSCR['submit']}</button>
 			<button class="uk-button" type="reset" name="reset"
 				value="{$LANG_SUBSCR['clearform']}" />{$LANG_SUBSCR['clearform']}</button>
-			<button class="uk-button uk-button-primary" type="button" name="cancel"
-				onClick="document.location.href='{site_admin_url}/plugins/subscription/index.php;" 
-				value="{$LANG_ADMIN['cancel']}" />{$LANG_ADMIN['cancel']}</button>
+			<a class="uk-button uk-button-primary" href="{site_admin_url}/plugins/subscription/index.php">{$LANG_ADMIN['cancel']}</a>
 
 {!if candelete}
 			<button class="uk-button uk-button-danger" name="deleteproduct" value="{$LANG_ADMIN['delete']}"
@@ -209,12 +210,5 @@ function update_duration_type(opt)
 		</div>
 	</div>
 </form>
-<script>
-$( function() {
-	$("#f_expiration").datepicker({
-		dateFormat: "yy-mm-dd"
-	});
-} );
-</script>
 {tooltipster_js}
 {# end {templatelocation} #}

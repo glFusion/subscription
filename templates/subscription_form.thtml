@@ -35,7 +35,7 @@
 			<span id="expiration" class="tooltip_cfg tooltipstered"></span>
 		</label>
 		<div class="uk-form-controls">
-			<input class="uk-input uk-form-width-small datepicker" type="text" name="expiration" value="{expiration}" size="12" id="f_expire" />
+			<input class="uk-input uk-form-width-small datepicker" autocomplete="off" type="text" name="expiration" value="{expiration}" size="12" id="f_expire" />
 		</div>
 	</div>
 
