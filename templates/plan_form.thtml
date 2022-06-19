@@ -45,7 +45,7 @@ function update_duration_type(opt)
 				<span id="duration" class="tooltip_cfg tooltipstered"></span>
 			</label>
 			<div class="uk-form-controls">
-				<input type="text" class="uk-input uk-form-width-small" name="duration" value="{duration}" id="f_duration">
+				<input type="number" class="uk-input uk-form-width-small" name="duration" value="{duration}" id="f_duration">
 				<select class="uk-select uk-form-width-small" name="duration_type" onchange="javascript:update_duration_type(this.value);">
 					<option value="day" {sel_day}>{$LANG_SUBSCR['day']}</option>
 					<option value="week" {sel_week}>{$LANG_SUBSCR['week']}</option>
@@ -79,7 +79,7 @@ function update_duration_type(opt)
 				<span id="addgroup" class="tooltip_cfg tooltipstered"></span>
 			</label>
 			<div class="uk-form-controls">
-				<select class="uk-select uk-form-width-small" name="addgroup" value="{addgroup}" id="f_addgroup">
+				<select class="uk-select" name="addgroup" value="{addgroup}" id="f_addgroup">
 					{addgroup_sel}
 				</select>
 			</div>
@@ -90,7 +90,7 @@ function update_duration_type(opt)
 				<span id="short_dscp" class="tooltip_cfg tooltipstered"></span>
 			</label>
 			<div class="uk-form-controls">
-				<input type="text" class="uk-input" id="f_short_desc" name="short_description" size="60" maxlength="255"
+				<input class="uk-input uk-form-width-large" type="text" class="uk-input" id="f_short_desc" name="short_description" maxlength="255"
 					value="{short_description}">
 			</div>
 		</div>
@@ -118,7 +118,7 @@ function update_duration_type(opt)
 				<span id="show_in_block" class="tooltip_cfg tooltipstered"></span>
 			</label>
 			<div class="uk-form-controls">
-				<input type="checkbox" id="f_show_in_block" name="show_in_block" value="1" {block_chk}>
+				<input class="uk-checkbox" type="checkbox" id="f_show_in_block" name="show_in_block" value="1" {block_chk}>
 			 </div>
 		</div>
 
@@ -127,7 +127,7 @@ function update_duration_type(opt)
 				<span id="taxable" class="tooltip_cfg tooltipstered"></span>
 			</label>
 			<div class="uk-form-controls">
-				<input type="checkbox" id="f_taxable" name="taxable" value="1" {taxable_chk}>
+				<input class="uk-checkbox" type="checkbox" id="f_taxable" name="taxable" value="1" {taxable_chk}>
 			</div>
 		</div>
 
@@ -136,7 +136,7 @@ function update_duration_type(opt)
 				<span id="at_registration" class="tooltip_cfg tooltipstered"></span>
 			</label>
 			<div class="uk-form-controls">
-				<input type="checkbox" name="at_registration" value="1" {register_chk} />
+				<input class="uk-checkbox" type="checkbox" name="at_registration" value="1" {register_chk} />
 			</div>
 		</div>
 
@@ -145,7 +145,7 @@ function update_duration_type(opt)
 				<span id="trial_days" class="tooltip_cfg tooltipstered"></span>
 			</label>
 			<div class="uk-form-controls">
-				<input type=text name="trial_days" value="{trial_days}" id="f_trial_days">
+				<input class="uk-input uk-form-width-small" type="number" name="trial_days" value="{trial_days}" id="f_trial_days">
 			</div>
 		</div>
 
@@ -154,7 +154,7 @@ function update_duration_type(opt)
 				<span id="grace_days" class="tooltip_cfg tooltipstered"></span>
 			</label>
 			<div class="uk-form-controls">
-				<input type=text name="grace_days" value="{grace_days}" id="f_grace_days">
+				<input class="uk-input uk-form-width-small" type="number" name="grace_days" value="{grace_days}" id="f_grace_days">
 			</div>
 		</div>
 
@@ -163,7 +163,7 @@ function update_duration_type(opt)
 				<span id="early_renewal" class="tooltip_cfg tooltipstered"></span>
 			</label>
 			<div class="uk-form-controls">
-				<input type=text id="f_early_renewal" name="early_renewal" value="{early_renewal}">
+				<input class="uk-input uk-form-width-small" type="number" id="f_early_renewal" name="early_renewal" value="{early_renewal}">
 			</div>
 		</div>
 
@@ -172,8 +172,8 @@ function update_duration_type(opt)
 				<span id="bonus_duration" class="tooltip_cfg tooltipstered"></span>
 			</label>
 			<div class="uk-form-controls">
-				<input type=text name="bonus_duration" value="{bonus_duration}" id="f_bonus_duration">
-				<select name="bonus_duration_type">
+				<input class="uk-input uk-form-width-small" type="number" name="bonus_duration" value="{bonus_duration}" id="f_bonus_duration">
+				<select class="uk-select uk-form-width-small" name="bonus_duration_type">
 					<option value="day" {sel_bonus_day}>{$LANG_SUBSCR['day']}</option>
 					<option value="week" {sel_bonus_week}>{$LANG_SUBSCR['week']}</option>
 					<option value="month" {sel_bonus_month}>{$LANG_SUBSCR['month']}</option>
@@ -187,7 +187,7 @@ function update_duration_type(opt)
 				<span id="grp_access" class="tooltip_cfg tooltipstered"></span>
 			</label>
 			<div class="uk-form-controls">
-				<select id="grp_access" name="grp_access">
+				<select class="uk-select" id="grp_access" name="grp_access">
 					{group_options}
 				</select>
 			</div>
