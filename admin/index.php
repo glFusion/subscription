@@ -41,7 +41,7 @@ $expected = array(
     'edit', 'cancel',
     'saveproduct', 'deleteproduct',
     'savesubscription', 'deletesubscription',
-    'renewbutton_x', 'cancelbutton_x',
+    'renewbutton_x', 'deletebutton_x',
     'resetratings', 'test',
     // Views
     'editproduct', 'products', 'subscriptions',
@@ -63,7 +63,6 @@ if ($action == 'mode') {
     // Catch the old "mode=xxx" format
     $action = $actionval;
 }
-
 
 // Get the mode and page name, if any
 //$view = isset($_REQUEST['view']) ?
@@ -129,9 +128,12 @@ case 'deletesubscription':
     echo COM_refresh(SUBSCR_ADMIN_URL . '/index.php?subscriptions');
     break;
 
-case 'cancelbutton_x':
-//case 'delMultiSub':
-    if (isset($_POST['delitem']) && is_array($_POST['delitem'])) {
+case 'deletebutton_x':
+    if (
+        isset($_POST['delitem']) &&
+        is_array($_POST['delitem']) &&
+        !empty($_POST['delitem'])
+    ) {
         foreach ($_POST['delitem'] as $item) {
             Subscription\Subscription::CancelByID($item);
         }
@@ -140,8 +142,11 @@ case 'cancelbutton_x':
     break;
 
 case 'renewbutton_x':
-    if (isset($_POST['delitem']) && is_array($_POST['delitem']) &&
-            !empty($_POST['delitem'])) {
+    if (
+        isset($_POST['delitem']) &&
+        is_array($_POST['delitem']) &&
+        !empty($_POST['delitem'])
+    ) {
         $S = new Subscription\Subscription();
         foreach ($_POST['delitem'] as $item) {
             $S->Read($item);
