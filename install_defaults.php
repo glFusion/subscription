@@ -194,10 +194,9 @@ $subscrConfigData = array(
 /**
  * Initialize Subscriptions plugin configuration.
  *
- * @param   integer $group_id   Group ID to use as the plugin's admin group
  * @return  boolean             true: success; false: an error occurred
  */
-function plugin_initconfig_subscription($group_id = 0)
+function plugin_initconfig_subscription() : bool
 {
     global $subscrConfigData;
 

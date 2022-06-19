@@ -144,13 +144,7 @@ function plugin_install_subscription()
  */
 function plugin_load_configuration_subscription()
 {
-    global $_CONF, $_CONF_SUBSCR, $_TABLES;
-
-    // Get the group ID that was saved previously.
-    $group_id = (int)DB_getItem($_TABLES['groups'], 'grp_id',
-            "grp_name='{$_CONF_SUBSCR['pi_name']} Admin'");
-
-    return plugin_initconfig_subscription($group_id);
+    return plugin_initconfig_subscription();
 }
 
 
