@@ -565,16 +565,16 @@ class Plan
             return false;
         }
 
+        $db = Database::getInstance();
+
         // Don't escape a NULL expiration or it ends up as '0000-00-00'
         $expiration = $this->expiration;
-        if ($expiration !== NULL) {
-            $expiration = "'" . DB_escapeString($expiration) . "'";
+        /*if ($expiration !== NULL) {
+            $expiration = $db->conn->quote($expiration);
         } else {
-            $expiration = 'NULL';
-        }
+            $expiration = NULL;
+        }*/
 
-        $db = Database::getInstance();
-        $qb = $db->conn->createQueryBuilder();
 
         // Ensure prices are formatted for MySQL regardless of locale
         $price = number_format($this->price, 2, '.', '');
@@ -582,71 +582,97 @@ class Plan
 
         // Insert or update the record, as appropriate
         if ($this->isNew) {
-            Log::write('subscr_debug', Log::DEBUG, 'Preparing to save a new product.');
             $count_should_be = 0;   // item_id should not be in the DB
-            $qb->insert($_TABLES['subscr_products'])
-               ->setValue('item_id', ':item_id')
-               ->setValue('short_description', ':short_dscp')
-               ->setValue('description', ':dscp')
-               ->setValue('price', ':price')
-               ->setValue('duration', ':duration')
-               ->setValue('duration_type', ':duration_type')
-               ->setValue('bonus_duration', ':bonus_duration')
-               ->setValue('bonus_duration_type', ':bonus_duration_type')
-               ->setValue('expiration', ':expiration')
-               ->setValue('enabled', ':enabled')
-               ->setValue('show_in_block', ':show_in_block')
-               ->setValue('taxable', ':taxable')
-               ->setValue('at_registration', ':at_registration')
-               ->setValue('trial_days', ':trial_days')
-               ->setValue('grace_days', ':grace_days')
-               ->setValue('early_renewal', ':early_renewal')
-               ->setValue('addgroup', ':addgroup')
-               ->setValue('upg_from', ':upg_from')
-               ->setValue('upg_price', ':upg_price')
-               ->setValue('upg_extend_exp', ':upg_extend_exp')
-               ->setValue('grp_access', ':grp_access');
-            $orig_item_id = $this->item_id;
         } else {
-            Log::write('subscr_debug', Log::DEBUG, 'Preparing to update product id ' . $this->item_id);
-            $qb->update($_TABLES['subscr_products'])
-               ->set('item_id', ':item_id')
-               ->set('short_description', ':short_dscp')
-               ->set('description', ':dscp')
-               ->set('price', ':price')
-               ->set('duration', ':duration')
-               ->set('duration_type', ':duration_type')
-               ->set('bonus_duration', ':bonus_duration')
-               ->set('bonus_duration_type', ':bonus_duration_type')
-               ->set('expiration', ':expiration')
-               ->set('enabled', ':enabled')
-               ->set('show_in_block', ':show_in_block')
-               ->set('taxable', ':taxable')
-               ->set('at_registration', ':at_registration')
-               ->set('trial_days', ':trial_days')
-               ->set('grace_days', ':grace_days')
-               ->set('early_renewal', ':early_renewal')
-               ->set('addgroup', ':addgroup')
-               ->set('upg_from', ':upg_from')
-               ->set('upg_price', ':upg_price')
-               ->set('upg_extend_exp', ':upg_extend_exp')
-               ->set('grp_access', ':grp_access')
-               ->where('item_id = :orig_item_id');
-            $count_should_be = 1;   // should be one existing record
-            if ($this->item_id != $orig_item_id) {
-                Log::write('subscr_debug', Log::DEBUG, "Updating from {$orig_item_id} to {$this->item_id}");
-                $count_should_be = 0;   // When updating item_id should be absent
-                $qb->set('item_id', ':item_id');
-            }
+            $count_should_be = $this->item_id == $orig_item_id ? 1 : 0;
         }
 
         // Check that the item_id does not already exist, or only exists once
         // if updating the same ID
-        $c = DB_count($_TABLES['subscr_products'], 'item_id', $this->item_id);
+        $c = $db->getCount(
+            $_TABLES['subscr_products'],
+            array('item_id'),
+            array($this->item_id),
+            array(Database::STRING)
+        );
         if ($c > $count_should_be) {
             Log::write('subscr_debug', Log::DEBUG, "Item {$this->item_id} already exists, cannot add");
             $this->Errors[] = "Item {$this->item_id} already exists, cannot create";
             return false;
+        }
+
+        $values = array(
+            'short_dscp' => $this->short_description,
+            'dscp' => $this->description,
+            'price' => $price,
+            'duration' => $this->duration,
+            'duration_type' => $this->duration_type,
+            'bonus_duration' => $this->bonus_duration,
+            'bonus_duration_type' => $this->bonus_duration_type,
+            'expiration' => $expiration,
+            'enabled' => $this->enabled,
+            'show_in_block' => $this->show_in_block,
+            'taxable' => $this->taxable,
+            'at_registration' => $this->at_registration,
+            'trial_days' => $this->trial_days,
+            'grace_days' => $this->grace_days,
+            'early_renewal' => $this->early_renewal,
+            'addgroup' => $this->addgroup,
+            'upg_from' => $this->upg_from,
+            'upg_price' => $upg_price,
+            'upg_extend_exp' => $this->upg_extend_exp,
+            'grp_access' => $this->upg_extend_exp,
+            'item_id' => $this->item_id,
+            'orig_item_id' => $orig_item_id,
+        );
+        $types = array(
+            Database::STRING,
+            Database::STRING,
+            Database::STRING,
+            Database::INTEGER,
+            Database::STRING,
+            Database::INTEGER,
+            Database::STRING,
+            Database::STRING,
+            Database::INTEGER,
+            Database::INTEGER,
+            Database::INTEGER,
+            Database::INTEGER,
+            Database::INTEGER,
+            Database::INTEGER,
+            Database::INTEGER,
+            Database::INTEGER,
+            Database::STRING,
+            Database::STRING,
+            Database::INTEGER,
+            Database::INTEGER,
+            Database::STRING,
+            Database::STRING,
+        );
+
+        if ($this->isNew) {
+            Log::write('subscr_debug', Log::DEBUG, 'Preparing to save a new product.');
+            try {
+                $db->conn->insert($_TABLES['subscr_products'], $values, $types);
+            } catch (\Exception $e) {
+                Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+                return false;
+            }
+            $orig_item_id = $this->item_id;
+        } else {
+            Log::write('subscr_debug', Log::DEBUG, 'Preparing to update product id ' . $this->item_id);
+            $types[] = Database::STRING;    // for the where
+            try {
+                $db->conn->update(
+                    $_TABLES['subscr_products'],
+                    $values,
+                    array('item_id' => $orig_item_id),
+                    $types
+                );
+            } catch (\Exception $e) {
+                Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+                return false;
+            }
         }
 
         // If the item_id has changed, update all the current subscription
@@ -654,44 +680,6 @@ class Plan
         // product, to avoid getting out of sync.
         if ($this->item_id != $orig_item_id) {
             Subscription::changePlanId($orig_item_id, $this->item_id);
-            /*$sql = "UPDATE {$_TABLES['subscr_subscriptions']}
-                    SET item_id = '{$this->item_id}'
-                    WHERE item_id = '$orig_item_id'";
-            DB_query($sql);
-            if (DB_error()) {
-                $this->Errors[] = "Failed updating subscriptions to {$this->item_id}";
-                return false;
-            }*/
-        }
-
-        $qb->setParameter('short_dscp', $this->short_description, Database::STRING)
-            ->setParameter('dscp', $this->description, Database::STRING)
-            ->setParameter('price', $price, Database::STRING)
-            ->setParameter('duration', $this->duration, Database::INTEGER)
-            ->setParameter('duration_type', $this->duration_type, Database::STRING)
-            ->setParamter('bonus_duration', $this->bonus_duration, Database::INTEGER)
-            ->setParameter('bonus_duration_type', $this->bonus_duration_type, Database::STRING)
-            ->setParameter('expiration', $expiration, Database::STRING)
-            ->setParameter('enabled', $this->enabled, Database::INTEGER)
-            ->setParameter('show_in_block', $this->show_in_block, Database::INTEGER)
-            ->setParameter('taxable', $this->taxable, Database::INTEGER)
-            ->setParameter('at_registration', $this->at_registration, Database::INTEGER)
-            ->setParameter('trial_days', $this->trial_days, Database::INTEGER)
-            ->setParameter('grace_days', $this->grace_days, Database::INTEGER)
-            ->setParameter('early_renewal', $this->early_renewal, Database::INTEGER)
-            ->setParameter('addgroup', $this->addgroup, Database::INTEGER)
-            ->setParameter('upg_from', $this->upg_from, Database::STRING)
-            ->setParameter('upg_price', $upg_price, Database::STRING)
-            ->setParameter('upg_extend_exp', $this->upg_extend_exp, Database::INTEGER)
-            ->setParameter('grp_access', $this->upg_extend_exp, Database::INTEGER)
-            ->setParameter('item_id', $this->item_id, Database::STRING)
-            ->setParameter('orig_item_id', $orig_item_id, Database::STRING);
-        try {
-            $qb->execute();
-            $status = true;
-        } catch (\Exception $e) {
-            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
-            $status = false;
         }
 
         // Clear all products since updates may affect listings
@@ -699,7 +687,7 @@ class Plan
         $cache_key = 'plan_' . $this->item_id;
         Cache::set($cache_key, $this, 'plans');
         PLG_itemSaved($this->item_id, $_CONF_SUBSCR['pi_name'], $orig_item_id);
-        return $status;
+        return true;
     }
 
 
@@ -900,11 +888,10 @@ class Plan
 
         $db = Database::getInstance();
         try {
-            $db->conn->executeStatement(
-                "UPDATE {$_TABLES['subscr_products']}
-                SET $varname = ?
-                WHERE item_id='" . DB_escapeString($id) . "'",
-                array($newvalue, $id),
+            $db->conn->update(
+                $_TABLES['subscr_products'],
+                array($varname => $newvalue),
+                array('item_id' => $id),
                 array(Database::INTEGER, Database::STRING)
             );
             Cache::clearAnyTags(array('plans_ena_1', 'plans_ena_0', 'plan_' . $id));
@@ -1248,6 +1235,17 @@ class Plan
 
 
     /**
+     * Get all the subscribers to this plan.
+     *
+     * @return  array       Array of Subscriber objects
+     */
+    public function getSubscribers() : array
+    {
+        return Subscription::getByPlan($this->item_id);
+    }
+
+
+    /**
      * Create an admin list of plans.
      *
      * @return  string      HTML for list
@@ -1357,7 +1355,10 @@ class Plan
         $form_arr = array();
         $query_arr = array(
             'table' => 'subscr_products',
-            'sql' => "SELECT p.*, g.grp_name, r.rating, r.votes
+            'sql' => "SELECT p.*, g.grp_name, r.rating, r.votes, (
+                SELECT count(*) FROM {$_TABLES['subscr_subscriptions']} s
+                WHERE s.item_id = p.item_id
+                ) AS subscriptions
                 FROM {$_TABLES['subscr_products']} p
                 LEFT JOIN {$_TABLES['groups']} g
                     ON g.grp_id=p.addgroup
@@ -1450,11 +1451,7 @@ class Plan
            break;
           
         case 'subscriptions':
-            $retval = (int)DB_count(
-                $_TABLES['subscr_subscriptions'],
-                'item_id',
-                $A['item_id']
-            );
+            $retval = (int)$fieldvalue;
             break;
 
         case 'rating':

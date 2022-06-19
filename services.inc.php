@@ -16,6 +16,7 @@
 if (!defined ('GVERSION')) {
     die ('This file can not be used on its own!');
 }
+use glFusion\Database\Database;
 use glFusion\Log\Log;
 
 
@@ -203,21 +204,23 @@ function service_handlePurchase_subscription($args, &$output, &$svc_msg)
         'file' => '',
     );
 
+    $db = Database::getInstance();
+
     // User ID is returned in the 'custom' field, so make sure it's numeric.
     if (!empty($ipn_data['Order'])) {
         $uid = $ipn_data['Order']->uid;
      } elseif (is_numeric($ipn_data['custom']['uid'])) {
         $uid = (int)$ipn_data['custom']['uid'];
     } else {
-        $uid = DB_getItem(
+        $uid = $db->getItem(
             $_TABLES['users'],
             'uid',
-            "email = '" . DB_escapeString($ipn_data['payer_email']) . "'"
+            array('email' => $ipn_data['payer_email'])
         );
     }
 
     Log::write('system', Log::INFO, "Processing subscription for user $uid to item {$product_id}");
-    $txn_id = SUBSCR_getVar($ipn_data, 'txn_id', 'string', 'undefined');
+    $txn_id = $ipn_data['txn_id'];
     $S = Subscription\Subscription::getInstance($uid, $product_id);
     $status = $S->withUid($uid)
                 ->withItemId($product_id)
@@ -234,7 +237,11 @@ function service_handlePurchase_subscription($args, &$output, &$svc_msg)
         if ($ref_uid > 0) {
             // update the referrer's subscription or other action
             $R = Subscription\Subscription::getInstance($ref_uid);
-            if (date('Y-m-d') <= $S->getExpiration()) {    // is subscription still valid
+            if (
+                !$R->isNew() &&
+                date('Y-m-d') <= $R->getExpiration()
+            ) {
+                // Check that subscription is valid.
                 Log::write('system', Log::INFO, "Processing affiliate bonus for user {$ref_uid} for purchase by user {$uid} of item {$product_id}");
                 $status = $R->AddBonus($S);
             }

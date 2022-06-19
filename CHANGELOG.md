@@ -1,7 +1,8 @@
 # Changelog for the Subscription plugin for glFusion
 
-## 1.1.2
+## 1.2.0
 Release TBD
+- Require glFusion 2.0.0+
 
 ## 1.1.1
 Release 2022-01-02

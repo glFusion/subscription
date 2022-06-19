@@ -65,10 +65,6 @@ class Subscription
      * @var boolean */
     private $isAdmin = false;
 
-    /** Flag to indicate that this is a new record.
-     * @var boolean */
-    private $isNew = true;
-
     /** Holder for a general-purpose date object.
      * @var object */
     private $dt = NULL;
@@ -112,7 +108,6 @@ class Subscription
             // Load variables from supplied array
             $this->setVars($id);
             $this->Plan = Plan::getInstance($this->item_id);
-            $this->isNew = false;
         } elseif ($id < 1) {
             $this->expiration = $this->dt->format('Y-m-d');
             $this->purchase_date = $this->dt->format('Y-m-d');
@@ -145,6 +140,17 @@ class Subscription
     public function getitemID()
     {
       return $this->item_id;
+    }
+
+
+    /**
+     * Get the subscriber's user ID.
+     *
+     * @return  integer     User ID
+     */
+    public function getUid() : int
+    {
+        return (int)$this->uid;
     }
 
 
@@ -263,6 +269,12 @@ class Subscription
     }
 
 
+    public function isNew() : bool
+    {
+        return $this->id == 0;
+    }
+
+
     /**
      * Sets all variables to the matching values from $rows.
      *
@@ -282,12 +294,45 @@ class Subscription
 
 
     /**
+     * Read all the subscribers for a specific plan ID.
+     *
+     * @param   string  $plan_id    Plan ID
+     * @return  array       Array of Subscriber objects
+     */
+    public static function getByPlan(string $plan_id) : array
+    {
+        global $_TABLES;
+
+        $retval = array();
+        $db = Database::getInstance();
+        try {
+            $data = $db->conn->executeQuery(
+                "SELECT * FROM {$_TABLES['subscr_subscriptions']}
+                WHERE item_id = ?",
+                array($plan_id),
+                array(Database::STRING)
+            )->fetchAllAssociative();
+        } catch (\Exception $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+            $data = false;
+        }
+        if (!empty($data)) {
+            foreach ($data as $A) {
+                $retval[$A['uid']] = new self;
+                $retval[$A['uid']]->setVars($A);
+            }
+        }
+        return $retval;
+    }
+
+
+    /**
      * Read a specific record and populate the local values.
      *
      * @param   integer $id     Optional ID.  Current ID is used if zero.
      * @return  boolean     True if a record was read, False on failure
      */
-    public function Read($id = 0)
+    public function Read(int $id = 0) : bool
     {
         global $_TABLES;
 
@@ -298,19 +343,21 @@ class Subscription
             return false;
         }
 
-        $result = DB_query(
-            "SELECT * FROM {$_TABLES['subscr_subscriptions']}
-            WHERE id='$id'"
-        );
-        if (!$result || DB_numRows($result) != 1) {
-            return false;
-        } else {
-            $row = DB_fetchArray($result, false);
+        $db = Database::getInstance();
+        try {
+            $data = $db->conn->executeQuery(
+                "SELECT * FROM {$_TABLES['subscr_subscriptions']}
+                WHERE id = ?",
+                array($id),
+                array(Database::INTEGER)
+            )->fetchAssociative();
+        } catch (\Exception $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+            $data = false;
         }
-        if (!empty($row)) {
-            $this->setVars($row, true);
-            $this->isNew = false;
-            $this->Plan = Plan::getInstance($row['item_id']);
+        if (!empty($data)) {
+            $this->setVars($data, true);
+            $this->Plan = Plan::getInstance($data['item_id']);
             return true;
         } else {
             return false;
@@ -325,25 +372,34 @@ class Subscription
      * @param   string  $item_id    Plan ID
      * @return  object      Subscription object
      */
-    public static function getInstance($uid, $item_id='')
+    public static function getInstance(int $uid, string $item_id='') : self
     {
         global $_TABLES;
 
         $uid = (int)$uid;
-        $sql = "SELECT * FROM {$_TABLES['subscr_subscriptions']}
-            WHERE uid = {$uid}";
-
+        $db = Database::getInstance();
+        $where = 'uid = ?';
+        $values = array($uid);
+        $types = array(Database::INTEGER);
         if (!empty($item_id)) {
-            $item_id= DB_escapeString($item_id);
-            $sql .= " AND item_id = '{$item_id}'";
+            $where .= ' AND item_id = ?';
+            $values[] = $item_id;
+            $types[] = Database::STRING;
         }
-        // Get the most recent subscription. Note this will need to be tweaked
-        //  when/if the site allows multiple active subscriptions per user
-        $sql .= ' ORDER BY expiration DESC LIMIT 1';
-        $res = DB_query($sql);
-        if ($res && DB_numRows($res) == 1) {
-            $A = DB_fetchArray($res, false);
-            $Obj = new self($A);
+        try {
+            $data = $db->conn->executeQuery(
+                "SELECT * FROM {$_TABLES['subscr_subscriptions']}
+                WHERE $where
+                ORDER BY expiration DESC LIMIT 1",
+                $values,
+                $types
+            )->fetchAssociative();
+        } catch (\Exception $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+            $data = false;
+        }
+        if (!empty($data)) {
+            $Obj = new self($data);
         } else {
             $Obj = new self();
         }
@@ -358,7 +414,7 @@ class Subscription
      * @param   array   $A      Optional array of values from $_POST
      * @return  boolean         True if no errors, False otherwise
      */
-    public function Save($A = '')
+    public function Save(?array $A = NULL) : bool
     {
         global $_TABLES;
 
@@ -368,7 +424,7 @@ class Subscription
 
         // If cancelling an existing subscription, just call self::_doCancel()
         if ($this->status == self::STATUS_CANCELED) {
-            if (!$this->isNew) {
+            if ($this->id != 0) {
                 return self::_doCancel();
             } else {
                 return true;    // Return success but do nothing
@@ -379,38 +435,60 @@ class Subscription
             return false;
         }
 
-        $db_expiration = DB_escapeString($this->expiration);
-        $sql = "INSERT INTO {$_TABLES['subscr_subscriptions']} SET
-                    item_id = '{$this->item_id}',
-                    uid = '" . (int)$this->uid . "',
-                    expiration = '$db_expiration',
-                    notified = '{$this->notified}',
-                    status = '{$this->status}'
-                ON DUPLICATE KEY UPDATE
-                    expiration = '$db_expiration',
-                    notified = '{$this->notified}',
-                    status = '{$this->status}'";
-        //echo $sql;die;
-        DB_query($sql, 1);
-
-        if (!DB_error()) {
-            if ($this->id == 0) {
-                // Save the ID of a new record
-                $this->id = DB_insertID();
+        $db = Database::getInstance();
+        try {
+            $db->conn->insert(
+                $_TABLES['subscr_subscriptions'],
+                array(
+                    'item_id' => $this->item_id,
+                    'uid' => $this->uid,
+                    'expiration' => $this->expiration,
+                    'notified' => $this->notified,
+                    'status' => $this->status,
+                ),
+                array(
+                    Database::INTEGER,
+                    Database::INTEGER,
+                    Database::STRING,
+                    Database::INTEGER,
+                    Database::INTEGER,
+                )
+            );
+            $this->id = $db->conn->lastInsertId();
+            $status = true;
+        } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException $k) {
+            try {
+                $db->conn->update(
+                    $_TABLES['subscr_subscriptions'],
+                    array(
+                        'expiration' => $this->expiration,
+                        'notified' => $this->notified,
+                        'status' => $this->status,
+                    ),
+                    array(
+                        Database::STRING,
+                        Database::INTEGER,
+                        Database::INTEGER,
+                    )
+                );
+                $status = true;
+            } catch (\Exception $e) {
+                Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+                $status = false;
             }
+        } catch (\Exception $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+            $status = false;
+        }
+
+        if ($status) {
             $status = true;
             $this->AddtoGroup();
-            //$this->Read();
-            $this->AddHistory();
+            $this->addHistory();
             Cache::clear('subscriptions');
         } else {
-            $status = false;
             $this->Errors[] = 'Database error, possible duplicate key.';
-            Log::write('system', Log::ERROR, __METHOD__ . ': SQL error: ' . $sql);
         }
-        /*$logmsg .= ' ' . $this->id . ' for ' .
-                COM_getDisplayName($A['uid']) . ' (' . $A['uid'] . ') ' .
-                $this->PlanName() . ", exp {$this->expiration}";*/
         Log::write('subscr_debug', Log::DEBUG, 'Status of last update: ' . print_r($status,true));
         return $status;
     }
@@ -421,7 +499,7 @@ class Subscription
      *
      * @return  boolean True on success, False on invalid ID
      */
-    public function Delete()
+    public function Delete() : bool
     {
         global $_TABLES, $_CONF_SUBSCR;
 
@@ -429,10 +507,20 @@ class Subscription
             return false;
         }
 
-        DB_delete($_TABLES['subscr_subscriptions'], 'id', $this->id);
-        Cache::clear('subscriptions');
-        $this->id = 0;
-        return true;
+        $db = Database::getInstance();
+        try {
+            $db->conn->delete(
+                $_TABLES['subscr_subscriptions'],
+                array('id' => $this->id),
+                array(Database::INTEGER)
+            );
+            Cache::clear('subscriptions');
+            $this->id = 0;
+            return true;
+        } catch (\Exception $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+            return false;
+        }
     }
 
 
@@ -441,12 +529,12 @@ class Subscription
      * This handles purchased subscriptions and calculates an expiration date.
      *
      * @uses    AddtoGroup()
-     * @uses    AddHistory()
+     * @uses    addHistory()
      * @return  boolean     True on successful update, False on error
      */
-    public function Add()
+    public function Add() : bool
     {
-        global $_TABLES;
+        global $_TABLES, $_CONF;;
 
         $today = $this->dt->format('Y-m-d');
         $this->status = self::STATUS_ENABLED;
@@ -468,7 +556,7 @@ class Subscription
             $this->duration = $P->getDuration();
         }
 
-        if ($this->isNew) {
+        if ($this->isNew()) {
             $this->expiration = $today;
         } else {
             if ($this->expiration < $today) {
@@ -487,52 +575,59 @@ class Subscription
             }
         }
 
+        $db = Database::getInstance();
+        $qb = $db->conn->createQueryBuilder();
+        if ($this->id == 0) {
+            // Create a new subscription record
+            $qb->insert($_TABLES['subscr_subscriptions'])
+               ->setValue('uid', ':uid')
+               ->setValue('item_id', ':item_id')
+               ->setValue('notified', ':notified')
+               ->setValue('expiration', ':expiration')
+               ->setValue('status', ':status');
+        } else {
+            // Update an existing subscription.  Also resets the notify flag
+            $qb->update($_TABLES['subscr_subscriptions'])
+                ->set('item_id', ':item_id')
+                ->set('expiration', ':expiration')
+                ->set('notified', ':notified')
+                ->set('status', ':status')
+                ->where('id = :id')
+                ->setParameter('id', $this->id, Database::INTEGER);
+        }
         // Set the new expiration to either the additional time, or the
         // fixed expiration date.
         if (!$this->is_upgrade || $P->upgradeExtendsExp() == 1) {
             if ($this->duration_type != 'FIXED') {
-                $expiration = "'{$this->expiration}' + INTERVAL {$this->duration} {$this->duration_type}";
+                $dt = clone $_CONF['_now'];
+                $interval = \DateInterval::createFromDateString($this->duration . ' ' . $this->duration_type);
+                $dt->add($interval);
+                $expiration = $dt->toMySQL(true);
             } else {
-                $expiration = "'" . DB_escapeString($P->getExpiration()) . "'";
+                $expiration = $P->getExpiration();
+                echo $expiration;die;
             }
         } else {
-            $expiration = "'{$this->expiration}'";
+            $expiration = $this->expiration;
         }
-
-        if ($this->id == 0) {
-            // Create a new subscription record
-            $sql1 = "INSERT INTO {$_TABLES['subscr_subscriptions']} SET
-                    uid = '{$this->uid}', ";
-            $sql3 = " ON DUPLICATE KEY UPDATE
-                    expiration = $expiration,
-                    notified = 0,
-                    status = " . self::STATUS_ENABLED;
-        } else {
-            // Update an existing subscription.  Also resets the notify flag
-            $sql1 = "UPDATE {$_TABLES['subscr_subscriptions']} SET ";
-            $sql3 = " WHERE id = '{$this->id}'";
-        }
-
-        $sql2 = "item_id = '{$this->item_id}',
-                expiration = $expiration,
-                notified = 0,
-                status = '" . self::STATUS_ENABLED . "'";
-        $sql = $sql1 . $sql2 . $sql3;
-        DB_query($sql, 1);     // Execute event record update
-        if (DB_error()) {
-            Log::write('system', Log::ERROR, __METHOD__ . "() SQL error: $sql");
-            $status = false;
-        } else {
+        $qb->setParameter('item_id', $this->item_id, Database::STRING)
+           ->setParameter('uid', $this->uid, Database::INTEGER)
+           ->setParameter('status', self::STATUS_ENABLED, Database::INTEGER)
+           ->setParameter('notified', 0, Database::INTEGER)
+           ->setParameter('expiration', $expiration, Database::STRING);
+        try {
+            $qb->execute();
             if ($this->id == 0) {
-                $this->id = DB_insertID();
+                $this->id = $db->conn->lastInsertId();
             }
             $status = true;
             $this->AddtoGroup();
             $this->Read();
-            $this->AddHistory($this->txn_id, $this->price);
-            // Now have the product update the member profile
-            //$P->updateProfile($this->expiration, $this->uid);
+            $this->addHistory($this->txn_id, $this->price);
             Cache::clear('subscriptions');
+        } catch (\Exception $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+            $status = false;
         }
         return $status;
     }
@@ -544,19 +639,34 @@ class Subscription
      * @param   string  $txn_id     Transaction ID
      * @param   float   $price      Price paid
      */
-    public function AddHistory($txn_id = '', $price = 0)
+    public function addHistory(string $txn_id, float $price = 0) : void
     {
         global $_TABLES;
 
-        $price = number_format($price, 2, '.', '');
-        $sql = "INSERT INTO {$_TABLES['subscr_history']} SET
-            item_id = '{$this->item_id}',
-            uid = '{$this->uid}',
-            txn_id = '" . DB_escapeString($txn_id) . "',
-            purchase_date = '" . $this->dt->toMySQL() . "',
-            expiration = '{$this->expiration}',
-            price = '$price'";
-        DB_query($sql, 1);
+        $db = Database::getInstance();
+        try {
+            $db->conn->insert(
+                $_TABLES['subscr_history'],
+                array(
+                    'item_id' => $this->item_id,
+                    'uid' => $this->uid,
+                    'txn_id' => $txn_id,
+                    'purchase_date' => $this->dt->toMySQL(),
+                    'expiration' => $this->expiration,
+                    'price' => $price,
+                ),
+                array(
+                    Database::STRING,
+                    Database::INTEGER,
+                    Database::STRING,
+                    Database::STRING,
+                    Database::STRING,
+                    Database::STRING,
+                )
+            );
+        } catch (\Exception $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+        }
     }
 
 
@@ -579,15 +689,23 @@ class Subscription
             return true;
         }
 
-        $expiration = "'{$this->expiration}' + INTERVAL {$P->getBonusDuration()} {$P->getBonusDurationType()}";
-        $sql = "UPDATE {$_TABLES['subscr_subscriptions']}
-                SET expiration = {$expiration}
-                WHERE id = '{$this->id}'";
-        DB_query($sql, 1);     // Execute event record update
-        if (DB_error()) {
-            Log::write('system', Log::ERROR, __METHOD__ . "() SQL error: $sql");
+        $expiration = "";
+        $db = Database::getInstance();
+        try {
+            $db->conn->executeStatement(
+                "UPDATE {$_TABLES['subscr_subscriptions']}
+                SET expiration = DATE_ADD('{$this->expiration}', INTERVAL {$P->getBonusDuration()} {$P->getBonusDurationType()})
+                WHERE id = ?",
+                array($this->id),
+                array(Database::INTEGER)
+            );
+            $status = true;
+        } catch (\Exception $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
             $status = false;
-        } else {
+        }
+
+        if ($status) {
             $this->AddReferral($S->getID());
             if ($notify) {
                 $msg = sprintf(
@@ -605,7 +723,6 @@ class Subscription
                 ) );
             }
             Cache::clear('subscriptions');
-            $status = true;
         }
         return $status;
     }
@@ -614,17 +731,30 @@ class Subscription
     /**
      * Add a referral record.
      *
-     * @param   int     $sub_id        The id of the subscription generating referral
+     * @param   integer $sub_id        The id of the subscription generating referral
      */
-    public function AddReferral($sub_id)
+    public function AddReferral(int $sub_id) : void
     {
-        global $_TABLES;
+        global $_TABLES, $_CONF;
 
-        $sql = "INSERT INTO {$_TABLES['subscr_referrals']} SET
-                referrer = '{$this->uid}',
-                subscription_id = {$sub_id},
-                purchase_date = NOW()";
-        DB_query($sql, 1);
+        $db = Database::getInstance();
+        try {
+            $db->conn->insert(
+                $_TABLES['subscr_referrals'],
+                array(
+                    'referrer' => $this->uid,
+                    'subscription_id' => $sub_id,
+                    'purchase_date' => $_CONF['_now']->toMySQL(false),
+                ),
+                array(
+                    Database::INTEGER,
+                    Database::INTEGER,
+                    Database::STRING,
+                )
+            );
+        } catch (\Exception $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+        }
     }
 
 
@@ -753,12 +883,26 @@ class Subscription
         $retval = COM_startBlock();
 
         $T = new \Template(SUBSCR_PI_PATH . '/templates');
-        $T->set_file(array('subscription' => 'subscr_detail.thtml',
-            ));
+        $T->set_file(array(
+            'subscription' => 'subscr_detail.thtml',
+        ) );
 
-        $A = DB_fetchArray(DB_query("SELECT item_id, description
+        $db = Database::getInstance();
+        try {
+            $A = $db->conn->executeQuery(
+                "SELECT item_id, description
                 FROM {$_TABLES['subscr_products']}
-                WHERE item_id='" . $this->item_id . "'"), false);
+                WHERE item_id='" . $this->item_id . "'",
+                array($this->item_id),
+                array(Database::INTEGER)
+            )->fetchAssociative();
+        } catch (\Exception $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+            $A = false;
+        }
+        if (empty($A)) {
+            return $retval;
+        }
 
         $T->set_var(array(
             'user_id'           => $this->uid,
@@ -769,28 +913,10 @@ class Subscription
             'expiration'        => $this->expiration,
             'purchase_date'     => $this->purchase_date,
         ) );
-
         $retval .= $T->parse('output', 'subscription');
         $retval .= COM_endBlock();
         return $retval;
     }
-
-
-    /*public function XX_Find($uid, $item_id)
-    {
-        global $_TABLES;
-
-        $uid = (int)$uid;
-        $item_id = COM_sanitizeID($item_id, false);
-
-        $sub_id = DB_getItem($_TABLES['subscr_subscriptions'],
-                'id', "uid=$uid AND item_id='$item_id'");
-        if (!empty($sub_id)) {
-            return $this->Read(sub_id);
-        } else {
-            return false;
-        }
-    }*/
 
 
     /**
@@ -804,7 +930,7 @@ class Subscription
      * @param   boolean $system     True if this is a system action.
      * @return  boolean             True on success, False on failure
      */
-    public static function Cancel($uid, $item_id, $system=false)
+    public static function Cancel(int $uid, string $item_id, ?bool $system=NULL)
     {
         $Sub = self::getInstance($uid, $item_id);
         return $Sub->_doCancel($system);
@@ -836,11 +962,11 @@ class Subscription
      * @param   boolean $system     True if this is a system cancellation
      * @return  boolean             True on success, False on failure
      */
-    private function _doCancel($system = false)
+    public function _doCancel($system = false)
     {
         global $_TABLES;
 
-        if ($this->isNew) return false;
+        if ($this->isNew()) return false;
 
         // Remove the subscriber from the subscription group
         USES_lib_user();
@@ -849,16 +975,26 @@ class Subscription
         USER_delGroup($this->Plan->getSubGroup(), $this->uid);
 
         // Mark the subscription as canceled and log the activity
-        $sql = "UPDATE {$_TABLES['subscr_subscriptions']} SET status='".self::STATUS_CANCELED."'
-                WHERE id='{$this->id}'";
-        DB_query($sql, 1);
-        Log::write(
-            'subscr_audit',
-            Log::INFO,
-            "Canceled subscription $this->id ({$this->Plan->getID()}) " .
-            "for user {$this->uid} (" .COM_getDisplayName($this->uid) . ')'
-        );
-        return true;
+        $db = Database::getInstance();
+        try {
+            $db->conn->update(
+                $_TABLES['subscr_subscriptions'],
+                array('status' => self::STATUS_CANCELED),
+                array('id' => $this->id),
+                array(Database::INTEGER)
+            );
+            Log::write(
+                'subscr_audit',
+                Log::INFO,
+                "Canceled subscription $this->id ({$this->Plan->getID()}) " .
+                "for user {$this->uid} (" .COM_getDisplayName($this->uid) . ')'
+            );
+            $status = true;
+        } catch (\Exception $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+            $status = false;
+        }
+        return $status;
     }
 
 
@@ -909,7 +1045,7 @@ class Subscription
     {
         global $_TABLES;
 
-        if ($this->isNew) return false;
+        if ($this->isNew()) return false;
 
         // Remove the subscriber from the subscription group
         USES_lib_user();
@@ -918,31 +1054,26 @@ class Subscription
         USER_delGroup($this->Plan->getSubGroup(), $this->uid);
 
         // Mark the subscription as expired and log the activity
-        $sql = "UPDATE {$_TABLES['subscr_subscriptions']} SET status='".self::STATUS_EXPIRED."'
-                WHERE id='{$this->id}'";
-        DB_query($sql, 1);
-        Log::write(
-            'subscr_audit',
-            Log::INFO,
-            "Marked subscription $this->id ({$this->Plan->getID()}) as expired " .
-            "for user {$this->uid} (" .COM_getDisplayName($this->uid) . '), expiring ' .
-            $this->expiration
-        );
-        return true;
-    }
-
-
-    /**
-     * Get the product name associated with this subscription.
-     *
-     * @deprecated
-     * @return string      Plan name
-     */
-    public function X_PlanName()
-    {
-        global $_TABLES;
-        return DB_getItem($_TABLES['subscr_products'], 'item_id',
-            "item_id='" . $this->item_id . "'");
+        $db = Database::getInstance();
+        try {
+            $db->conn->update(
+                $_TABLES['subscr_subscriptions'],
+                array('status' => self::STATUS_EXPIRED),
+                array('id' => $this->id),
+                array(Database::STRING)
+            );
+            Log::write(
+                'subscr_audit',
+                Log::INFO,
+                "Marked subscription $this->id ({$this->Plan->getID()}) as expired " .
+                "for user {$this->uid} (" .COM_getDisplayName($this->uid) . '), expiring ' .
+                $this->expiration
+            );
+            return true;
+        } catch (\Exception $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+            return false;
+        }
     }
 
 
@@ -976,19 +1107,32 @@ class Subscription
         if ($uid == 0) {
             $uid = $_USER['uid'];
         }
-        $uid = (int)$uid;
-        $sql = "SELECT * FROM {$_TABLES['subscr_subscriptions']}
-                WHERE uid = $uid";
+        $db = Database::getInstance();
+        $qb = $db->conn->createQueryBuilder();
+        $qb->select('*')
+           ->from($_TABLES['subscr_subscriptions'])
+           ->where('uid = :uid')
+           ->setParameter('uid', $uid, Database::INTEGER);
         if (is_array($status)) {
             $status = array_map('intval', $status);
-            $sql .= ' AND status IN (' . implode(',', $status) . ')';
+            $qb->andWhere('status IN (:statuses)')
+               ->setParameter('statuses', $status, Database::PARAM_INT_ARRAY);
         } elseif ($status > -1) {
             $status = (int)$status;
-            $sql .= " AND status = $status";
+            $qb->andWhere('status = :status')
+               ->setParameter('status', $status, Database::INTEGER);
         }
-        $res = DB_query($sql);
-        while ($A = DB_fetchArray($res, false)) {
-            $retval[$A['item_id']] = new self($A);
+         try {
+            $data = $qb->execute()->fetchAllAssociative();
+        } catch (\Exception $e) {
+            Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+            $data = false;
+        }
+
+        if (!empty($data)) {
+            foreach ($data as $A) {
+                $retval[$A['item_id']] = new self($A);
+            }
         }
         return $retval;
     }
@@ -1071,7 +1215,7 @@ class Subscription
         );
 
         $options = array('chkdelete' => 'true', 'chkfield' => 'id',
-            'chkactions' => '<input name="cancelbutton" type="image" src="'
+            'chkactions' => '<input name="deletebutton" type="image" src="'
                 . $_CONF['layout_url'] . '/images/admin/delete.' . $_IMAGE_TYPE
                 . '" style="vertical-align:text-bottom;" title="' . $LANG01[124]
                 . '" class="tooltip"'

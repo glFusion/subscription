@@ -5,7 +5,7 @@
  * @author      Lee Garner <lee@leegarner.com>
  * @copyright   Copyright (c) 2009-2022 Lee Garner <lee@leegarner.com>
  * @package     subscription
- * @version     v1.1.1
+ * @version     v1.2.0
  * @license     http://opensource.org/licenses/gpl-2.0.php 
  *              GNU Public License v2 or later
  * @filesource
@@ -16,6 +16,7 @@ global $_CONF, $_CONF_SUBSCR, $SUBSCR_UPGRADE;
 
 /** Include the table creation strings */
 require_once __DIR__ . "/sql/mysql_install.php";
+use glFusion\Database\Database;
 use glFusion\Log\Log;
 
 
@@ -139,13 +140,16 @@ function SUBSCR_do_upgrade_sql($version='', $ignore_errors=false)
             return true;
     }
 
+    $db = Database::getInstance();
+
     // Execute SQL now to perform the upgrade
     Log::write('system', Log::INFO, "-- Updating Subscription to version $version");
     foreach($SUBSCR_UPGRADE[$version] as $sql) {
         Log::write('system', Log::INFO, "--- Subscription Plugin $version update: Executing SQL");
-        DB_query($sql, 1);
-        if (DB_error()) {
-            Log::write('system', Log::ERROR, "*** SQL Error during Subscription Plugin update => $sql");
+        try {
+            $db->conn->executeStatement($sql);
+        } catch (\Exception $e) {
+            Log::write('system', Log::ERROR, __FUNCTION__ . ': ' . $e->getMessage());
             if ($ignore_errors) return false;
         }
     }
@@ -167,15 +171,20 @@ function SUBSCR_do_set_version($ver)
     global $_TABLES, $_CONF_SUBSCR;
 
     // now update the current version number.
-    $sql = "UPDATE {$_TABLES['plugins']} SET
-            pi_version = '{$_CONF_SUBSCR['pi_version']}',
-            pi_gl_version = '{$_CONF_SUBSCR['gl_version']}',
-            pi_homepage = '{$_CONF_SUBSCR['pi_url']}'
-        WHERE pi_name = '{$_CONF_SUBSCR['pi_name']}'";
-
-    $res = DB_query($sql, 1);
-    if (DB_error()) {
-        Log::write('system', Log::ERROR, "*** Error updating the {$_CONF_SUBSCR['pi_display_name']} plugin version");
+    $db = Database::getInstance();
+    try {
+        $db->conn->update(
+            $_TABLES['plugins'],
+            array(
+                'pi_version' => $_CONF_SUBSCR['pi_version'],
+                'pi_gl_version' => $_CONF_SUBSCR['gl_version'],
+                'pi_homepage' => $_CONF_SUBSCR['pi_url'],
+            ),
+            array('pi_name' => $_CONF_SUBSCR['pi_name']),
+            array(Database::STRING, Database::STRING, Database::STRING, Database::STRING)
+        );
+    } catch (\Exception $e) {
+        Log::write('system', Log::ERROR, __FUNCTION__ . ': ' . $e->getMessage());
         return false;
     } else {
         Log::write('system', Log::INFO, "--- Updated the {$_CONF_SUBSCR['pi_display_name']} plugin version to $ver");

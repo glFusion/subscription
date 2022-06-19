@@ -148,33 +148,43 @@ function plugin_showstats_subscription($showsitestats)
 
     $retval = '';
 
-    $sql = "SELECT p.item_id, COUNT(s.id) as sub_count
-            FROM {$_TABLES['subscr_products']} p
-            LEFT JOIN {$_TABLES['subscr_subscriptions']} s
-                ON p.item_id=s.item_id
-            WHERE p.enabled = 1
-            AND ( s.status = '" . Subscription\Subscription::STATUS_ENABLED . "' )
-            AND ( s.expiration > '{$_CONF['_now']->toMySQL(true)}' )
-            GROUP BY p.item_id";
-    //echo $sql;die;
-    $result = DB_query($sql);
-    $nrows  = DB_numRows ($result);
-    if ($nrows > 0) {
+    $db = Database::getInstance();
+    $qb = $db->conn->createQueryBuilder();
+    try {
+        $data = $qb->select('p.item_id', 'COUNT(s.id) AS sub_count')
+                   ->from($_TABLES['subscr_products'], 'p')
+                   ->leftJoin('p', $_TABLES['subscr_subscriptions'], 's', 's.item_id=p.item_id')
+                   ->where('p.enabled = 1')
+                   ->andWhere('s.status = :status' . Subscription\Subscription::STATUS_ENABLED)
+                   ->andWhere('s.expiration = :expiration')
+                   ->groupBy('p.item_id ASC')
+                   ->execute()
+                   ->fetchAllAssociative();
+    } catch (\Exception $e) {
+        Log::write('system', Log::ERROR, __FUNCTION__ . ': ' . $e->getMessage());
+        $data = false;
+    }
+    if (!empty($data)) {
         USES_lib_admin();
         $header_arr = array(
-            array('text' => $LANG_SUBSCR['product'],
-                    'field' => 'item_id',
-                    'header_class' => 'stats-header-title'),
-            array('text' => $LANG_SUBSCR['subscriptions'],
-                    'field' => 'sub_count',
-                    'header_class' => 'stats-header-count',
-                    'field_class' => 'stats-list-count'),
+            array(
+                'text' => $LANG_SUBSCR['product'],
+                'field' => 'item_id',
+                'header_class' => 'stats-header-title',
+            ),
+            array(
+                'text' => $LANG_SUBSCR['subscriptions'],
+                'field' => 'sub_count',
+                'header_class' => 'stats-header-count',
+                'field_class' => 'stats-list-count',
+            ),
         );
         $data_arr = array();
-        $text_arr = array('has_menu'     => false,
-                          'title'        => $LANG_SUBSCR['subscriptions'],
+        $text_arr = array(
+            'has_menu'     => false,
+            'title'        => $LANG_SUBSCR['subscriptions'],
         );
-        while ($A = DB_fetchArray($result, false)) {
+        foreach ($data as $A) {
             $A['item_id'] = "<a href=\"" . COM_buildUrl(SUBSCR_URL .
                     "/index.php?mode=detail&item_id={$A['item_id']}"). '">' .
                     htmlspecialchars($A['item_id']) . '</a>';
@@ -183,7 +193,6 @@ function plugin_showstats_subscription($showsitestats)
         }
         $retval .= ADMIN_simpleList("", $header_arr, $text_arr, $data_arr);
     }
-
     return $retval;
 }
 
@@ -197,10 +206,15 @@ function plugin_statssummary_subscription()
 {
     global $LANG_SUBSCR, $_TABLES;
 
-    $count = DB_count($_TABLES['subscr_subscriptions'],
-            'status', Subscription\Subscription::STATUS_ENABLED);
-    $retval = array($LANG_SUBSCR['subscriptions'], $count);
-    return $retval;
+    $db = Database::getInstance();
+    return array(
+        $LANG_SUBSCR['subscriptions'],
+        $db->getCount(
+            $_TABLES['subscr_subscriptions'],
+            'status',
+            Subscription\Subscription::STATUS_ENABLED
+        )
+    );
 }
 
 
@@ -358,22 +372,40 @@ function plugin_enablestatechange_subscription($enabled)
     global $_TABLES, $_PLUGINS;
 
     $enabled = $enabled == true ? 1 : 0;
+    $db = Database::getInstance();
 
     // If trying to enable the plugin but lgLib is not available,
     // take no action and return
     if ($enabled && !in_array('lglib', $_PLUGINS)) {
         // Re-disable the plugin
-        DB_change($_TABLES['plugins'], 'pi_enabled', 0, 'pi_name', 'subscription');
-        $enabled = 0;
+        try {
+            $db->conn->update(
+                $_TABLES['plugins'],
+                array('pi_enabled' => 0),
+                array('pi_name' => 'subscription'),
+                array(Database::INTEGER, Database::STRING)
+            );
+            $enabled = 0;
+        } catch (\Exception $e) {
+            Log::write('system', Log::ERROR, __FUNCTION__ . ': ' . $e->getMessage());
+        }
     }
 
 
     if ($enabled == 0) {    // Never automatically enable blocks
         $blockfns = array('phpblock_subscription_');
         foreach ($blockfns as $blockfn) {
-            DB_query("UPDATE {$_TABLES['blocks']}
-                SET is_enabled=$enabled
-                WHERE phpblockfn LIKE '{$blockfn}%'");
+            try {
+                $db->conn->update(
+                    "UPDATE {$_TABLES['blocks']}
+                    SET is_enabled = ?
+                    WHERE phpblockfn LIKE '{$blockfn}%'",
+                    array($enabled, $blockfn),
+                    array(Database::INTEGER, Database::STRING)
+                );
+            } catch (\Exception $e) {
+                Log::write('system', Log::ERROR, __FUNCTION__ . ': ' . $e->getMessage());
+            }
         }
     }
 }
@@ -392,7 +424,17 @@ function plugin_itemdeleted_subscription($id, $type)
     // If the lgLib plugin is disabled or removed, disable thie plugin
     if ($type == 'lglib' && $id == '*') {
         plugin_enablestatechange_subscription(false);
-        DB_change($_TABLES['plugins'], 'pi_enabled', 0, 'pi_name', 'subscription');
+        $db = Database::getInstance();
+        try {
+            $db->conn->update(
+                $_TABLES['plugins'],
+                array('pi_enabled' => 0),
+                array('pi_name' => 'subscription'),
+                array(Database::INTEGER, Databse::STRING)
+            );
+        } catch (\Exception $e) {
+            Log::write('system', Log::ERROR, __FUNCTION__ . ': ' . $e->getMessage());
+        }
     }
 }
 
@@ -483,27 +525,32 @@ function phpblock_subscription_subscribe()
         return $retval;
     }
 
-    $sql = "SELECT p.item_id
-            FROM {$_TABLES['subscr_products']} p
-            LEFT JOIN {$_TABLES['subscr_subscriptions']} s
-            ON s.uid = '{$_USER['uid']}' AND p.item_id = s.item_id
-            WHERE p.enabled = 1
-            AND (s.item_id IS NULL OR
-                 s.expiration <= '{$_CONF['_now']}' + INTERVAL p.early_renewal DAY)
-            AND p.show_in_block = 1";
-    //echo $sql;die;
-    $r = DB_query($sql);
+    $db = Database::getInstance();
+    $qb = $db->conn->createQueryBuilder();
+    try {
+        $stmt = $qb->select('p.item_id')
+                   ->from($_TABLES['subscr_products'], 'p')
+                   ->leftJoin('p', $_TABLES['subscr_subscriptions'], 's', 'p.item_id=s.item_id')
+                   ->where('p.enabled = 1')
+                   ->andWhere(('s.item_id IS NULL OR s.expiration <= :now  + INTERVAL p.early_renewal DAY'))
+                   ->andWhere('p.show_in_block = 1')
+                   ->setParameter('now', $_CONF['_now']->toMySQL(true), Database::STRING)
+                   ->execute();
+        $nrows = $stmt->rowCount();
+                   //->fetchAllAssociative();
+    } catch (\Exception $e) {
+        Log::write('system', Log::ERROR, __FUNCTION__ . ': ' . $e->getMessage());
+        $data = false;
+    }
 
-    // DB_numRows is checked just to save having to load the subscription
     // class if nothing needs to be shown.
-    $n = DB_numRows($r);
-    if ($n < 1) {
+    if ($nrows < 1) {
         return '';
     }
 
     $T = new Template(__DIR__ . '/templates');
     $i = 0;
-    while ($row = DB_fetchArray($r, false)) {
+    while ($row = $stmt->fetchAssociative()) {
         $P = Subscription\Plan::getInstance($row['item_id']);
         if ($P->getID() == '') continue;     // no access to this product
 
@@ -553,27 +600,34 @@ function plugin_profileblocksdisplay_subscription($uid)
         return $retval;
     }
 
-    $sql = "SELECT p.item_id, s.expiration
-            FROM {$_TABLES['subscr_subscriptions']} s
-            LEFT JOIN {$_TABLES['subscr_products']} p
-            ON s.item_id = p.item_id
-            WHERE s.uid = $uid";
-    $res = DB_query($sql);
-    if ($res && DB_numRows($res) > 0) {
+    $db = Database::getInstance();
+    $qb = $db->conn->createQueryBuilder();
+    try {
+        $data = $qb->select('p.item_id', 's.expiration')
+           ->from($_TABLES['subscr_subscriptions'], 's')
+           ->leftJoin('s', $_TABLES['subscr_products'], 'p', 'p.item_id=s.item_id')
+           ->where('s.uid = :uid')
+           ->setParameter('uid', $uid, Database::INTEGER)
+           ->execute()
+           ->fetchAllAssociative();
+    } catch (\Exception $e) {
+        Log::write('system', Log::ERROR, __FUNCTION__ . ': ' . $e->getMessage());
+        $data = false;
+    }
+    if (!empty($data)) {
         $LT = new Template(SUBSCR_PI_PATH . '/templates/');
         $LT->set_file(array(
             'block' => 'profileblock.thtml',
         ));
         $LT->set_block('block', 'subscription_row', 'srow');
 
-        while ($A = DB_fetchArray($res, false)) {
+        foreach ($data as $A) {
             $LT->set_var(array(
                 'item_id' => $A['item_id'],
                 'expires' => $A['expiration'],
             ) );
             $LT->parse('srow', 'subscription_row', true);
         }
-
         $LT->parse('output', 'block');
         $retval = $LT->finish($LT->get_var('output'));
     }
@@ -674,27 +728,35 @@ function SUBSCR_notifyExpiration()
         return;
     }
 
-    $sql = "SELECT s.*,
-                p.item_id, p.short_description, p.grace_days,
-                p.description, p.price
-            FROM {$_TABLES['subscr_subscriptions']} s
-            LEFT JOIN {$_TABLES['subscr_products']} p
-                ON p.item_id = s.item_id
-            LEFT JOIN {$_TABLES['users']} u
-                ON u.uid = s.uid
-            WHERE notified = 0
-            AND s.expiration < '{$_CONF['_now']->toMySQL(true)}' + INTERVAL {$_CONF_SUBSCR['notifydays']} DAY";
-    $r = DB_query($sql);
-    if (!$r) {
+    $db = Database::getInstance();
+    $qb = $db->conn->createQueryBuilder();
+    try {
+        $stmt = $qb->select(
+            's.*', 'p.item_id', 'p.short_description', 'p.grace_days',
+            'p.description', 'p.price', 'u.email, u.language'
+        )
+        ->from($_TABLES['subscr_subscriptions'], 's')
+        ->leftJoin('s', $_TABLES['subscr_products'], 'p', 'p.item_id=s.item_id')
+        ->leftJoin('s', $_TABLES['users'], 'u', 'u.uid=s.uid')
+        ->where('notified = 0')
+        ->andWhere('s.expiration < :now + INTERVAL :days DAY')
+        ->setParameter('now', $_CONF['_now']->toMySQL(true), Database::STRING)
+        ->setParameter('days', $_CONF_SUBSCR['notifydays'], Database::INTEGER)
+        ->execute();
+    } catch (\Exception $e) {
+        Log::write('system', Log::ERROR, __FUNCTION__ . ': ' . $e->getMessage());
+        $stmt = false;
+    }
+    if (!$stmt) {
         return;
     }
 
     $template_base = SUBSCR_PI_PATH . '/templates/notify';
 
-    while ($row = DB_fetchArray($r, false)) {
+    while ($row = $stmt->fetchAssociative()) {
         $username = COM_getDisplayName($row['uid']);
-        $email = DB_getItem($_TABLES['users'], 'email', "uid={$row['uid']}");
-        //$language = DB_getItem($_TABLES['users'], 'language', "uid={$row['uid']}");
+        $email = $row['email'];
+        //$language = $row['language'];
 
         // Include the owner's language, if possible.
         // Fallback to site language.
@@ -736,9 +798,16 @@ function SUBSCR_notifyExpiration()
         );
 
         // Mark that the expiration notification has been sent.
-        DB_query("UPDATE {$_TABLES['subscr_subscriptions']}
-                SET notified=1
-                WHERE id='{$row['id']}'");
+        try {
+            $db->conn->update(
+                $_TABLES['subscr_subscriptions'],
+                array('notified' => 1),
+                array('id' => $row['id']),
+                array(Database::INTEGER)
+                );
+        } catch (\Exception $e) {
+            Log::write('system', Log::ERROR, __FUNCTION__ . ': ' . $e->getMessage());
+        }
     }
 }
 
@@ -752,7 +821,16 @@ function plugin_user_delete_subscription($uid)
 {
     global $_TABLES;
 
-    DB_delete($_TABLES['subscr_subscriptions'], 'uid', (int)$uid);
+    $db = Database::getInstance();
+    try {
+        $db->conn->delete(
+            $_TABLES['subscr_subscriptions'],
+            array('uid' => $uid),
+            array(Database::INTEGER)
+        );
+    } catch (\Exception $e) {
+        Log::write('system', Log::ERROR, __FUNCTION__ . ': ' . $e->getMessage());
+    }
 }
 
 
@@ -801,23 +879,22 @@ function plugin_user_create_subscription($uid = 0)
  * @param   integer $origUID    Original (remote) user ID
  * @param   integer $destUID    Merged (local) user ID
  */
-function plugin_user_move_subscription($origUID, $destUID)
+function plugin_user_move_subscription(int $origUID, int $destUID) : void
 {
     global $_TABLES;
 
-    $origUID = (int)$origUID;
-    $destUID = (int)$destUID;
-
-    $sqls = array(
-        "UPDATE {$_TABLES['subscr_subscriptions']}
-            SET uid = $destUID WHERE uid = $origUID",
-        "UPDATE {$_TABLES['subscr_history']}
-            SET uid = $destUID WHERE uid = $origUID",
-    );
-    foreach($sqls as $sql) {
-        DB_query($sql, 1);
-        if (DB_error()) {
-            Log::write('system', Log::ERROR, __FUNCTION__ . ": SQL error: $sql");
+    $db = Database::getInstance();
+    $tables = array('subscr_subscriptions', 'subscr_history');
+    foreach ($tables as $table) {
+        try {
+            $db->conn->update(
+                $_TABLES[$table],
+                array('uid' => $destUID),
+                array('uid' => $origUID),
+                array(Database::INTEGER)
+            );
+        } catch (\Exception $e) {
+            Log::write('system', Log::ERROR, __FUNCTION__ . ': ' . $e->getMessage());
         }
     }
 }
@@ -872,15 +949,25 @@ function plugin_getiteminfo_subscription($id, $what, $uid=0, $options=array())
     }
 
     $retval = array();
+    $db = Database::getInstance();
     $sql = "SELECT * FROM {$_TABLES['subscr_products']} ";
+    $values = array();
+    $types = array();
     if ($id != '*') {
-        $sql .= " WHERE (item_id = '" . DB_escapeString($id) . "')";
+        $sql .= " WHERE (item_id = ?)";
+        $values[] = $id;
+        $types[] = Database::STRING;
     }
 
-    $res = DB_query($sql);
+    try {
+        $stmt = $db->conn->executeQuery($sql, $values, $types);
+    } catch (\Exception $e) {
+        Log::write('system', Log::ERROR, __FUNCTION__ . ': ' . $e->getMessage());
+        return $retval;
+    }
     $props = array();
     $item_mod = 'new';
-    while ($A = DB_fetchArray($res, false)) {
+    while ($A = $stmt->fetchAssociative()) {
         $P = new Subscription\Plan($A);
         if ($item_mod == 'upgrade') {
             // check if upgrade is possible.
@@ -1016,6 +1103,12 @@ function plugin_canuserrate_subscription($item_id, $uid)
 function Xplugin_itemrated_subscription($id, $rating, $votes)
 {
 //    return Subscription\Plan::updateRating($id, $rating, $votes);
+}
+
+
+function plugin_getsubscribers_subscription(string $plan_id) : array
+{
+    return Subscription\Subscription::getByPlan($plan_id);
 }
 
 
