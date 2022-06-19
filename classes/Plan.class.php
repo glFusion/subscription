@@ -542,7 +542,7 @@ class Plan
      */
     public function Save(?array $A = NULL) : bool
     {
-        global $_TABLES, $_CONF_SUBSCR;
+        global $_TABLES, $_CONF_SUBSCR, $LANG_SUBSCR;
 
         if (!$this->isNew) {
             // Save the original item ID by which this record was loaded
@@ -602,8 +602,8 @@ class Plan
         }
 
         $values = array(
-            'short_dscp' => $this->short_description,
-            'dscp' => $this->description,
+            'short_description' => $this->short_description,
+            'description' => $this->description,
             'price' => $price,
             'duration' => $this->duration,
             'duration_type' => $this->duration_type,
@@ -623,7 +623,7 @@ class Plan
             'upg_extend_exp' => $this->upg_extend_exp,
             'grp_access' => $this->upg_extend_exp,
             'item_id' => $this->item_id,
-            'orig_item_id' => $orig_item_id,
+            'grp_access' => $this->grp_access,
         );
         $types = array(
             Database::STRING,
@@ -648,6 +648,7 @@ class Plan
             Database::INTEGER,
             Database::STRING,
             Database::STRING,
+            Database::INTEGER,
         );
 
         if ($this->isNew) {
@@ -656,6 +657,7 @@ class Plan
                 $db->conn->insert($_TABLES['subscr_products'], $values, $types);
             } catch (\Exception $e) {
                 Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+                $this->Errors[] = $LANG_SUBSCR['err_general'];
                 return false;
             }
             $orig_item_id = $this->item_id;
@@ -671,6 +673,7 @@ class Plan
                 );
             } catch (\Exception $e) {
                 Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
+                $this->Errors[] = $LANG_SUBSCR['err_general'];
                 return false;
             }
         }
@@ -810,6 +813,7 @@ class Plan
             'price'         => sprintf('%.2f', $this->price),
             'duration'      => $this->duration,
             'bonus_duration' => $this->bonus_duration,
+            'trial_days'    => $this->trial_days,
             'grace_days'    => $this->grace_days,
             'early_renewal' => $this->early_renewal,
             'pi_admin_url'  => SUBSCR_ADMIN_URL,
@@ -1205,6 +1209,7 @@ class Plan
         $enabled = $enabled == 1 ? 1 : 0;
         $cache_key = 'plans_' . $enabled;
         $retval = Cache::get($cache_key);
+        $retval = NULL;
         if ($retval === NULL) {
             $retval = array();
             $db = Database::getInstance();
@@ -1447,11 +1452,22 @@ class Plan
             break;
 
         case 'bonus_duration':
-            $retval = $fieldvalue . ' ' . $LANG_SUBSCR[$A['bonus_duration_type']];
+            if (!empty($fieldvalue)) {
+                $retval = $fieldvalue . ' ' . $LANG_SUBSCR[$A['bonus_duration_type']];
+            } else {
+                $retval = 'n/a';
+            }
            break;
           
         case 'subscriptions':
-            $retval = (int)$fieldvalue;
+            if (!empty($fieldvalue)) {
+                $retval = COM_createLink(
+                    (int)$fieldvalue,
+                    SUBSCR_ADMIN_URL . '/index.php?subscriptions=' . $A['item_id']
+                );
+            } else {
+                $retval = '0';
+            }
             break;
 
         case 'rating':

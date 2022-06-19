@@ -136,6 +136,7 @@ $LANG_SUBSCR = array(
 'reset_ratings' => 'Reset Ratings',
 'rating'        => 'Rating',
 'msg_referral' => 'For referring a new subscriber, your subscription to %1$s has been extended by %2$d %3$s.',
+'err_general' => 'An error occurred, see the system log for details.',
 );
 
 // Messages for the plugin upgrade
