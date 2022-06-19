@@ -242,7 +242,7 @@ function service_handlePurchase_subscription($args, &$output, &$svc_msg)
                 date('Y-m-d') <= $R->getExpiration()
             ) {
                 // Check that subscription is valid.
-                Log::write('system', Log::INFO, "Processing affiliate bonus for user {$ref_uid} for purchase by user {$uid} of item {$product_id}");
+                Log::write('subscription', Log::INFO, "Processing affiliate bonus for user {$ref_uid} for purchase by user {$uid} of item {$product_id}");
                 $status = $R->AddBonus($S);
             }
         }

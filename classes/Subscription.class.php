@@ -686,6 +686,7 @@ class Subscription
         $P = Plan::getInstance($S->getItemID());
 
         if ($P->getBonusDuration() == 0) {  // if no duration, no bonus
+            Log::write('subscription', Log::INFO, 'No referral bonus for plan ' . $P->getID());
             return true;
         }
 
@@ -700,6 +701,9 @@ class Subscription
                 array(Database::INTEGER)
             );
             $status = true;
+            Log::write('subscription', Log::INFO,
+                "Added {$P->getBonusDuration()} {$P->getBonusDurationType()} to {$P->getID()} for {$this->getUid()}"
+            );
         } catch (\Exception $e) {
             Log::write('system', Log::ERROR, __METHOD__ . ': ' . $e->getMessage());
             $status = false;
@@ -984,7 +988,7 @@ class Subscription
                 array(Database::INTEGER)
             );
             Log::write(
-                'subscr_audit',
+                'subscription',
                 Log::INFO,
                 "Canceled subscription $this->id ({$this->Plan->getID()}) " .
                 "for user {$this->uid} (" .COM_getDisplayName($this->uid) . ')'
@@ -1063,7 +1067,7 @@ class Subscription
                 array(Database::STRING)
             );
             Log::write(
-                'subscr_audit',
+                'subscription',
                 Log::INFO,
                 "Marked subscription $this->id ({$this->Plan->getID()}) as expired " .
                 "for user {$this->uid} (" .COM_getDisplayName($this->uid) . '), expiring ' .

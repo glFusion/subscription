@@ -66,7 +66,7 @@ spl_autoload_register(function ($class)
 use glFusion\Database\Database;
 use glFusion\Log\Log;
 
-Log::config('subscr_audit',
+Log::config('subscription',
     array(
       'type'  => 'file',
       'path'  => $_CONF['path_log'],
@@ -75,6 +75,7 @@ Log::config('subscr_audit',
     )
 );
 
+// Leverage the system log for debugging based on the plugin debug setting.
 Log::config('subscr_debug',
     array(
       'type'  => 'file',
