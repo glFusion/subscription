@@ -3,7 +3,7 @@
  * Class to provide admin and user-facing menus.
  *
  * @author      Lee Garner <lee@leegarner.com>
- * @copyright   Copyright (c) 2019 Lee Garner <lee@leegarner.com>
+ * @copyright   Copyright (c) 2019-2022 Lee Garner <lee@leegarner.com>
  * @package     subscription
  * @version     v1.0.0
  * @since       v1.0.0
@@ -128,15 +128,10 @@ class Menu
     {
         $retval = '';
         if (!empty($msg)) {
-            $retval .= '<span class="alert">' . "\n";
-            $retval .= "<ul>$msg</ul>\n";
-            $retval .= "</span>\n";
+            $retval .= COM_showMessageText($msg, '', true, 'error');
         }
         return $retval;
     }
 
 }
-
-?>
-
 
