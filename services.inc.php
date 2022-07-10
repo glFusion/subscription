@@ -267,11 +267,14 @@ function service_handleRefund_subscription($args, &$output, &$svc_msg)
     $shop_data = $args['ipn_data'];
 
     // Must have an item ID following the plugin name
-    if (!is_array($item) || !isset($item[1]))
+    if (!is_array($item) || !isset($item[1])) {
         return PLG_RET_ERROR;
+    }
 
     // User ID is provided in the 'custom' field, so make sure it's numeric.
-    if (isset($shop_data['custom'])) {
+    if (isset($shop_data['uid'])) {
+        $uid = $shop_data['uid'];
+    } elseif (isset($shop_data['custom'])) {    // legacy
         $uid = SUBSCR_getVar($shop_data['custom'], 'uid', 'int', 1);
     } else {
         $uid = 1;
